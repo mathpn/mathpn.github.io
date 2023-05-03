@@ -14,6 +14,14 @@ This is a list of my favorite personal projects, all available on Github.
   - and all the blog posts in it.
  
 
+- [fraud-o-meter](https://github.com/mathpn/fraud-o-meter)
+  - Credit card fraud detection API using FastAPI, Scikit-Learn and RabbitMQ.
+
+
+- [zeroshot-summarizer-v1](https://github.com/mathpn/zeroshot-summarizer-v1)
+  - A summarizer model that takes abstracts and return paper titles styled according to predefined adjectives.
+
+
 - [listme](https://github.com/mathpn/listme)
   - Python library to summarize you FIXME, TODO, XXX (and other tags) comments so you don't forget them.
 
@@ -59,16 +67,28 @@ This is a list of my favorite personal projects, all available on Github.
 Repositories created to spread knowledge while I'm learning.
 
 
-- [exercism-javascript](https://github.com/mathpn/exercism-javascript) -- ongoing
+- [kaggle-playground-series](https://github.com/mathpn/kaggle-playground-series)
+  - Code for Kaggle Playground Series competitions
+
+
+- [exercism-javascript](https://github.com/mathpn/exercism-javascript)
   - Exercise solutions for the Exercism Javascript track.
 
 
-- [advent-of-code-2022](https://github.com/mathpn/advent-of-code-2022) -- ongoing
-  - Advent of Code 2022 solutions
+- [exercism-go](https://github.com/mathpn/exercism-go)
+  - Exercise solutions for the Exercism Go track.
 
 
-- [advent-of-code-2021](https://github.com/mathpn/advent-of-code-2021) -- ongoing
-  - Advent of Code 2021 solutions
+- [advent-of-code-2022](https://github.com/mathpn/advent-of-code-2022)
+  - Advent of Code 2022 solutions.
+
+
+- [advent-of-code-2021](https://github.com/mathpn/advent-of-code-2021)
+  - Advent of Code 2021 solutions.
+
+
+- [exercism-julia](https://github.com/mathpn/exercism-julia)
+  - Exercise solutions for the Exercism Julia track.
 
 
 - [exercism-rust](https://github.com/mathpn/exercism-rust)
