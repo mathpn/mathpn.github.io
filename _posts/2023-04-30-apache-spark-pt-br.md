@@ -82,3 +82,90 @@ Host <nome_do_servidor>
     HostName <endereço_ip>
     User <seu_usuário_no_servidor>
 ```
+
+
+## Roteador
+
+Agora vamos fixar um IP para nosso servidor no roteador. Isso é importante para que o servidor sempre se conecte utilizando o mesmo IP local, o que facilita a conexão utilizando SSH.
+
+Utilize o seguinte comando e anote o IP que aparece no campo "gateway":
+
+```bash
+ip -json route get 8.8.8.8
+```
+
+Agora, vá até esse IP, faça log-in no seu roteador (cada marca possui um par de usuário e senha padrão, verifique no seu roteador). Infelizmente, como há muitas marcas disponíveis, essa etapa vai variar bastante. Mas, em linhas gerais, basta ir na seção de rede local, localizar o seu servidor pelo IP e adicionar uma nova reserva de IP para aquele dispositivo.
+
+
+## Instalando Hadoop
+
+Agora vamos instalar o Hadoop no servidor. É necessário instalar também o Java Runtime Environment versão 11. Nesse ponto, você deve ser capaz de conectar-se facilmente ao servidor utilizando o SSH. Conectado ao servidor, rode os seguintes comandos:
+
+```bash
+sudo pacman -S jre11-openjdk
+wget https://dlcdn.apache.org/hadoop/common/hadoop-3.3.5/hadoop-3.3.5.tar.gz
+tar -xzf hadoop-3.3.5.tar.gz
+mv hadoop-3.3.5 ~/hadoop
+cd ~/hadoop
+```
+
+Adicione as seguintes linhas ao arquivo etc/hadoop/hadoop-env.sh:
+
+```
+export JAVA_HOME=/lib/jvm/default
+```
+
+Em seguida:
+
+```bash
+source etc/hadoop/hadoop-env.sh 
+```
+bin/hadoop ????
+
+Adicione as seguinte linhas ao arquivo etc/hadoop/core-site.xml
+
+```
+<configuration>
+    <property>
+        <name>fs.defaultFS</name>
+        <value>hdfs://localhost:9000</value>
+    </property>
+</configuration>
+```
+
+Adicione as seguinte linhas ao arquivo etc/hadoop/hdfs-site.xml
+
+```
+<configuration>
+    <property>
+        <name>dfs.replication</name>
+        <value>1</value>
+    </property>
+    <property>
+        <name>dfs.data.dir</name>
+	<value>/home/matheus/hadoop_data</value>
+    </property>
+</configuration>
+```
+
+Agora precisamos checar se conseguimos conectar-se ao localhost. Provavelmente o comando a seguir irá resultar em um erro:
+
+```bash
+ssh localhost
+```
+
+*Atenção: rode esse comando conectado ao servidor!*
+
+Caso o comando resulte em um erro (o que é bem provável) rode os comandos a seguir:
+
+```bash
+ssh-keygen -t rsa -P '' -f ~/.ssh/id_rsa
+cat ~/.ssh/id_rsa.pub >> ~/.ssh/authorized_keys
+chmod 0600 ~/.ssh/authorized_keys
+```
+
+Agora tente conectar-se novamente ao localhost e dessa vez o comando deve funcionar!
+
+```bash
+ssh localhost
+```
