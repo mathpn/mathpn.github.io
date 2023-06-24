@@ -169,3 +169,150 @@ Agora tente conectar-se novamente ao localhost e dessa vez o comando deve funcio
 ```bash
 ssh localhost
 ```
+
+Adicione a seguinte linha ao arquivo etc/hadoop/hadoop-env.sh
+
+```bash
+export HADOOP_CONF_DIR=/home/matheus/hadoop/etc/hadoop
+```
+
+## Adicionando permissões ao firewall
+
+É necessário adicionar permissões ao firewall tanto da sua máquina quanto do servidor. Os comandos abaixo funcionam em Arch Linux com o pacote firewall-cmd.
+
+
+sudo firewall-cmd --add-source=192.168.15.25 --zone=trusted
+(local) sudo firewall-cmd --add-source=192.168.15.18 --zone=trusted
+
+sudo chmod +777 -R /home/matheus/hadoop/logs/
+
+
+## Formatando o sistema de arquivos Hadoop
+
+Mais informações [aqui](https://hadoop.apache.org/docs/stable/hadoop-project-dist/hadoop-common/SingleCluster.html).
+
+```bash
+bin/hdfs namenode -format
+sbin/start-dfs.sh
+bin/hdfs dfs -mkdir /user
+bin/hdfs dfs -mkdir /user/matheus
+```
+
+nvim etc/hadoop/mapred-site.xml
+<configuration>
+    <property>
+        <name>mapreduce.framework.name</name>
+        <value>yarn</value>
+    </property>
+    <property>
+        <name>mapreduce.application.classpath</name>
+        <value>$HADOOP_MAPRED_HOME/share/hadoop/mapreduce/*:$HADOOP_MAPRED_HOME/share/hadoop/mapreduce/lib/*</value>
+    </property>
+</configuration>
+
+
+nvim etc/hadoop/yarn-site.xml
+<configuration>
+    <property>
+        <name>yarn.nodemanager.aux-services</name>
+        <value>mapreduce_shuffle</value>
+    </property>
+    <property>
+        <name>yarn.nodemanager.env-whitelist</name>
+        <value>JAVA_HOME,HADOOP_COMMON_HOME,HADOOP_HDFS_HOME,HADOOP_CONF_DIR,CLASSPATH_PREPEND_DISTCACHE,HADOOP_YARN_HOME,HADOOP_HOME,PATH,LANG,TZ,HADOOP_MAPRED_HOME</value>
+    </property>
+</configuration>
+
+http://192.168.15.18:9870/
+http://192.168.15.18:8088/
+
+
+## Instalando spark
+
+wget https://dlcdn.apache.org/spark/spark-3.3.2/spark-3.3.2-bin-hadoop3.tgz
+tar -xzf spark-3.3.2-bin-hadoop3.tgz
+
+nvim ~/.bashrc
+export SPARK_HOME=/home/matheus/spark
+export PATH=$PATH:$SPARK_HOME/bin:$SPARK_HOME/sbin
+
+source ~/.bashrc
+
+nvim conf/spark-env.sh.template
+SPARK_MASTER_HOST=192.168.15.18
+mv conf/spark-env.sh.template conf/spark-env.sh
+
+cd bin
+start-master.sh
+start-worker.sh spark://192.168.15.18:7077
+checar http://192.168.15.18:8080/ - tem que ter worker
+
+stop-worker.sh
+stop-master.sh
+
+sudo nvim /etc/systemd/system/spark-master.service
+```
+[Unit]
+Description=Apache Spark Master
+After=network.target
+
+[Service]
+Type=forking
+User=root
+Group=root
+ExecStart=/home/matheus/spark/sbin/start-master.sh
+ExecStop=/home/matheus/spark/sbin/stop-master.sh
+
+[Install]
+WantedBy=multi-user.target
+```
+
+sudo nvim /etc/systemd/system/spark-worker.service
+```
+[Unit]
+
+Description=Apache Spark Worker
+
+After=network.target
+
+[Service]
+Type=forking
+User=root
+Group=root
+ExecStart=/home/matheus/spark/sbin/start-worker.sh spark://192.168.15.18:7077
+ExecStop=/home/matheus/spark/sbin/stop-worker.sh
+
+[Install]
+WantedBy=multi-user.target
+```
+
+sudo systemctl start spark-master spark-worker
+checar browser
+
+sudo systemctl stop spark-master spark-worker
+nvim conf/spark-env.sh
+HADOOP_CONF_DIR=/home/matheus/hadoop/etc/hadoop
+
+sudo systemctl start spark-master spark-worker
+checar browser
+
+sudo systemctl enable spark-master spark-worker
+
+```python
+from pyspark.sql import SparkSession
+
+spark = SparkSession.builder \
+    .appName("DeltaLakeExample") \
+    .master("spark://192.168.15.18:7077") \
+    .config("spark.jars.packages", "io.delta:delta-core_2.12:2.3.0") \
+    .config("spark.sql.extensions", "io.delta.sql.DeltaSparkSessionExtension") \
+    .config("spark.sql.catalog.spark_catalog", "org.apache.spark.sql.delta.catalog.DeltaCatalog") \
+    .getOrCreate()
+
+# Create a sample dataframe
+data = [("Alice", 1), ("Bob", 2), ("Charlie", 3)]
+df = spark.createDataFrame(data, ["Name", "Age"])
+
+# Write the dataframe to Delta Lake
+df.write.format("delta").mode("overwrite").option("path", "hdfs://192.168.15.18:9000/tables/foobar").saveAsTable("foobar")
+```
