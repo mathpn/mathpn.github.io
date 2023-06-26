@@ -20,14 +20,13 @@ Estou usando o Linux Manjaro mais recente (escrevo em 15/05/2023), o qual é bas
 Primeiro, conecte um mouse, teclado e tela ao seu computador antigo. Vamos instalar e configurar o OpenSSH. Isso permitirá a conexão remota ao servidor (vamos chamar de servidor daqui em diante). Também recomendo instalar um editor de texto adequado ao terminal. Aqui utilizo o neovim, mas sinta-se à vontade para utilizar qualquer um, inclusive o nano (que já deve estar instalado). E se ficar preso dentro do vim/neovim, basta utilizar o comando :q para sair (Ctrl+C para sair do modo de inserção e digitar comandos).
 
 ```bash
-yay -S openssh
-yay -S neovim
+sudo pacman -S openssh
+sudo pacman -S neovim
 ```
 
-Agora vamos gerar chaves SSH para nossa máquina e habilitar o serviço do servidor SSH.
+Agora vamos gerar chaves SSH para o servidor e habilitar o serviço do servidor SSH.
 
 ```bash
-ssh-keygen -A
 sudo systemctl enable sshd.service
 sudo systemctl start sshd.service
 ```
@@ -35,7 +34,7 @@ sudo systemctl start sshd.service
 Agora vamos instalar o jq e utilizá-lo para obter o IP local da máquina:
 
 ```bash
-yay -S jq
+sudo pacman -S jq
 ip -json route get 8.8.8.8 | jq -r '.[].prefsrc'
 ```
 
@@ -97,6 +96,8 @@ ip -json route get 8.8.8.8
 Agora, vá até esse IP, faça log-in no seu roteador (cada marca possui um par de usuário e senha padrão, verifique no seu roteador). Infelizmente, como há muitas marcas disponíveis, essa etapa vai variar bastante. Mas, em linhas gerais, basta ir na seção de rede local, localizar o seu servidor pelo IP e adicionar uma nova reserva de IP para aquele dispositivo.
 
 
+# Apache Hadoop
+
 ## Instalando Hadoop
 
 Agora vamos instalar o Hadoop no servidor. É necessário instalar também o Java Runtime Environment versão 11. Nesse ponto, você deve ser capaz de conectar-se facilmente ao servidor utilizando o SSH. Conectado ao servidor, rode os seguintes comandos:
@@ -115,14 +116,15 @@ Adicione as seguintes linhas ao arquivo etc/hadoop/hadoop-env.sh:
 export JAVA_HOME=/lib/jvm/default
 ```
 
+_Atenção: o diretório JAVA_HOME varia conforme sua distribuição Linux. Ele deve conter o caminho até a implementação Java a ser utilizada pelo Hadoop._
+
 Em seguida:
 
 ```bash
-source etc/hadoop/hadoop-env.sh 
+source etc/hadoop/hadoop-env.sh
 ```
-bin/hadoop ????
 
-Adicione as seguinte linhas ao arquivo etc/hadoop/core-site.xml
+Adicione as seguinte linhas ao arquivo etc/hadoop/core-site.xml, substituindo a tag \<configuration\> vazia.
 
 ```
 <configuration>
@@ -148,7 +150,7 @@ Adicione as seguinte linhas ao arquivo etc/hadoop/hdfs-site.xml
 </configuration>
 ```
 
-Agora precisamos checar se conseguimos conectar-se ao localhost. Provavelmente o comando a seguir irá resultar em um erro:
+Agora precisamos checar se conseguimos conectar-se ao localhost **sem exigir senha**. Provavelmente o comando a seguir irá resultar em um erro:
 
 ```bash
 ssh localhost
@@ -156,7 +158,7 @@ ssh localhost
 
 *Atenção: rode esse comando conectado ao servidor!*
 
-Caso o comando resulte em um erro (o que é bem provável) rode os comandos a seguir:
+Caso o comando resulte em um erro ou peça senha - o que é bem provável - rode os comandos a seguir:
 
 ```bash
 ssh-keygen -t rsa -P '' -f ~/.ssh/id_rsa
@@ -173,32 +175,35 @@ ssh localhost
 Adicione a seguinte linha ao arquivo etc/hadoop/hadoop-env.sh
 
 ```bash
-export HADOOP_CONF_DIR=/home/matheus/hadoop/etc/hadoop
+export HADOOP_CONF_DIR=${HOME}/etc/hadoop
 ```
 
 ## Adicionando permissões ao firewall
 
-É necessário adicionar permissões ao firewall tanto da sua máquina quanto do servidor. Os comandos abaixo funcionam em Arch Linux com o pacote firewall-cmd.
+Dependendo da sua distribuição linux, pode ser necessário adicionar permissões ao firewall tanto da sua máquina quanto do servidor. Os comandos abaixo funcionam em Arch Linux com o pacote firewalld. Basicamente, permitimos conexão por todas as portas entre o servidor e a nossa máquina. Isso pode trazer riscos de segurança se você não puder confiar na segurança da sua rede local ou no seu servidor. Rode o mesmo comando tanto no servidor quanto na sua máquina. No servidor, insira o IP da sua máquina no lugar de \<IP\> e vice-versa. Se necessário, instale firewalld de acordo com as instruções da sua distribuição, há mais informações [aqui](https://wiki.archlinux.org/title/firewalld).
 
+Você pode pular essa etapa. Caso não consiga abrir URLs que apontem para o servidor posteriormente, volte para esse ponto e adicione permissões de firewall de acordo com as intruções da sua distribuição Linux.
 
-sudo firewall-cmd --add-source=192.168.15.25 --zone=trusted
-(local) sudo firewall-cmd --add-source=192.168.15.18 --zone=trusted
-
-sudo chmod +777 -R /home/matheus/hadoop/logs/
-
+```bash
+sudo firewall-cmd --add-source=<IP> --zone=trusted
+```
 
 ## Formatando o sistema de arquivos Hadoop
 
-Mais informações [aqui](https://hadoop.apache.org/docs/stable/hadoop-project-dist/hadoop-common/SingleCluster.html).
+Mais informações [aqui](https://hadoop.apache.org/docs/stable/hadoop-project-dist/hadoop-common/SingleCluster.html). Substitua **\<USERNAME\>** pelo seu nome de usuário do sistema.
 
 ```bash
 bin/hdfs namenode -format
 sbin/start-dfs.sh
 bin/hdfs dfs -mkdir /user
-bin/hdfs dfs -mkdir /user/matheus
+bin/hdfs dfs -mkdir /user/<USERNAME>
 ```
 
-nvim etc/hadoop/mapred-site.xml
+## Mais configurações do Hadoop
+
+Adicione às seguintes linhas ao arquivo etc/hadoop/mapred-site.xml no lugar da tag \<configuration\> vazia.
+
+```xml
 <configuration>
     <property>
         <name>mapreduce.framework.name</name>
@@ -209,9 +214,12 @@ nvim etc/hadoop/mapred-site.xml
         <value>$HADOOP_MAPRED_HOME/share/hadoop/mapreduce/*:$HADOOP_MAPRED_HOME/share/hadoop/mapreduce/lib/*</value>
     </property>
 </configuration>
+```
 
 
-nvim etc/hadoop/yarn-site.xml
+Adicione as seguintes linhas ao arquivo etc/hadoop/yarn-site.xml no lugar da tag \<configuration\> vazia.
+
+```xml
 <configuration>
     <property>
         <name>yarn.nodemanager.aux-services</name>
@@ -222,35 +230,86 @@ nvim etc/hadoop/yarn-site.xml
         <value>JAVA_HOME,HADOOP_COMMON_HOME,HADOOP_HDFS_HOME,HADOOP_CONF_DIR,CLASSPATH_PREPEND_DISTCACHE,HADOOP_YARN_HOME,HADOOP_HOME,PATH,LANG,TZ,HADOOP_MAPRED_HOME</value>
     </property>
 </configuration>
+```
 
-http://192.168.15.18:9870/
-http://192.168.15.18:8088/
+## Verificar se o Hadoop está rodando
+
+Nesse ponto, o Apache Hadoop deve estar rodando no seu servidor! Verifique se consegue acessar o seguinte endereço no navegador da sua máquina principal
+
+> http://\<IP\>:9870/
+
+No qual **\<IP\>** é o endereço IP local do seu servidor. Caso veja uma página com informações do Hadoop, verifique o campo **DFS Remaining** - deve haver pelo menos alguma memória livre. Caso a configuração do Hadoop tenha algum problema, é possível que não haja nenhum espaço livre detectado.
 
 
-## Instalando spark
+# Apache Spark
 
-wget https://dlcdn.apache.org/spark/spark-3.3.2/spark-3.3.2-bin-hadoop3.tgz
-tar -xzf spark-3.3.2-bin-hadoop3.tgz
+## Instalando o Spark
 
-nvim ~/.bashrc
-export SPARK_HOME=/home/matheus/spark
+```bash
+wget https://dlcdn.apache.org/spark/spark-3.4.1/spark-3.4.1-bin-hadoop3.tgz
+tar -xzf spark-3.4.1-bin-hadoop3.tgz
+mv spark-3.4.1-bin-hadoop3 ~/spark
+```
+
+## Configurando o Spark
+
+Dependendo do seu shell, adicionaremos linhas a arquivos diferentes. Este arquivo é ~/.bashrc caso use Bash e ~/.zshrc caso use zsh. Verifique qual Shell está em uso com o comando:
+
+```bash
+ps -p $$
+```
+
+Na coluna CMD estará o nome do Shell em uso.
+
+Adicione as seguintes linhas:
+
+```bash
+export SPARK_HOME=$HOME/spark
 export PATH=$PATH:$SPARK_HOME/bin:$SPARK_HOME/sbin
+```
 
+Rode o seguinte comando para as novas linhas terem efeito na sessão atual do Shell:
+
+```bash
 source ~/.bashrc
+```
 
-nvim conf/spark-env.sh.template
-SPARK_MASTER_HOST=192.168.15.18
+Vá até a pasta ~/spark. Adicione as seguintes linhas ao arquivo conf/spark-env.sh.template na qual **\<IP\> é o IP local do seu servidor.
+
+```bash
+SPARK_MASTER_HOST=<IP>
+HADOOP_CONF_DIR=$HOME/hadoop/etc/hadoop
+```
+
+Vamos renomear o arquivo:
+
+```bash
 mv conf/spark-env.sh.template conf/spark-env.sh
+```
 
+## Iniciando uma sessão Spark
+
+Substitua **\<IP\>** pelo IP local do seu servidor.
+
+```bash
 cd bin
 start-master.sh
-start-worker.sh spark://192.168.15.18:7077
-checar http://192.168.15.18:8080/ - tem que ter worker
+start-worker.sh spark://<IP>:7077
+```
 
+Na sua máquina principal, vá até o endereço http://\<IP\>:8080/ (novamente, substitua a tag IP conforme dito acima). Uma página com o título "Spark Master" deve carregar. Verifique na sessão _"Workers"_ se há um _worker_ rodando. Se sim, o Spark está rodando normalmente. Vamos parar o Spark.
+
+```bash
 stop-worker.sh
 stop-master.sh
+```
 
-sudo nvim /etc/systemd/system/spark-master.service
+## Criando um serviço para rodar o Spark automaticamente
+
+Essa etapa é opcional. Com os comandos acima é possível iniciar seu servidor Spark sempre que necessário. Aqui vamos integrar o Spark ao systemd para poder gerenciá-lo como um serviço rodando ao fundo do sistema sempre que ligamos o servidor.
+
+Crie o arquivo /etc/systemd/system/spark-master.service e adicione as seguintes linhas (necessário abrir o editor com sudo). **Lembre-se de substituir \<HOME\> pelo caminho completo até a pasta home do seu usuário!**
+
 ```
 [Unit]
 Description=Apache Spark Master
@@ -260,14 +319,15 @@ After=network.target
 Type=forking
 User=root
 Group=root
-ExecStart=/home/matheus/spark/sbin/start-master.sh
-ExecStop=/home/matheus/spark/sbin/stop-master.sh
+ExecStart=<HOME>/spark/sbin/start-master.sh
+ExecStop=<HOME>/spark/sbin/stop-master.sh
 
 [Install]
 WantedBy=multi-user.target
 ```
 
-sudo nvim /etc/systemd/system/spark-worker.service
+Crie o arquivo /etc/systemd/system/spark-worker.service e adicione as seguintes linhas (necessário abrir o editor com sudo). **Lembre-se de substituir \<IP\> pelo IP local do seu servidor e \<HOME\> pelo caminho completo até a pasta home do seu usuário!**
+
 ```
 [Unit]
 
@@ -279,40 +339,36 @@ After=network.target
 Type=forking
 User=root
 Group=root
-ExecStart=/home/matheus/spark/sbin/start-worker.sh spark://192.168.15.18:7077
-ExecStop=/home/matheus/spark/sbin/stop-worker.sh
+ExecStart=<HOME>/spark/sbin/start-worker.sh spark://<IP>:7077
+ExecStop=<HOME>/spark/sbin/stop-worker.sh
 
 [Install]
 WantedBy=multi-user.target
 ```
 
-sudo systemctl start spark-master spark-worker
-checar browser
+Vamos ativar ambos os serviços para que sejam iniciados junto com o sistema e iniciá-los:
 
-sudo systemctl stop spark-master spark-worker
-nvim conf/spark-env.sh
-HADOOP_CONF_DIR=/home/matheus/hadoop/etc/hadoop
-
-sudo systemctl start spark-master spark-worker
-checar browser
-
+```bash
 sudo systemctl enable spark-master spark-worker
+sudo systemctl start spark-master spark-worker
+```
+
+Espere alguns segundos e, novamente, verifique o endereço http://\<IP\>:8080/. Se a mesma página de antes carregar com 1 _worker_ ativo, o Spark está rodando normalmente.
+
+
+## Conectando-se ao servidor Spark remotamente
 
 ```python
 from pyspark.sql import SparkSession
 
 spark = SparkSession.builder \
-    .appName("DeltaLakeExample") \
-    .master("spark://192.168.15.18:7077") \
-    .config("spark.jars.packages", "io.delta:delta-core_2.12:2.3.0") \
-    .config("spark.sql.extensions", "io.delta.sql.DeltaSparkSessionExtension") \
-    .config("spark.sql.catalog.spark_catalog", "org.apache.spark.sql.delta.catalog.DeltaCatalog") \
+    .appName("SparkTest") \
+    .master("spark://192.168.15.12:7077") \
     .getOrCreate()
 
 # Create a sample dataframe
 data = [("Alice", 1), ("Bob", 2), ("Charlie", 3)]
 df = spark.createDataFrame(data, ["Name", "Age"])
 
-# Write the dataframe to Delta Lake
-df.write.format("delta").mode("overwrite").option("path", "hdfs://192.168.15.18:9000/tables/foobar").saveAsTable("foobar")
+df.show()
 ```
