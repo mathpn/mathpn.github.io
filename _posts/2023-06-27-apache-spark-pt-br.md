@@ -1,7 +1,7 @@
 ---
 title: "Como configurar e usar um cluster de Apache Spark em sua rede local"
 header:
-  overlay_image: //assets/images/default_overlay.jpg
+  overlay_image: /assets/images/default_overlay.jpg
   show_overlay_excerpt: false
 categories:
   - Tutorial
