@@ -1,7 +1,7 @@
 ---
 title: "Survival analysis with Cox reggression - heart failure data"
 header:
-  overlay_image: //assets/images/default_overlay.jpg
+  overlay_image: /assets/images/default_overlay.jpg
   show_overlay_excerpt: false
 categories:
   - Data Analysis
