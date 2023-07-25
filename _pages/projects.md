@@ -12,13 +12,25 @@ This is a list of my favorite personal projects, all available on Github.
 
 - [The website you're reading](https://github.com/mathpn/mathpn.github.io) -- ongoing
   - and all the blog posts in it.
- 
+
+
+- [picfusion](https://github.com/mathpn/picfusion)
+  - Picfusion allows you to search through your images using other images as query, a set of tags, pure text, or any combination of them.
+
+
+- [DocuStore](https://github.com/mathpn/DocuStore)
+  - A program to save any URL or raw text (with support for Markdown) and search for them later.
+
+
+- [olist-ml](https://github.com/mathpn/olist-ml)
+  - Churn prediction Machine Learning project using the Olist public dataset.
+
 
 - [fraud-o-meter](https://github.com/mathpn/fraud-o-meter)
   - Credit card fraud detection API using FastAPI, Scikit-Learn and RabbitMQ.
 
 
-- [zeroshot-summarizer-v1](https://github.com/mathpn/zeroshot-summarizer-v1)
+- [zeroshot-summarizer](https://github.com/mathpn/zeroshot-summarizer)
   - A summarizer model that takes abstracts and return paper titles styled according to predefined adjectives.
 
 
@@ -29,6 +41,9 @@ This is a list of my favorite personal projects, all available on Github.
 - [movie-recommender](https://github.com/mathpn/movie-recommender)
   - A movie recommender built using The Movie Dataset (from Kaggle), FastAPI and PyTorch. This system uses both content-based filtering and collaborative filtering. Can run as a Docker image.
 
+
+- [imagetour](https://github.com/mathpn/imagetour)
+  - 1D image embeddings.
 
 - [pytorch-saver](https://github.com/mathpn/pytorch-saver)
   - Simple helper to save and load PyTorch models.
