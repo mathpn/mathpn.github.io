@@ -119,9 +119,9 @@ O Apache Spark pode rodar sem o Apache Hadoop, no entanto algumas funcionalidade
 
 ```bash
 sudo pacman -S jre11-openjdk
-wget https://dlcdn.apache.org/hadoop/common/hadoop-3.3.5/hadoop-3.3.5.tar.gz
-tar -xzf hadoop-3.3.5.tar.gz
-mv hadoop-3.3.5 ~/hadoop
+wget https://dlcdn.apache.org/hadoop/common/hadoop-3.3.6/hadoop-3.3.6.tar.gz
+tar -xzf hadoop-3.3.6.tar.gz
+mv hadoop-3.3.6 ~/hadoop
 cd ~/hadoop
 ```
 
@@ -263,6 +263,7 @@ No qual **\<IP\>** é o endereço IP local do seu servidor. Caso veja uma págin
 ## Instalando o Spark
 
 ```bash
+cd ~
 wget https://dlcdn.apache.org/spark/spark-3.4.1/spark-3.4.1-bin-hadoop3.tgz
 tar -xzf spark-3.4.1-bin-hadoop3.tgz
 mv spark-3.4.1-bin-hadoop3 ~/spark
@@ -396,6 +397,60 @@ df.show()
 ```
 
 Se tudo correr bem, o _DataFrame_ será exibido.
+
+# Spark Connect
+
+Nessa sessão vamos ver como configurar a funcionalidade Spark Connect. O Spark Connect introduziu uma arquitetura cliente-servidor desacoplada que permite conectividade remota a clusters Spark usando a API de DataFrame. A separação entre cliente e servidor permite que o Spark e seu ecossistema aberto sejam aproveitados de qualquer lugar. Ele pode ser incorporado em aplicações de dados modernas, em IDEs, Notebooks e linguagens de programação.
+
+## Configurando o servico Spark Connect
+
+Crie o arquivo _/etc/systemd/system/spark-connect.service_ e adicione as seguintes linhas (necessário abrir o editor com sudo). **Lembre-se de substituir \<IP\> pelo IP local do seu servidor e \<HOME\> pelo caminho completo até a pasta home do seu usuário!**
+
+```
+[Unit]
+
+Description=Apache Spark Connect
+
+After=network.target
+
+[Service]
+Type=forking
+User=root
+Group=root
+ExecStart=<HOME>/spark/sbin/start-connect-server.sh --packages org.apache.spark:spark-connect_2.12:3.4.1
+ExecStop=<HOME>/spark/sbin/stop-connect-server.sh
+
+[Install]
+WantedBy=multi-user.target
+```
+
+Vamos ativar o serviço para que seja iniciado junto com o sistema e iniciá-lo:
+
+```bash
+sudo systemctl enable spark-connect
+sudo systemctl start spark-connect
+```
+
+Essa funcionalidade requer algumas dependências extras. Para garantir que elas estejam instaladas no seu computador (não é necessário no servidor), instale o pyspark com as dependências opcionais do connect:
+
+```bash
+pip install "pyspark[connect]"
+```
+
+## Testando a conexão com Spark Connect
+
+O código abaixo conecta-se ao servidor Spark utilizando o Spark Connect (lembre-se de substituir a tag **\<IP\>**), cria e exibe um DataFrame.
+
+```python
+from pyspark.sql import SparkSession
+
+spark = SparkSession.builder.remote("sc://<IP>:15002").getOrCreate()
+
+data = [("Alice", 1), ("Bob", 2), ("Charlie", 3)]
+df = spark.createDataFrame(data, ["Name", "Age"])
+
+df.show()
+```
 
 # Conclusões
 
