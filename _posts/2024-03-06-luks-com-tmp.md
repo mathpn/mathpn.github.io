@@ -19,3 +19,47 @@ Porém, a segurança de um disco criptografado é tão boa quanto a força da su
 
 Assim, o objetivo aqui é configurar uma partição LUKS para usar uma chave criptográfica armazenada no _chip_ TPM **combinada** com uma senha. Um ataque de força bruta diretamente no disco fora do PC se torna mais difícil já que a chave criptográfica do TPM é (provavelmente) mais complexa que apenas sua senha. E tentar desbloquear a partição sem retirar o disco também se torna mais difícil já que o TPM impõe uma velocidade máxima para cada tentativa de autenticação.
 
+# Passos
+
+## Adicionar módulos do dracut
+
+Adicionar ao arquivo `/etc/dracut.conf.d/myflags.conf`:
+
+```
+add_dracutmodules+=" tpm2-tss "
+```
+
+Gerar initramfs:
+
+```bash
+dracut --hostonly --no-hostonly-cmdline /boot/initramfs-linux.img
+```
+
+reiniciar.
+
+## Adicionar TPM ao LUKS com `cryptenroll`
+
+```bash
+systemd-cryptenroll --tpm2-device=auto --tpm2-with-pin=yes /dev/abc
+```
+
+conferir:
+
+```bash
+cryptsetup luksDump /dev/nvme0n1p3
+```
+
+## Configurar `cryptsetup`
+
+Adicionar ao arquivo `etc/crypttab.initramfs`:
+
+TODO pegar UUID
+```
+root  UUID=XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX  none  tpm2-device=auto
+```
+
+Gerar initramfs:
+
+```bash
+dracut --hostonly --no-hostonly-cmdline /boot/initramfs-linux.img
+```
