@@ -111,4 +111,8 @@ Vamos gerar o _initramfs_ novamente:
 dracut --hostonly --no-hostonly-cmdline /boot/initramfs-linux.img
 ```
 
-Agora basta reiniciar e digitar a senha atrelada à chave do TPM!
+Agora basta reiniciar e digitar a senha atrelada à chave do TPM! Caso a autenticação com a senha atrelada ao TMP dê errado basta usar a senha de recuperação configurada acima e tentar seguir as etapas novamente.
+
+## Limitações
+
+O TPM não é perfeito, na verdade [há relatos](https://pulsesecurity.co.nz/articles/TPM-sniffing) em que foi possível extrair a chave do TPM com acesso físico à máquina. No entanto, esse ataque funcionava _justamente_ porque não havia senha atrelada à chave do TPM, então a chave era automaticamente enviada ao processador para permitir a leitura da partição criptograda ao ligar o computador. Com o método descrito aqui esse ataque não seria possível. _Isso não quer dizer que os chips TPM não possam ter vulnerabilidades_. Porém, mesmo no cenário em que a chave é extraída do TPM ainda seria necessário descobrir sua senha. Ou seja, no pior cenário voltaríamos ao nível de segurança do LUKS com senha sem TPM.
