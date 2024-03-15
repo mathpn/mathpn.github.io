@@ -11,7 +11,7 @@ tags:
 excerpt: "Tutorial de como criptografar um disco com LUKS e TPM no Linux"
 ---
 
-# Motivação
+## Motivação
 
 O disco principal do meu computador é criptografado usando LUKS. Se o seu disco principal não é criptografado, recomendo fortemente que use algum tipo de criptografia para proteger seus dados. Sem criptografia, _qualquer pessoa_ pode remover o disco do computador e ler _todos_ os arquivos. Cada sistema operacional oferece uma ou mais soluções para criptografar um disco inteiro, como o Bitlocker no Windows e o LUKS no Linux.
 
@@ -19,13 +19,13 @@ Porém, a segurança de um disco criptografado é tão boa quanto a força da su
 
 Assim, o objetivo aqui é configurar uma partição LUKS para usar uma chave criptográfica armazenada no _chip_ TPM **combinada** com uma senha. Um ataque de força bruta diretamente no disco fora do PC se torna mais difícil já que a chave criptográfica do TPM é (provavelmente) mais complexa que apenas sua senha. E tentar desbloquear a partição sem retirar o disco também se torna mais difícil já que o TPM impõe uma velocidade máxima para cada tentativa de autenticação.
 
-# Como fazer
+## Como fazer
 
 As etapas foram testadas no Fedora 39, mas devem funcionar em todas as distros que usam `dracut` (Fedora, RHEL, Gentoo, Debian etc) e `systemd`.
 
 **É essencial ter pelo menos uma outra senha registrada na partição LUKS** para não correr o risco de perder completamente seu acesso. O recomendado é ter uma senha bem longa (como uma sequência de 8-12 palavras, por exemplo), a qual será usada apenas até configurar a outra senha atrelada à chave do TPM. Se você já tem uma partição LUKS com uma senha menor, basta adicionar a senha grande antes de prosseguir. Você pode pular essas etapas se quiser manter sua senha atual como senha de recuperação caso o TPM falhe.
 
-## Listar _slots_ da partição LUKS
+### Listar _slots_ da partição LUKS
 
 Primeiro, encontre o caminho da partição LUKS com o comando `lsblk -o NAME,FSTYPE,UUID,MOUNTPOINTS`. A partição será listada com o tipo _crypto_LUKS_. Anote o nome da partição.
 
@@ -37,7 +37,7 @@ systemd-cryptenroll /dev/disk
 
 Substituindo `disk` pelo nome da partição.
 
-## Adicionar senha de recuperação
+### Adicionar senha de recuperação
 
 Adicione a senha de recuperação a um novo _slot_ com o seguinte comando:
 
@@ -45,7 +45,7 @@ Adicione a senha de recuperação a um novo _slot_ com o seguinte comando:
 systemd-cryptenroll /dev/disk --password
 ```
 
-## Remover senha antiga (opcional)
+### Remover senha antiga (opcional)
 
 A partir do resultado da primeira etapa, sabemos qual _slot_ contém a senha antiga a ser apagada. É interessante apagar a senha antiga pois ela provavelmente não é tão forte quanto a senha de recuperação nova, mas é uma etapa opcional. **Muito cuidado ao limpar _slots_ da partição LUKS**, você pode acabar sem acesso à partição se não fizer corretamente. **Recomendo ter um _backup_ de todas as informações**.
 
@@ -57,7 +57,7 @@ systemd-cryptenroll /dev/disk --wipe-slot=SLOT
 
 Trocando `SLOT` pelo número do _slot_ a ser apagado.
 
-## Adicionar módulo ao dracut
+### Adicionar módulo ao dracut
 
 Primeiro, é necessário instalar `tpm-tss2`, que provavelmente estará disponível nos repositórios da sua distro (talvez com o nome `tpm2-tools`). Em seguida, adicionamos esse módulo ao `dracut` incluindo a seguinte linha ao arquivo `/etc/dracut.conf.d/myflags.conf`:
 
@@ -75,7 +75,7 @@ dracut --hostonly --no-hostonly-cmdline /boot/initramfs-linux.img
 
 E reinicie o computador.
 
-## Adicionar TPM ao LUKS com `cryptenroll`
+### Adicionar TPM ao LUKS com `cryptenroll`
 
 Agora vamos registrar o _token_ do TPM na partição LUKS de interesse. Você pode encontrar o caminho para a partição com o comando `lsblk -o NAME,FSTYPE,UUID,MOUNTPOINTS`. A partição será listada com o tipo _crypto_LUKS_. Anote o nome da partição e **substitua o `abc1` em `/dev/abc1` abaixo pelo nome**.
 
@@ -93,7 +93,7 @@ Confira que de fato há um _token_ registrado com o nome `systemd-tpm2`, bem com
 cryptsetup luksDump /dev/nvme0n1p3
 ```
 
-## Configurar `cryptsetup`
+### Configurar `cryptsetup`
 
 Copie o UUID da partição LUKS usando o comando `lsblk -o NAME,FSTYPE,UUID,MOUNTPOINTS` novamente.
 
