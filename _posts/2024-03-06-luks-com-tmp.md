@@ -1,5 +1,5 @@
 ---
-title: "Como criptografar seu computador com LUKS e TPM"
+title: "Como criptografar seu computador com LUKS e TPM + senha"
 header:
   overlay_image: /assets/images/default_overlay.jpg
   show_overlay_excerpt: false
@@ -8,7 +8,7 @@ categories:
 tags:
   - Linux
   - Security
-excerpt: "Tutorial de como criptografar um disco com LUKS e TPM no Linux"
+excerpt: "Tutorial de como criptografar um disco com LUKS, TPM + senha no Linux"
 ---
 
 # Motivação
