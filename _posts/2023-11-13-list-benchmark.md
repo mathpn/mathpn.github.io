@@ -15,9 +15,17 @@ excerpt: "XX"
 
 The goal is to compare prepend/append operations in Go and Elixir. Different results reflect different data structures and implementations used.
 
+------------------
+
+We all know lists. Most if not all programming languages provide an implementation of a list-like data structure. Lists may be implemented in some different ways, for instance as singly-linked lists or arrays. In fact, it is common to refer to many different data structures as lists, as long as they provide some familiar list-like interface.
+
+As we'll see, different implementations produce highly different performance in some operations. The decision on which concrete data structure to use as a list is also coupled with the language design itself. I'll compare lists in two languages: Elixir and Go.
+
 ## Elixir
 
-We'll use [Benchee](https://github.com/bencheeorg/benchee) to benchmark our functions:
+Elixir is a functional language that runs on the BEAM virtual machine, which comes from the Erlang world. As the [documentation](https://hexdocs.pm/elixir/1.12/List.html) says, lists are singly-linked lists. In fact, the documentation explains very well the tradeoffs of singly-linked lists and I recommend reading it. A singly-linked list can be represented as head and tail pairs, in which the head contain one value and point to the tail. If we follow the tail, we end up with another head pointing to a new tail.
+
+Let's write some simple functions to benchmark some common list operations. We'll use [Benchee](https://github.com/bencheeorg/benchee) to benchmark our functions.
 
 ```elixir
 Benchee.run(
@@ -68,7 +76,17 @@ prepend        1.33 M
 append       0.0598 M - 22.25x slower +15.98 μs
 ```
 
-Prepend and prepend + reverse are -- by far -- the fastest functions.
+Prepend and prepend + reverse are -- by far -- the fastest functions. This comes down to the tradeoffs of singly-linked lists. To prepend we only need to create a new head, find the current head and point the new head to the current head, which is now a tail. This can be done in constant time O(1) since the head location in memory is always known.
+
+However, to append an element to the end of the list we need to find the last element. There is no way to directly access the last element, we must traverse the list following the tail pointers until we reach its end. Thus, this is done in linear time -- O(n).
+
+In fact, the [Erlang documentation](https://www.erlang.org/doc/system/listhandling) explicitly advises against appending elements to the end of the list recursively. This behavior is quite different from what happens in other common languages such as JavaScript and Python, and it's (very likely) by design.
+
+Elixir (and Erlang) are functional languages and, as such, are very conducive to the use of recursion and higher-order functions. When calling a recursive function with a list as argument, the function may use the head value and pass the tail as an argument to the next call. This access is sequential, and thus _each one_ happens in O(1) time. Of course, accessing the entire list has an O(n) complexity, but in this case the entire list must be traversed anyway. Arrays also provide O(n) complexity to traverse all elements, but they fail in a very important aspect when it comes to functional-style programming.
+
+All data structures in Elixir are immutable by default. Singly-linked lists are very friendly towards immutability. To prepend an element you don't need to move anything in memory. In fact, you only need to create the new head and point it towards the tail (the entire list prior to the prepend operation). Since all values are immutable, you don't need to worry about any of the other values changing. Therefore, prepends can _always_ be executed in O(1) time (while there is memory available).
+
+Immutable arrays would have quite poor performance since _every_ append or prepend operation would require copying the _entire_ array to a new memory location, which happens in O(n) time. If you construct an entire array one element at a time the time complexity becomes O(n^2), since N O(N) operations are done. It doesn't take a huge number of prepends before immutable arrays become impractically slow.
 
 ## Go
 
