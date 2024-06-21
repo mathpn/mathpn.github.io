@@ -124,38 +124,54 @@ package list_fun
 
 import (
 	"fmt"
-	"slices"
+	"math/rand/v2"
 	"testing"
 )
 
+func createList(length int) []int {
+	list := make([]int, 0)
+	for i := 0; i < length; i++ {
+		list = append(list, i)
+	}
+	return list
+}
+
 func BenchmarkSlice(b *testing.B) {
-	lengths := []int{1_000, 10_000, 100_000}
+	lengths := []int{10_000, 100_000, 1_000_000}
 	for _, length := range lengths {
+		list := createList(length)
+		idx := rand.Perm(length)[:100]
+		b.Run(fmt.Sprintf("random access %d", length), func(b *testing.B) {
+			var _ int
+			for _, i := range idx {
+				_ = list[i]
+			}
+		})
+		list = createList(length)
+		b.Run(fmt.Sprintf("iterate %d", length), func(b *testing.B) {
+			var _ int
+			for i := 0; i < len(list); i++ {
+				_ = list[i]
+			}
+		})
+		list = createList(length)
+		b.Run(fmt.Sprintf("iterate reverse %d", length), func(b *testing.B) {
+			var _ int
+			for i := len(list) - 1; i >= 0; i-- {
+				_ = list[i]
+			}
+		})
+		list = createList(length)
 		b.Run(fmt.Sprintf("append %d", length), func(b *testing.B) {
-			list := make([]int, 0)
-			for i := 0; i < length; i++ {
+			for i := 0; i < 100; i++ {
 				list = append(list, i)
 			}
 		})
-		b.Run(fmt.Sprintf("append reverse %d", length), func(b *testing.B) {
-			list := make([]int, 0)
-			for i := 0; i < length; i++ {
-				list = append(list, i)
-			}
-			slices.Reverse(list)
-		})
+		list = createList(length)
 		b.Run(fmt.Sprintf("prepend %d", length), func(b *testing.B) {
-			list := make([]int, 0)
-			for i := 0; i < length; i++ {
+			for i := 0; i < 100; i++ {
 				list = append([]int{i}, list...)
 			}
-		})
-		b.Run(fmt.Sprintf("prepend reverse %d", length), func(b *testing.B) {
-			list := make([]int, 0)
-			for i := 0; i < length; i++ {
-				list = append([]int{i}, list...)
-			}
-			slices.Reverse(list)
 		})
 	}
 }
@@ -164,12 +180,22 @@ func BenchmarkSlice(b *testing.B) {
 Results:
 
 ```
-                         │ benchmark.log │
-                         │    sec/op     │
-Slice/append_10000-16      0.2310n ±  9%
-Slice/prepend_10000-16      912.1n ± 13%
-Slice/append_100000-16     0.2355n ± 10%
-Slice/prepend_100000-16     9.293µ ±  9%
-Slice/append_1000000-16    0.2555n ±  6%
-Slice/prepend_1000000-16    91.63µ ±  4%
+                                 │ benchmark.log  │
+                                 │     sec/op     │
+Slice/random_access_10000-16       0.01805n ± 39%
+Slice/iterate_10000-16              0.2885n ±  2%
+Slice/iterate_reverse_10000-16      0.2545n ± 22%
+Slice/append_10000-16              0.02655n ± 25%
+Slice/prepend_10000-16               84.29n ± 26%
+Slice/random_access_100000-16      0.01700n ± 71%
+Slice/iterate_100000-16              3.048n ± 25%
+Slice/iterate_reverse_100000-16      2.432n ± 29%
+Slice/append_100000-16             0.02505n ± 24%
+Slice/prepend_100000-16              740.1n ± 22%
+Slice/random_access_1000000-16     0.02105n ± 24%
+Slice/iterate_1000000-16             26.45n ± 23%
+Slice/iterate_reverse_1000000-16     22.20n ±  6%
+Slice/append_1000000-16            0.02905n ± 21%
+Slice/prepend_1000000-16             9.463µ ± 11%
 ```
+
