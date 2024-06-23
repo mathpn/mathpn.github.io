@@ -17,7 +17,7 @@ As we'll see, different implementations yield highly different performance in so
 
 ## Lists in Go (slices)
 
-We'll implement a simple benchmark function:
+Let's implement a simple benchmark function:
 
 ```go
 package list_fun
@@ -99,7 +99,17 @@ Slice/append_1000000-16            0.02905n ± 21%
 Slice/prepend_1000000-16             9.463µ ± 11%
 ```
 
-### TODO explain big O briefly
+### A refresher on time complexity
+
+The time complexity of an algorithm or data structure operation refers to how the time it takes to execute such task scales as the input size grows. Typically, the worse-case time complexity is considered.
+
+This relationship is commonly expressed using [big O notation](https://en.wikipedia.org/wiki/Big_O_notation). All constant factors are dropped. For instance, if the time a task takes doesn't depend on input size at all, it has a O(1) or constant time complexity. If the time scales linearly with the input size, it has linear time complexity or O(N), where N is the input size.
+
+Even though we drop all constant factors, they should not be forgotten. A O(1) algorithm can be slower than an O(N) one due to these constant factors. However, as input size grows, the O(N) algorithm will eventually become slower.
+
+Time complexity is important to understand how well an algorithm scales. Some time complexities can result in prohibitively slow performance (such as O(N!)). Here, we'll use big O notation to grasp the strengths and weakness of each list implementation.
+
+### Back to Go slices
 
 Iterating over the list scales roughly linearly with input size. Random access doesn't scale with input size. This is because Go lists, called slices, are implemented as pointers to arrays. Since arrays are stored as one or many contiguous memory blocks we can infer the exact memory location of all elements. Moreover, that arrays may store pointers to values, allowing the program to follow these pointers and read the values. As a result, random access doesn't depend on the size of the array, making it O(1) and quite fast.
 
@@ -119,7 +129,7 @@ But it doesn't have to be like this. Other programming languages take a differen
 
 ## Lists in Elixir
 
-Elixir is a functional language that runs on the BEAM virtual machine, which comes from the Erlang world. As the [documentation](https://hexdocs.pm/elixir/1.12/List.html) says, lists are singly-linked lists. In fact, the documentation explains very well the trade-offs of singly-linked lists and I recommend reading it. A singly-linked list can be represented as head and tail pairs, in which the head contain one value and point to the tail. If we follow the tail, we end up with another head pointing to a new tail.
+Elixir is a functional language that runs on the BEAM virtual machine, which comes from the Erlang world. The _List_ module provides a singly-linked list implementation, which is explained in the [documentation](https://hexdocs.pm/elixir/1.12/List.html). In fact, the documentation explains very well the trade-offs of singly-linked lists and I recommend reading it. A singly-linked list can be represented as head and tail pairs, in which the head contain one value and point to the tail. If we follow the tail, we end up with another head pointing to a new tail.
 
 Let's write some simple functions to benchmark some common list operations. We'll use [Benchee](https://github.com/bencheeorg/benchee) to benchmark our functions.
 
@@ -199,23 +209,23 @@ append                56.23 K - 22.71x slower +17.00 μs
 random access         50.28 K - 25.40x slower +19.11 μs
 ```
 
-Prepend is -- by far -- the fastest function. This comes down to the trade-offs of singly-linked lists. Iterating is quite simple, you get the head value and follow the tail pointer to the next head, so it's quite fast. To prepend we only need to create a new head, find the current head and point the new head to the current head, which is now a tail. This can be done in constant time O(1) since the current head location in memory is always known.
+Prepend is -- by far -- the fastest function. Prepending is achieved by creating a new head that points to the current head, resulting in constant time complexity (O(1)). This is possible because the memory location of the head is always known. Iterating is quite simple, you get the head value and follow the tail pointer to the next head, so it's also quite fast.
 
-However, random access is also slow since each access requires iterating over the list up to the desired index. There is no way to directly access one position since the list is not represented as a contiguous memory space, therefore we don't know where the nth value is stored in memory. Each random access operation happens in linear time -- O(n). Similarly, to append an element to the end of the list we need to find the last element. We must iterate over the list following the tail pointers until we reach its end. Thus, this is also done in linear time -- O(n).
+However, random access is slow. Since the list is not stored in contiguous memory space, accessing an element at a specific index required iterating over the list up to that index. This results in linear time complexity (O(n)). Similarly, appending elements to the end of a list requires finding the last element by iterating over the list. This operation also has a time complexity of O(n).
 
 In fact, the [Erlang documentation](https://www.erlang.org/doc/system/listhandling) explicitly advises against appending elements to the end of a list recursively. This behavior is completely different from what we saw earlier in Go, and it is so by design.
 
-Elixir (and Erlang) are functional languages and, as such, are very conducive to the use of recursion and higher-order functions. When calling a recursive function with a list as argument, the function may use the head value and pass the tail as an argument to the next call. This access is sequential, and thus _each one_ happens in O(1) time. Of course, accessing the entire list has an O(n) complexity (n operations of O(1) complexity), but in this case we must iterate over the entire list anyway. Arrays also provide O(n) complexity to iterate over all elements, but they fail in a very important aspect when it comes to functional-style programming.
+Elixir (and Erlang) are functional languages and, as such, are very conducive to the use of recursion and higher-order functions, which makes the use of linked lists more suitable than arrays. When calling a recursive function with a list as argument, the function may use the head value and pass the tail as an argument to the next call. Iterating over the entire list has linear time complexity (O(N)). Arrays also provide O(N) complexity to iterate over all elements, but they fail in a very important aspect when it comes to functional-style programming.
 
-All data structures in Elixir are immutable by default. Singly-linked lists are friendly towards immutability. To prepend an element you don't need to move anything in memory. In fact, you only need to create the new head and point it towards the tail (the entire list prior to the prepend operation). Since all values are immutable, you don't need to worry about any of the other values changing. Therefore, prepends can _always_ be executed in O(1) time (while there is memory available).
+All data structures in Elixir are immutable by default. Singly-linked lists are friendly towards immutability. Prepending an element does not require moving any values in memory; it only requires creating the new head and point it to the tail (the entire list prior to the prepend operation). Since all values are immutable, you don't need to worry about any of the other values changing. Therefore, prepends can _always_ be executed in O(1) time.
 
-Immutable arrays would have quite poor performance since _every_ append or prepend operation would require copying the _entire_ array to a new memory location, which happens in O(n) time. If you construct an entire array one element at a time the time complexity becomes O(n^2), since N O(N) operations are done. It doesn't take a huge number of prepends before immutable arrays become impractically slow.
+Immutable arrays would have quite poor performance since _every_ append or prepend operation would require copying the _entire_ array to a new memory location. If you construct an entire array one element at a time the time complexity becomes O(N²), since N O(N) operations are done. It doesn't take a huge number of prepends before immutable arrays become impractically slow.
 
 Slow random access is also not a major concern since Elixir code is usually much more declarative than a similar Go code, for instance. Instead of writing loops and mutating list elements directly, you use higher-order functions such as `map`, `filter` and `reduce` to achieve the same result. Also, due to immutability there is no point in using random access to mutate values. Thus, by design Elixir code usually doesn't require random access.
 
 ## Conclusion
 
-I guess the conclusion is that different things are different. Seriously though, the motivation of this post was the 2023 edition of [advent of code](https://adventofcode.com/). I solved some puzzles with Elixir and others with Go (or Python). The list is simply a very fundamental abstract data structure that we take for granted in almost all programming languages. It still has major implementation differences that reflect the design of each language. The influence of programming language design on code goes beyond hard limitations. You cannot mutate a value in Elixir, but you could still make modified copies and somehow implement an imperative-ish solution. Should you do it, though? Of course not, the code would be cumbersome and unhinged.
+I guess the conclusion is that different things are different. Seriously though, the motivation of this post was the 2023 edition of [Advent of Code](https://adventofcode.com/). I solved some puzzles with Elixir and others with Go (or Python). The list is simply a very fundamental abstract data structure that we take for granted in almost all programming languages. It still has major implementation differences that reflect the design of each language. The influence of programming language design on code goes beyond hard limitations. You cannot mutate a value in Elixir, but you could still make modified copies and somehow implement an imperative-_ish_ solution. Should you do it, though? Of course not, the code would be cumbersome and unhinged.
 
 Perhaps unsurprisingly, solving the puzzles in Elixir requires a thinking process that is distinct of that of using Go. That's why I used the word _conducive_ a few times in this post: even without hard limitations, the programming language design influences the code you'll write, and we should be aware of the major design choice differences.
 
