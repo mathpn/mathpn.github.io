@@ -22,3 +22,12 @@ Now, let's consider the relationship between two consecutive dart throws. Since 
 Therefore, a lucky throw doesn't change the probability of getting extreme (high or low) scores on the next throw. The score of the second throw will be centered - of course - around the mean, regardless of the first score.
 
 This example may seem useless, but it lies on the heart of regression to the mean. Values tend to regress to the mean simply because the mean is the most likely values when the variable is approximately normally distributed. The normality assumption may seem restrictive, but a huge number of things are somewhat normally distributed. Even when the distribution is skewed, some form of regression still happens.
+
+## Regression between correlated variables
+
+Consider you work at a gas station and you decide to take a look at the sales registers for a given day. There you find registers reporting the number of liters and the value of each purchase. The price was constant throughout the day. You plot the two variables together and get something like this:
+
+Since the variables are related through a mathematical identity (the values of the purchases depend only on the price, which is constant, and on the number of liters purchased), they are perfectly correlated. In this case, there is no regression to the mean. One variable (liters) completely determines the value of the other (value of purchase). In fact, it hardly makes sense to talk about regression to the mean in this case, since there are no separate measurements between which the value may regress to the mean. Still, it's important to understand that regression to the mean doesn't happen in this scenario and why.
+
+The example is very specific because there are almost no (if any) real-world variables with perfect correlation, excluding those that are mathematical identities (i.e. different values for the same measurement).
+
