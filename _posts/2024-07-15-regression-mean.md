@@ -51,3 +51,15 @@ When dealing with chronic illness, symptoms oscillate. Let's say we're measuring
 
 Patients are more likely to seek medical help or even to enroll in clinical trials when their symptoms are at their worst. This is a form of [selection bias](https://en.wikipedia.org/wiki/Selection_bias), which is another problem entirely, but it can greatly enhance the observed effect of regression to the mean by selecting patients with unusually bad symptoms. The opposite is also true. If we actively seek patients with rheumatoid arthritis in periods of exceptionally low pain, they will likely experience _more_ pain in subsequent weeks, regardless of the treatment.
 
+## Fooled by regression to the mean
+
+There is nothing causal in regression to the mean. Good test scores do not produce lower scores, terrible profits do not produce better results in the next quarter. However, it's tempting and makes intuitive sense to interpret these phenomena as causal relationships. In fact, it's tempting to see causality everywhere, but we should be cautious.
+
+Whenever we make a measurement, take an action to influence it, and measure it again regression to the mean is at play. This is commonly seem in punishment and reward strategies. Using sports results as an example, luck and other random factors are always at play, so there is imperfect correlation between two subsequent performances of the same athlete. As we've seen above, chances are that very bad results will be followed by better ones and vice-versa, regardless of punishment or reward.
+
+Even though it might seem superficially simple, measurement the causal effect of any intervention is surprisingly challenging. Finding a controlled environment with as little external influence as possible is already a big challenge, but statistical phenomena such as regression to the mean still impair our ability to reach causal conclusions. This is of extreme relevance to many fields of science. For instance, virtually all good-quality biological research uses control groups (such as placebo groups), but this is not always possible.
+
+In order to estimate the causal effect of anything, we need to compare the world in which the intervention occurred with the world in which it didn't. We call the latter the [counterfactual world](https://theincidentaleconomist.com/wordpress/counterfactuals/) Strictly speaking, the counterfactual world doesn't exist. When experimental designs with control groups are possible, we rely on big numbers or good sampling to assume that both groups are similar enough to be compared. But in fields such as economics and sociology it's rarely possible to create such a control group.
+
+Even though there are statistical workarounds for the lack of a plausible counterfactual, they are out of reach in everyday life. We should be aware that causality is hard to prove and many factors, one of which is regression to the mean, may explain the apparent effect of our interventions.
+
