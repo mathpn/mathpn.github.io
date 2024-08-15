@@ -7,7 +7,7 @@ categories:
   - Blog
 tags:
   - Statistics
-excerpt: something something
+excerpt: Exploring regression to the mean
 ---
 
 Regression to the mean (RTM) is the statistical tendency for extreme measurements to be followed by values closer to the mean. In simpler terms, things tend to even out. Most of us have an intuitive grasp of this concept, but it's useful to understand it in more depth.
