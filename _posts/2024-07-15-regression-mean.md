@@ -30,6 +30,8 @@ This example may seem useless, but it lies on the heart of RTM. Values tend to r
 
 Consider you are a physician taking a look at patient records. You notice that for many patients there are two measurements of their height and decide to plot these two values together. Consider there is no error when measuring height. You should get something like this:
 
+![perfect correlation scatter plot](/assets/images/regression_mean/perfect_correlation_scatter_plot.png){: .align-right}
+
 Since both measurements capture the same value (patient height), they are _perfectly correlated_. In this case, there is no RTM. Knowing the value of one measurement completely _determines_ the value of the other, therefore extreme values in the first measurement remain extreme in the second one. In fact, it hardly makes sense to talk about RTM in this case, since there are no truly independent values between which the value may regress to the mean. Still, it's important to understand that RTM doesn't happen in this scenario and why.
 
 The example is very specific because there are almost no (if any) two real-world measurements with perfect correlation, excluding those that express the same underlying value. Thus, almost all pairs of variables or measurements either have partial correlation or no correlation at all. When there is no correlation, we've seen that RTM happens at its maximum. When there is partial correlation, RTM happens with a smaller magnitude. Therefore, if you pick two random variables RTM is almost certainly at play.
