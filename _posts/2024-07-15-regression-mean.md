@@ -18,11 +18,13 @@ Why do things tend to even out? Why do measurements tend towards the mean? When 
 
 Let's consider a series of independent events. For instance, the score of a sequence of dart throws. Extremely low and high score are unlikely due to the typical design of dartboards. Therefore, The distribution of dart-throw scores will approximate a normal distribution.
 
-Now, let's consider the relationship between two consecutive dart throws. Since they are independent, we expect on average 0 correlation between their scores. Therefore, if the first throw had a high score, we can't infer anything about the second throw. This is the most extreme form of RTM, since the first measurement has no influence over the second one.
+Now, let's consider the relationship between two consecutive dart throws. Since they are independent, we expect on average 0 correlation between their scores. Therefore, if the first throw had a high score, we couldn't infer anything about the second throw. This is the most extreme form of RTM, since the first measurement has no influence over the second one.
 
-Therefore, a lucky throw doesn't change the probability of getting extreme (high or low) scores on the next throw. The score of the second throw will be centered - of course - around the mean, regardless of the first score.
+![perfect correlation scatter plot](/assets/images/regression_mean/no_correlation_scatter_plot.png) {: .align-right}
 
-This example may seem useless, but it lies on the heart of RTM. Values tend to regress to the mean simply because the mean is the most likely values when the variable is approximately normally distributed. The normality assumption may seem restrictive, but a huge number of things are somewhat normally distributed. Even when the distribution is skewed, some form of regression still happens.
+Therefore, a lucky throw doesn't change the probability of getting extreme (high or low) scores on the next throw. The score of the second throw will be centered -- of course -- around the mean, regardless of the first score.
+
+This example may seem useless, but it lies on the heart of RTM. Values tend to regress to the mean simply because the mean is the most likely value when the variable is approximately normally distributed. The normality assumption may seem restrictive, but a huge number of things are somewhat normally distributed. Even when the distribution is skewed, some form of regression still happens.
 
 ## Regression between correlated measurements
 
@@ -30,7 +32,9 @@ This example may seem useless, but it lies on the heart of RTM. Values tend to r
 
 Consider you are a physician taking a look at patient records. You notice that for many patients there are two measurements of their height and decide to plot these two values together. Consider there is no error when measuring height. You should get something like this:
 
-Since both measurements capture the same value (patient height), they are _perfectly correlated_. In this case, there is no RTM. Knowing the value of one measurement completely determines the value of the other, therefore extreme values in the first measurement remain extreme in the second one. In fact, it hardly makes sense to talk about RTM in this case, since there are no truly independent values between which the value may regress to the mean. Still, it's important to understand that RTM doesn't happen in this scenario and why.
+![perfect correlation scatter plot](/assets/images/regression_mean/perfect_correlation_scatter_plot.png){: .align-right}
+
+Since both measurements capture the same value (patient height), they are _perfectly correlated_. In this case, there is no RTM. Knowing the value of one measurement completely _determines_ the value of the other, therefore extreme values in the first measurement remain extreme in the second one. In fact, it hardly makes sense to talk about RTM in this case, since there are no truly independent values between which the value may regress to the mean. Still, it's important to understand that RTM doesn't happen in this scenario and why.
 
 The example is very specific because there are almost no (if any) two real-world measurements with perfect correlation, excluding those that express the same underlying value. Thus, almost all pairs of variables or measurements either have partial correlation or no correlation at all. When there is no correlation, we've seen that RTM happens at its maximum. When there is partial correlation, RTM happens with a smaller magnitude. Therefore, if you pick two random variables RTM is almost certainly at play.
 
@@ -38,7 +42,7 @@ The example is very specific because there are almost no (if any) two real-world
 
 Francis Galton first described what we now know as regression to the mean while analyzing heights of parents and children. He noticed that very tall parents usually have shorter children and vice-versa. Even though our understanding of genetics was lacking at the time, this observation laid the foundation to the concept of RTM and regression analysis more generally.
 
-There is nothing particular about the average height that drives children towards it. Rather, due to the complex nature of heredity, the correlation between parents' height and children's height is not perfect and so RTM happens. Why? Well, starting with the dart throw example, the mean is the most likely value for a normal-_ish_ distribution. Since there is a correlation, taller parents have taller kids on average. But since the correlation is not perfect, there is a significant random element, which resembles the dart throw. That is, the height of the parents only partially _predict_ the height of the children, and the random contribution pulls values towards the mean.
+There is nothing particular about the average height that drives children towards it. Rather, due to the complex nature of heredity, the correlation between parents' height and children's height is not perfect and so RTM happens. Why? Well, starting with the dart throw example, the mean is the most likely value for a normal-ish distribution. Since there is a correlation, taller parents have taller kids on average. But since the correlation is not perfect, there is a significant random element, which resembles the dart throw. That is, the height of the parents only partially _predict_ the height of the children, and the random contribution pulls values towards the mean.
 
 There are some ways to intuitively grasp this concept. We can think that extreme values are outliers and, as such, are too unlikely to happen multiple times. Or we can think that the mean is a very reasonable most-likely value, and we drift away from the mean given a prior observation proportionately to the strength of the correlation.
 
