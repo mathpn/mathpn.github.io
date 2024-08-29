@@ -20,9 +20,7 @@ Let's consider a series of independent events. For instance, the score of a sequ
 
 Now, let's consider the relationship between two consecutive dart throws. Since they are independent, we expect on average 0 correlation between their scores. Therefore, if the first throw had a high score, we couldn't infer anything about the second throw. This is the most extreme form of RTM, since the first measurement has no influence over the second one.
 
-<img src="assets/images/regression_mean/no_correlation_scatter_plot.png" alt="drawing" width="200"/>
-
-![perfect correlation scatter plot](/assets/images/regression_mean/no_correlation_scatter_plot.png){: width="200" }
+![perfect correlation scatter plot](/assets/images/regression_mean/no_correlation_scatter_plot.png){: width="400" }
 
 Therefore, a lucky throw doesn't change the probability of getting extreme (high or low) scores on the next throw. The score of the second throw will be centered -- of course -- around the mean, regardless of the first score.
 
@@ -34,7 +32,7 @@ This example may seem useless, but it lies on the heart of RTM. Values tend to r
 
 Consider you are a physician taking a look at patient records. You notice that for many patients there are two measurements of their height and decide to plot these two values together. Consider there is no error when measuring height. You should get something like this:
 
-![perfect correlation scatter plot](/assets/images/regression_mean/perfect_correlation_scatter_plot.png){: width="200" }
+![perfect correlation scatter plot](/assets/images/regression_mean/perfect_correlation_scatter_plot.png){: width="400" }
 
 Since both measurements capture the same value (patient height), they are _perfectly correlated_. In this case, there is no RTM. Knowing the value of one measurement completely _determines_ the value of the other, therefore extreme values in the first measurement remain extreme in the second one. In fact, it hardly makes sense to talk about RTM in this case, since there are no truly independent values between which the value may regress to the mean. Still, it's important to understand that RTM doesn't happen in this scenario and why.
 
