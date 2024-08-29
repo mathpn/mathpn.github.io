@@ -20,6 +20,8 @@ Let's consider a series of independent events. For instance, the score of a sequ
 
 Now, let's consider the relationship between two consecutive dart throws. Since they are independent, we expect on average 0 correlation between their scores. Therefore, if the first throw had a high score, we couldn't infer anything about the second throw. This is the most extreme form of RTM, since the first measurement has no influence over the second one.
 
+![perfect correlation scatter plot](/assets/images/regression_mean/no_correlation_scatter_plot.png) {: .align-right}
+
 Therefore, a lucky throw doesn't change the probability of getting extreme (high or low) scores on the next throw. The score of the second throw will be centered -- of course -- around the mean, regardless of the first score.
 
 This example may seem useless, but it lies on the heart of RTM. Values tend to regress to the mean simply because the mean is the most likely value when the variable is approximately normally distributed. The normality assumption may seem restrictive, but a huge number of things are somewhat normally distributed. Even when the distribution is skewed, some form of regression still happens.
