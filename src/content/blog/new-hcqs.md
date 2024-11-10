@@ -1,0 +1,88 @@
+---
+title: "Why new hydroxichloroquines will come"
+tags:
+  - Pandemic
+  - Science
+  - Statistics
+description: 'We should focus on explaining why ineffective therapies can appear to be very effective and show the benefits of proper clinical trials.'
+pubDatetime: 2020-08-26
+---
+# TODO relative links
+
+_Versão em português [aqui](https://mathpn.github.io/novas-cloroquinas/)_
+
+## Hydroxichloroquine and COVID-19
+
+It is not new that hydroxychloroquine was once the promised drug to defeat (or at least to curb) the emerging COVID-19 pandemic. Also, everyone knows that the short but convoluted hydroxychloroquine (HCQ for short) story is [not rosy](https://sciencebasedmedicine.org/hydroxychloroquine-to-treat-covid-19-evidence-cant-seem-to-kill-it/).
+
+HCQ rose to scientific and mainstream media attention when Chinese researchers [noted](https://www.medrxiv.org/content/10.1101/2020.03.22.20040758v3) that none of 80 patients taking HCQ to treat lupus had become infected by the Sars-Cov-2 virus (which causes COVID-19). This kind of evidence is very speculative and, while it might point towards a valid hypothesis, should not be stretched too far. The sample of 80 patients is extremely small and patients with lupus might adhere to social distancing more as they are more susceptible to infectious diseases due to their usual treatments. Still, _stretched it was_, especially after a [french study](https://www.mediterranee-infection.com/wp-content/uploads/2020/03/Hydroxychloroquine_final_DOI_IJAA.pdf) with _many flaws_ was published, in which HCQ combined with the antibiotic (which presumably does nothing against viruses, only against bacteria) azithromycin supposedly led to shockingly quicker recoveries in hospitalized patients (read [here](https://sciencebasedmedicine.org/are-hydroxychloroquine-and-azithromycin-an-effective-treatment-for-covid-19/) to know more about this study).
+
+As it's always said: extraordinary claims require extraordinary evidence. But the more-than-ordinary and higly questionable evidence for HCQ use against COVID-19 quickly became popular, with [politicians](https://www1.folha.uol.com.br/internacional/en/scienceandhealth/2020/07/after-covid-19-diagnosis-bolsonaro-takes-hydroxychloroquine-on-video-and-asks-i-trust-it-how-about-you.shtml) and even some health authorities defending its use. Since march, various studies with greater scientific rigour investigated this use of HCQ (read [here](https://www.bmj.com/content/369/bmj.m1849), [here](https://www.nejm.org/doi/full/10.1056/NEJMoa2016638), [here](https://academic.oup.com/cid/advance-article/doi/10.1093/cid/ciaa1009/5872589#.XxCYlMdGoJM), [here](https://www.medrxiv.org/content/10.1101/2020.07.15.20151852v1) and [here](https://www.acpjournals.org/doi/10.7326/M20-4207)). Unsurprisingly, all these studies (randomized clinical trials) found no evidence that HCQ presents any benefit against COVID-19.
+
+Nonetheless, some political leaderships still defend HCQ with great passion and its use is still widely popular. In Brazil, not only does the president defend its widespread use, but health insurance companies are also distributing hideous ['COVID kits'](https://noticias.uol.com.br/saude/ultimas-noticias/redacao/2020/07/19/cloroquina-unimed-kit-covid.htm), that contain HCQ and other drugs, to infected patients.
+
+In the middle of this nonsense, one might wonder: how did we get to this point? This is not an easy question, with multiple factors coming into play - such as distrust in authorities and science, right-wing populism with denialistic shades, high hopes when no therapy exists, and many others. But from all the factors, I'd like to focus on one: how we, as scientists, are **failing to explain why well-controlled studies are necessary**. I won't even try to explain what randomized clinical trials are, there are great resources on this topic.
+
+I think this failure is partly due to a lack of intuitive understanding of basic statistical and scientific notions, which will be briefly explored here.
+
+## Prior probabilities and the coin toss mistake
+
+Let's suppose there is a disease spreading out with no available therapy, with low death rates (1%). Now let's also suppose that a certain treatment, with very weak evidence in its favour, gains momentum and popularity. Let's call the treatment the 'What If (**WI**) it works' drug. People start to take the WI drug and report that _their recoveries were extra quick and smooth_. As this happens thousands of times, it is tempting, almost _irresistible, to conclude that WI drug works_, right? Not so much.
+
+Assuming that the drug does absolutely nothing, let's build a simple table. The columns indicate whether a person took WI or not, while the rows indicate whether the person died or not (with 1% mortality).
+
+![Table with innefective treatment](@assets/images/new_hcqs/table_1.png){: .align-right}
+
+In this example, out of 10000 people with the disease, half took WI (to make it easier to visualize), and 50 people died in both groups (taking WI or not). When we see this table, it's very _easy to see the drug doesn't appear to be working at all_. However, consider that 4950 people that took the drug are perfectly well, and **many if not most of them will attribute their survival to the drug, while the 50 who died will not be heard.**
+
+Let's simulate a new scenario. This time, the drug made things worse:
+
+![Table with harmful treatment](@assets/images/new_hcqs/table_2.png){: .align-right}
+
+Again, looking at the table, it's easy to see that _WI lead to a 100% increase in mortality!_ But there are still 4900 people (that is, 98% of those who took the drug) that survived and may defend WI with all their passion.
+
+One last example, this time a more realistic one:
+
+![Table with useless treatment](@assets/images/new_hcqs/table_3.png){: .align-right}
+
+The drug has no effect, but imagine getting to know about cases only through individual reports and media coverage. _The numbers get cloudy and it's easy to draw wrong conclusions._
+
+These examples illustrate that in a real-world scenario, it's hard to grasp the real dimension of things at this level, and **anecdotal evidence** - that is, when someone tells you he or she got better after taking WI - **must not be taken at face value!** Even if this table showed a positive effect of WI, that would not be enough. _People who choose to take WI may be different from those who don't take it in various aspects that influence their chance of survival._ **These biases can only be addressed with randomized clinical trials.**
+
+## Disease is not a coin toss
+
+Intuitively, our sense of probability is close to a coin toss reasoning. That is, we think: I got this disease and may die ou not (a coin toss, with 50/50% chance). _'I may very well try this What If drug everyone is talking about, it may help me'_ (50/50). _'If I survive, the drug probably helped. Better yet, if many people survive after taking WI, the drug must work!'_
+
+The mistake must be obvious by now. While almost everyone knows that their chance of dying is not 50% (in this case, it's 1%), it's hard to intuitively take these probabilities into account and we gravitate towards the 50/50 scenario. Under the influence of the coin toss bias (50/50), **when thousands of people survive after taking WI, we tend to think that the drug must be working exactly because we ignore the known low mortality**. What is the probability that the drug actually works? If evidence is too weak, it might as well be the probability that any _random drug_ would work, which is of course very close to _zero_.
+
+These probabilities, 1% mortality and near-zero chance of a random drug to work are called **[prior (or base) probabilities](https://en.wikipedia.org/wiki/Prior_probability)**. If evidence about a particular case is weak (for example, _'will I survive this disease?'_), **we should always use the base probability as a starting point** (1% chance of dying). From that probability, we can _cautiously_ walk in either direction with evidence about particular cases (e.g. 'I have a heart condition, which increases my risk of dying', or, 'I'm very young, which decreases my overall risk'). **The weaker the evidence, the less we should stray away from the base probability.**
+
+Regarding the drug, if the evidence is very weak, we should consider the prior probability as the chance that any random drug would work against the disease, or the chance that other drugs of the same class (some might already be tested) are effective.
+
+However, intuitively we tend to **largely overestimate the weak pieces of evidence of particular cases** and gravitate towards a 50/50 scenario. _'My neighbour was almost dying and recovered after taking WI'_, for example. This may happen also with high mortality diseases (e.g. cancer) because only those who survived can talk about their therapies, and only a handful of the acquaintances of those who passed will criticize any drug or therapy.
+
+This alone is enough to assure new HCQs will come, as new or old diseases continue to exist and many people survive them after taking various drugs or treatments that might as well do nothing. In the real world, **it's very hard to tell the % of people who survived after taking the drug versus the % among those who didn't take it.** This makes proper reasoning almost impossible without adequate studies - _randomized clinical trials._
+
+## No positive evidence
+
+The second reason why new HCQs will come is a huge miscommunication issue between the scientific community and the general public: in scientific terms, _we cannot formally prove a negative statement_. That is, scientists never claim that drug X or Y were _proven to be ineffective_ against COVID-19 or any other condition. That is due to how studies are designed: they seek differences between groups undertaking different treatments. Thus, the study can state that (1) there was a difference among groups (e.g. people taking drug X died less) or (2) that there was no difference. No difference between groups is not formally a proof that the drug is ineffective, but it's sure a good piece of evidence in this direction.
+
+Throughout the COVID-19 pandemic, many studies found no differences between HCQ and placebo groups both in terms of death and hospitalization outcomes. With various independent studies arriving at the same conclusions, it's safe to say with good confidence that [HCQ does not work](https://www.bbc.com/news/world-us-canada-53575964).
+
+Still, authorities adhere to the technical terms and state that there is no scientific evidence that HCQ works against COVID-19. However, that is misleading. It is true, of course, but it _undermines the fact that there is simply no good evidence in favour of HCQ_. This is a huge miscommunication problem that needs to be addressed. We will never prove, in scientific terms, that HCQ is ineffective against COVID-19, just like we'll never prove that eating chocolate is also ineffective against COVID-19 or any other disease!
+
+Nevertheless, **the fact that negative statements are never proven in scientific terms is not an excuse to stick to ineffective therapies nor to study them forever**, hoping that one miraculous study will prove its efficacy. Even if one study does so, _the evidence must be taken as a whole_, and one positive study among many negative ones can happen by pure chance. The more studies we do, the higher the chance that a false-positive result occur.
+
+## Consequences of "hydroxichloroquines"
+
+Science has an imperfect but the best-to-date available method to avoid unnecessary research: peer review. Every research funding request is evaluated by other members of the scientific community. It's very likely that without all the general public attention and pressure **HCQ would never have been tested as much as it has been**. Simply put: there was never enough evidence to consider it a viable therapy. Thus, if traditional peer review process were followed, **a huge amount of financial and human resources could have been better employed elsewhere**, in other and more promising trials to tackle the COVID-19 pandemic, for instance.
+
+This also happened in Brazil with [phosphoethanolamine](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC5102686/). A Professor started making unsupported claims that this drug was the "cure" for cancer. It quickly gained popularity and momentum, pressing politicians and regulators to test it or even allow its commercialization without any proven efficacy. Indeed, the current Brazilian president, Jair Bolsonaro, [wrote a bill that legalized its medical use](https://www.sciencemag.org/news/2016/04/brazil-president-signs-law-legalizing-renegade-cancer-pill) as a congressman, at the time. The bill was approved and then revoked by justice. Even human studies were conducted, failing to prove its efficacy against cancer ([here](https://sboc.org.br/noticias/item/826-estudo-sobre-fosfoetanolamina-e-suspenso-por-nao-constatar-beneficio)). Again, a huge amount of resources was spent on useless research because of pressure to test a therapy without good evidence from _in vitro_ nor animal studies.
+
+# Conclusion
+
+Our neglectfullness towards prior probabilities, combined with huge amounts of anecdotal evidence from peers on social media, neighbourhood or other spaces provide a powerful booster to the popularity of ineffective therapies. This, combined with the miscommunication problem we explored earlier, is the perfect combination to allow pseudoscience and even pure bullshit to strive.
+
+This, along with other social and cultural factors, is one of the main reasons why completely ineffective therapies such as [homeopathy](https://sciencebasedmedicine.org/homeopathy-is-worthless-and-not-always-harmless/) are still so popular to this day. We, as scientists, should pay more attention to the popularity of useless treatments. Even if they have no side effects (and no effect at all, such as homeopathy), they provide fertile ground for harmful misconceptions, such as the case with HCQ, to flourish.
+
+**We should focus on explaining why ineffective therapies can appear to be very effective and show the benefits of proper clinical trials.**
