@@ -48,7 +48,7 @@ Even though the placebo effect is widely known, it's often misrepresented. The p
 
 Rather, other factors explain the observed improvement, such as RTM. There are two distinct cases: one in which the disease is expected to naturally resolve for most people, such as a common cold; another in which the disease may become or already is chronic and usually does not resolve without intervention. In the first case, the placebo effect is simply the natural course of the disease.
 
-When dealing with chronic illness, symptoms oscillate. Let's say we're measuring pain. The correlation between pain in consecutive weeks is not perfect, so RTM is at play. Even with no improvement of the underlying condition, weeks of very high pain will likely be followed be weeks of more moderate (average) pain.
+When dealing with chronic illness, symptoms oscillate. Let's say we're measuring pain. The correlation between pain in consecutive weeks is not perfect, so RTM is at play. Even with no improvement of the underlying condition, weeks of very high pain will likely be followed by weeks of more moderate (average) pain.
 
 Patients are more likely to seek medical help or even to enroll in clinical trials when their symptoms are at their worst. This is a form of [selection bias](https://en.wikipedia.org/wiki/Selection_bias), which is another problem entirely, but it can greatly enhance the observed effect of RTM by selecting patients with unusually bad symptoms. The opposite is also true. If we actively seek patients with rheumatoid arthritis in periods of exceptionally low pain, they will likely experience _more_ pain in subsequent weeks, regardless of the treatment.
 
@@ -67,4 +67,3 @@ Even though there are statistical workarounds for the lack of a plausible counte
 ## Conclusion
 
 Regression to the mean is everywhere. It can easily fool ourselves into seeing causality where there is none. But regression to the mean itself is not causal, that is, there is nothing _causing_ the return to the average value -- it is a byproduct of imperfect correlation.
-

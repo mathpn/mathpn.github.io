@@ -11,6 +11,7 @@ description: Let's use PyTorch to analyze 3D fractals by implementing the box-co
 Most implementations use the numpy _reduceat_ function. However, this does not scale well, especially in 3 dimensions. Thus, here we use [**PyTorch**](https://pytorch.org/) to make use of GPU performance on 3D fractal analysis.
 
 ## Generating Fractals
+
 I used the [_quintic formula_](https://en.wikipedia.org/wiki/Mandelbulb#Quintic_formula) to generate a three-dimensional Mandelbulb pseudofractal. The _params_ variable can be freely changed to generate different Mandelbulbs. Numba _just-in-time_ compiler is used to make the code more efficient. Still, it is quite inefficient.
 
 ```python
@@ -59,7 +60,8 @@ if __name__ == '__main__':
     params = (1, 0, 1, 0)
     frac = mandelbrot_image(dims, params, 10, 10, 10, 30)
 ```
-Here we present an example with (1, 0, 1, 0) parameters. The code to generate an animated GIF with pyplot.imshow is presented below:
+
+Here we present an example with (1, 0, 1, 0) parameters. The code to generate an animated GIF with `pyplot.imshow` is presented below:
 
 ```python
 import matplotlib.pyplot as plt
@@ -85,9 +87,9 @@ ani = animation.ArtistAnimation(fig, ims, interval=75, blit=True,
 ani.save('./frac_animation.gif', writer='imagemagick', fps = 30)
 ```
 
-The square-root is used to reduce the image contrast and enhance visualization. The image represents a sliding slice of the image on the z-axis, just like a tomography.
+The square root is used to reduce the image contrast and enhance visualization. The image represents a sliding slice of the image on the _z-axis_, just like a tomography.
 
-![image](@assets/images/fractal1.gif){: .align-left}
+![Animation showing slices of a 3D pseudofractal](@assets/images/fractal1.gif)
 
 ## Fractal Analysis
 
@@ -95,9 +97,11 @@ The [box-counting algorithm](https://en.wikipedia.org/wiki/Box_counting) is the 
 
 This can be easily generalized to three dimensions substituting squares for cubes.
 
-![image](@assets/images/fractal_GB.png) By Prokofiev - Own work, CC BY-SA 3.0, [https://commons.wikimedia.org/w/index.php?curid=12042116](https://commons.wikimedia.org/w/index.php?curid=12042116)
+![Illustration of the box-counting algorithm using the Great-Britain map contour](@assets/images/fractal_GB.png)
 
-This count is performed for each box size and the box slides through the image with a predefined stride, in our case, the stride was defined as half the box side. Using pytorch AvgPool3d function, we can detect edges as follows: if the average pooling is 0, there is no edge; if it's 1, the object completely fills the box, without edges. Thus, **a pooling between 0 and 1 means that there's an edge**. This can be achieved with the following code:
+> By [Prokofiev - Own work](https://commons.wikimedia.org/w/index.php?curid=12042116), CC BY-SA 3.0
+
+This count is performed for each box size and the box slides through the image with a predefined stride, in our case, the stride was defined as half the box side. Using pytorch `AvgPool3d` function, we can detect edges as follows: if the average pooling is 0, there is no edge; if it's 1, the object completely fills the box, without edges. Thus, **a pooling between 0 and 1 means that there's an edge**. This can be achieved with the following code:
 
 ```python
 stride = (int(size/2), int(size/2), int(size/2))
@@ -105,6 +109,7 @@ pool = AvgPool3d(kernel_size = (size, size, size), stride = stride, padding = in
 # Performs optimized 3D average pooling for box-counting
 S = pool(image)
 ```
+
 Where size is the dimension of the image.
 
 ## Fractal Dimension
@@ -113,15 +118,17 @@ The fractal dimension is an estimate of the complexity of a fractal as a functio
 
 An **estimator of the fractal dimension** of an image can be obtained through the box-counting algorithm: the counts should follow a power law distribution in perfect fractal images, that is, the number of counts increase exponentially as the box size goes down. The fractal dimension estimator from box-counting **(Db)** is the **opposite of the slope of a linear reggression that takes as inputs the natural log of counts and the natural log of box sizes**. Applying the log transformation to both axis transforms a power law relationship into a linear one. The next two images show the effect of the log transformation:
 
-![image](@assets/images/fractal_log_comparison.png)
+![Plots of box-counting in linear and log scales](@assets/images/fractal_log_comparison.png)
 
 ## Lacunarity
 
 [Lacunarity](https://en.wikipedia.org/wiki/Lacunarity) is another useful measure to explore fractal-like patterns. It is a measure of **_"gappines"_ and, more generally, of heterogeneity (rotational invariance)**. Intuitively, it can be thought as a measure of how dense a pattern is and how self-similar it is when subjected to spatial transformations. It can be estimated with the box-counting algorithm using the following formula:
 
-![image](@assets/images/fractal_lacunarity_formula.svg)
+$$
+\lambda_{\epsilon,g} = (CV_{\epsilon,g})^2 = \bigg(\frac{\sigma_{\epsilon,g}}{\mu_{\epsilon,g}}\bigg)^2
+$$
 
-where ![image](@assets/images/fractal_e.svg) is the box size and g is the orientation. Moreover, ![image](@assets/images/sigma.svg) and  and ![image](@assets/images/mu.svg) are the **standard-error and mean for pixels per box**, recpectively.
+where $\epsilon$ is the box size and $g$ is the orientation. Moreover, $\sigma$ and $\mu$ are the **standard-error and mean number of pixels per box**, recpectively.
 
 ## Full code
 
@@ -230,6 +237,6 @@ class Fractal:
 
 First, the array is converted to a binary one according to a provided threshold. Following, the get_sizes function calculates box sizes as powers of 2, without exceeding half the size of the array's smaller dimension.
 
-The get_count function performs the magic. The while loop ensures that a maximum of 4 orientations is used for each box size to decrease bias. Then, the AvgPool3d combined with the torch.where functions perform the box-counting, which is added to the count_u variable for each iteration. Also, for each iteration, a lacunarity value is calculated. The final count value is just the sum of all orientations for each size, while the final lacunarity value is the average for all orientations at a given box size.
+The `get_count` function performs the magic. The `while` loop ensures that a maximum of 4 orientations is used for each box size to decrease bias. Then, the AvgPool3d combined with the torch.where functions perform the box-counting, which is added to the `count_u` variable for each iteration. Also, for each iteration, a lacunarity value is calculated. The final count value is just the sum of all orientations for each size, while the final lacunarity value is the average for all orientations at a given box size.
 
 The fractal shown in the GIF image has a **2.05795 fractal dimension** and a **1.19497 mean lacunarity**. If you want a more in-depth view of fractal analysis, consider reading [this article](https://academic.oup.com/gji/article/132/2/275/671597).

@@ -6,11 +6,9 @@ description: We'll use Recurrent Neural Networks to classify the Sentiment140 da
 pubDatetime: 2018-12-30
 ---
 
-# TODO change links to relative paths
+> This is the part 2 of a series, please read [part 1](/posts/sentiment-classification-twitter-part1) before reading this.
 
-> This is the part 2 of a series, please read [part 1](http://hyperspaces.org/sentiment-classification-twitter-part1/) before reading this.
-
-We'll use Recurrent Neural Networks to classify the [Sentiment140](http://www.sentiment140.com) dataset into positive or negative tweets. Previously, [we used a Bag of Words followed by a logistic regression classifier](http://hyperspaces.org/sentiment-classification-twitter-part1/). This approach, however, completely ignores the semantic relationship between words as it only consider the count of each word in a tweet. Thus, we aim at considering the **position of words and its complex relationships** to achieve better classification.
+We'll use Recurrent Neural Networks to classify the [Sentiment140](http://www.sentiment140.com) dataset into positive or negative tweets. Previously, we've used a Bag of Words followed by a logistic regression classifier. This approach, however, completely ignores the semantic relationship between words as it only consider the count of each word in a tweet. Thus, we aim at considering the **position of words and its complex relationships** to achieve better classification.
 
 ## Pre-processing
 
@@ -25,7 +23,6 @@ from matplotlib import pyplot as plt
 data = pd.read_csv('training.1600000.processed.noemoticon.csv', encoding = 'ISO-8859-1', header = None)
 data.columns = ['sentiment','id','date','flag','user','tweet']
 ```
-
 
 ```python
 def preprocess_tweets(tweet):
@@ -59,6 +56,7 @@ def preprocess_tweets(tweet):
 
     return tweet
 ```
+
 This time, however, we'll split the data into train, test and validation sets. The **validation** set is used to **monitor overfitting during training**. The test set should be left untouched and unseen until its evaluation. It may sound counter-intuitive, but merely tweaking the model according to the validation set performance may produce indirect overfitting (indirect as the model never sees any of the validation data) and may jeopardize its generalization capability (that is, its ability to perform well in data other than what it was trained on).
 
 ```python
@@ -84,7 +82,7 @@ sentiment_val = np.array(val_data['sentiment'])
 tweets_val = np.array(val_data['tweet'].apply(preprocess_tweets))
 ```
 
-Just like in the previous post, we'll count word occurrences and establish a parsimonious threshold. Words below this threshold will be replaced by the *OUT* tag. This way, we limit model complexity while retaining most of information (more than 95% of word occurrences). Next, we build a word2int dictionary that assigns an integer value to each word in our dictionary. *PAD*, *OUT*, *EOS* and *SOS* tokens are also included in the dictionary. However, the *end-of-sentence* (EOS) and *start-of-sentence* (SOS) ended up not being used on this model.
+Just like in the previous post, we'll count word occurrences and establish a parsimonious threshold. Words below this threshold will be replaced by the _OUT_ tag. This way, we limit model complexity while retaining most of information (more than 95% of word occurrences). Next, we build a word2int dictionary that assigns an integer value to each word in our dictionary. _PAD_, _OUT_, _EOS_ and _SOS_ tokens are also included in the dictionary. However, the _end-of-sentence_ (EOS) and _start-of-sentence_ (SOS) ended up not being used on this model.
 
 ```python
 word2count = {}
@@ -159,7 +157,8 @@ for _tweet in tweets_test:
 
 tweets_int = tweets_train_int + tweets_val_int + tweets_test_int
 ```
-Our recurrent neural network receive inputs of fixed length. Therefore, our sequences will be padded (the *PAD* token will be added to the beginning of every tweet until it reaches our fixed length). Again, some tweets are extremely long due to repetitions and excessive punctuation. As a parsimonious length, the 99th percentile of all lengths was chosen, that is, 99% of all tweets will fit in our maximum padding length. Tweets longer than this will be truncated at the maximum length.
+
+Our recurrent neural network receive inputs of fixed length. Therefore, our sequences will be padded (the _PAD_ token will be added to the beginning of every tweet until it reaches our fixed length). Again, some tweets are extremely long due to repetitions and excessive punctuation. As a parsimonious length, the 99th percentile of all lengths was chosen, that is, 99% of all tweets will fit in our maximum padding length. Tweets longer than this will be truncated at the maximum length.
 
 ```python
 lens = []
@@ -173,8 +172,6 @@ print(max_len)
 
     34
 
-
-
 ```python
 from keras.preprocessing.sequence import pad_sequences
 
@@ -186,6 +183,7 @@ sentiment_train[sentiment_train == 4] = 1
 sentiment_test[sentiment_test == 4] = 1
 sentiment_val[sentiment_val == 4] = 1
 ```
+
 ## Building our Neural Network
 
 A [research paper](https://ieeexplore.ieee.org/document/8141873) suggests that a **combination of 1D convolutions with recurrent units result in a higher performance** than both of these alone. Thus, we built a neural network with an architecture inspired by this research paper.
@@ -200,7 +198,7 @@ A quite large dropout (0.5 rate) is used after the GRU layers as recurrent neura
 
 **The model architecture is represented on the scheme below:**
 
-![model_architecture](@assets/images/sentiment140/architecture1.png){: .align-center}
+![Model architecture with parallel convolutional and RNN paths](@assets/images/sentiment140/architecture1.png)
 
 Keras functional API must be used due to parallel layers. The result of both 1D convolutions and GRUs is concatenated and followed by a 1-unit output dense layer. The Adam optimizer with soft weight decay will be used.
 
@@ -247,46 +245,46 @@ print(model.summary())
 ```
 
     __________________________________________________________________________________________________
-    Layer (type)                    Output Shape         Param #     Connected to                     
+    Layer (type)                    Output Shape         Param #     Connected to
     ==================================================================================================
-    input_7 (InputLayer)            (None, 34)           0                                            
+    input_7 (InputLayer)            (None, 34)           0
     __________________________________________________________________________________________________
-    embedding_7 (Embedding)         (None, 34, 200)      1996600     input_7[0][0]                    
+    embedding_7 (Embedding)         (None, 34, 200)      1996600     input_7[0][0]
     __________________________________________________________________________________________________
-    dropout_19 (Dropout)            (None, 34, 200)      0           embedding_7[0][0]                
+    dropout_19 (Dropout)            (None, 34, 200)      0           embedding_7[0][0]
     __________________________________________________________________________________________________
-    conv1d_19 (Conv1D)              (None, 32, 128)      76928       dropout_19[0][0]                 
+    conv1d_19 (Conv1D)              (None, 32, 128)      76928       dropout_19[0][0]
     __________________________________________________________________________________________________
-    batch_normalization_19 (BatchNo (None, 32, 128)      512         conv1d_19[0][0]                  
+    batch_normalization_19 (BatchNo (None, 32, 128)      512         conv1d_19[0][0]
     __________________________________________________________________________________________________
-    activation_19 (Activation)      (None, 32, 128)      0           batch_normalization_19[0][0]     
+    activation_19 (Activation)      (None, 32, 128)      0           batch_normalization_19[0][0]
     __________________________________________________________________________________________________
-    conv1d_20 (Conv1D)              (None, 29, 64)       32832       activation_19[0][0]              
+    conv1d_20 (Conv1D)              (None, 29, 64)       32832       activation_19[0][0]
     __________________________________________________________________________________________________
-    batch_normalization_20 (BatchNo (None, 29, 64)       256         conv1d_20[0][0]                  
+    batch_normalization_20 (BatchNo (None, 29, 64)       256         conv1d_20[0][0]
     __________________________________________________________________________________________________
-    activation_20 (Activation)      (None, 29, 64)       0           batch_normalization_20[0][0]     
+    activation_20 (Activation)      (None, 29, 64)       0           batch_normalization_20[0][0]
     __________________________________________________________________________________________________
-    conv1d_21 (Conv1D)              (None, 27, 64)       12352       activation_20[0][0]              
+    conv1d_21 (Conv1D)              (None, 27, 64)       12352       activation_20[0][0]
     __________________________________________________________________________________________________
-    batch_normalization_21 (BatchNo (None, 27, 64)       256         conv1d_21[0][0]                  
+    batch_normalization_21 (BatchNo (None, 27, 64)       256         conv1d_21[0][0]
     __________________________________________________________________________________________________
-    activation_21 (Activation)      (None, 27, 64)       0           batch_normalization_21[0][0]     
+    activation_21 (Activation)      (None, 27, 64)       0           batch_normalization_21[0][0]
     __________________________________________________________________________________________________
-    gru_17 (GRU)                    (None, 34, 128)      126336      dropout_19[0][0]                 
+    gru_17 (GRU)                    (None, 34, 128)      126336      dropout_19[0][0]
     __________________________________________________________________________________________________
-    global_average_pooling1d_7 (Glo (None, 64)           0           activation_21[0][0]              
+    global_average_pooling1d_7 (Glo (None, 64)           0           activation_21[0][0]
     __________________________________________________________________________________________________
-    gru_18 (GRU)                    (None, 128)          98688       gru_17[0][0]                     
+    gru_18 (GRU)                    (None, 128)          98688       gru_17[0][0]
     __________________________________________________________________________________________________
     dropout_20 (Dropout)            (None, 64)           0           global_average_pooling1d_7[0][0]
     __________________________________________________________________________________________________
-    dropout_21 (Dropout)            (None, 128)          0           gru_18[0][0]                     
+    dropout_21 (Dropout)            (None, 128)          0           gru_18[0][0]
     __________________________________________________________________________________________________
-    concatenate_7 (Concatenate)     (None, 192)          0           dropout_20[0][0]                 
-                                                                     dropout_21[0][0]                 
+    concatenate_7 (Concatenate)     (None, 192)          0           dropout_20[0][0]
+                                                                     dropout_21[0][0]
     __________________________________________________________________________________________________
-    dense_7 (Dense)                 (None, 1)            193         concatenate_7[0][0]              
+    dense_7 (Dense)                 (None, 1)            193         concatenate_7[0][0]
     ==================================================================================================
     Total params: 2,344,953
     Trainable params: 2,344,441
@@ -311,7 +309,7 @@ model.fit(x = pad_tweets_train, y = sentiment_train,\
     Epoch 4/20
     1152000/1152000 [==============================] - 2747s 2ms/step - loss: 0.2984 - acc: 0.8734 - val_loss: 0.3643 - val_acc: 0.8411
 
-After the third epoch, the model reached its best performance on the validation set. The EarlyStopping callback makes sure that this is the model that is kept under the *model* variable.
+After the third epoch, the model reached its best performance on the validation set. The EarlyStopping callback makes sure that this is the model that is kept under the _model_ variable.
 
 ## Model Evaluation
 
@@ -337,7 +335,7 @@ The best AUC achieved with the bag of words approach was **0.8782**, showing tha
 
 As in the first part of this post series, the top false positives and false negatives are actually mislabeled data. Thus, we'll take a peek at random false positive or negative examples, without actually choosing the most "incorrect" ones.
 
-* **True Positives**
+### True Positives
 
 ```python
 from random import sample
@@ -351,15 +349,15 @@ print(tweets_test[true_positives][samples])
 print(pred.reshape((-1))[true_positives][samples])
 ```
 
-| Tweet | Positive Probability |
-| --- | ---: |
-| 'feeling better about everything thank you booze!' | 0.9616 |
-| 'some writing, some dusting, and then work 59 with tricia! ' | 0.6634 |
-| '<user> thats badass jd! keep it up and in no time youll be looking like camillo! have all them cougars following your group!' | 0.9469 |
-| '<user> i would have liked to have a like button to press for your last comment ' | 0.8898 |
-| '<user> aw <elong> ! that is so sweet. ' | 0.8991 |
+| Tweet                                                                                                                          | Positive Probability |
+| ------------------------------------------------------------------------------------------------------------------------------ | -------------------: |
+| 'feeling better about everything thank you booze!'                                                                             |               0.9616 |
+| 'some writing, some dusting, and then work 59 with tricia! '                                                                   |               0.6634 |
+| '<user> thats badass jd! keep it up and in no time youll be looking like camillo! have all them cougars following your group!' |               0.9469 |
+| '<user> i would have liked to have a like button to press for your last comment '                                              |               0.8898 |
+| '<user> aw <elong> ! that is so sweet. '                                                                                       |               0.8991 |
 
-* **True Negatives**
+### True Negatives
 
 ```python
 neg_indices = sentiment_test == 0
@@ -371,15 +369,15 @@ print(tweets_test[true_negatives][samples])
 print(pred.reshape((-1))[true_negatives][samples])
 ```
 
-| Tweet | Positive Probability |
-| --- | ---: |
-| 'well ive now got a chest infection, and it hurts like a bitch i want <*allcaps*> kfc <*allcaps*> ' | 0.0102 |
-| 'a bee stung me in the finger! its so swollen that i dont have a fingerprint. ' | 0.0077 |
-| 'i miss having tcm <*allcaps*> ' | 0.0141 |
-| 'kittens are going soon. sad times. i love them too much ' | 0.4847 |
-| '<*user*> i took 2 weeks off work for in the sun, instead im lieing here trying to use this bastard twitter, gr <*elong*> i should be raving ' | 0.2338 |
+| Tweet                                                                                                                                          | Positive Probability |
+| ---------------------------------------------------------------------------------------------------------------------------------------------- | -------------------: |
+| 'well ive now got a chest infection, and it hurts like a bitch i want <_allcaps_> kfc <_allcaps_> '                                            |               0.0102 |
+| 'a bee stung me in the finger! its so swollen that i dont have a fingerprint. '                                                                |               0.0077 |
+| 'i miss having tcm <_allcaps_> '                                                                                                               |               0.0141 |
+| 'kittens are going soon. sad times. i love them too much '                                                                                     |               0.4847 |
+| '<_user_> i took 2 weeks off work for in the sun, instead im lieing here trying to use this bastard twitter, gr <_elong_> i should be raving ' |               0.2338 |
 
-* **False Positives**
+### False Positives
 
 ```python
 neg_indices = sentiment_test == 0
@@ -391,20 +389,20 @@ print(tweets_test[false_positives][samples])
 print(pred.reshape((-1))[false_positives][samples])
 ```
 
-| Tweet | Positive Probability |
-| --- | ---: |
-| '<*user*> with 1 / 40th of that following alone, i could stay on twitter 24 / 7 the only stress to tire me would come from coulterites! ' | 0.7520 |
-| '<*user*> not even in the land of ketchup, thats just wrong. did u ever try the ketchup fries?' | 0.6687 |
-| '<*user*> thanks girlie i need it. <*repeat*> theres a lot to do ' | 0.7414 |
-|'<*user*> hi ryan! why you are getting so unfashionable lately? ' | 0.8097 |
-| 'i dont know what i am doing on here. wow i joined the new fad ' | 0.8859 |
-| '<*user*> thats okay. <*repeat*> it will take a couple hours of intense therapy to get over it, but ill manage somehow ' | 0.9083 |
-| '? <*repeat*> quotbest video <*url*> ? <*repeat*> ? <*repeat*> ? <*repeat*> ? <*repeat*> , ? <*repeat*> ? <*repeat*> ? <*repeat*> ? <*repeat*> ? <*repeat*> ! i already clicked it <*url*> ' | 0.5936 |
-| 'wii fit day 47. hang over prevented wii this morning. late night work meant i wasnt home til near midnight. 15 min walk then situps. ' | 0.6522 |
-| '<*user*> were gettin alot of rain. we must be getting yours! ' | 0.6998 |
-| 'im tired didnt do anything all day! except went to the craft store to get some hemp string ' | 0.8360 |
+| Tweet                                                                                                                                                                                        | Positive Probability |
+| -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------: |
+| '<_user_> with 1 / 40th of that following alone, i could stay on twitter 24 / 7 the only stress to tire me would come from coulterites! '                                                    |               0.7520 |
+| '<_user_> not even in the land of ketchup, thats just wrong. did u ever try the ketchup fries?'                                                                                              |               0.6687 |
+| '<_user_> thanks girlie i need it. <_repeat_> theres a lot to do '                                                                                                                           |               0.7414 |
+| '<_user_> hi ryan! why you are getting so unfashionable lately? '                                                                                                                            |               0.8097 |
+| 'i dont know what i am doing on here. wow i joined the new fad '                                                                                                                             |               0.8859 |
+| '<_user_> thats okay. <_repeat_> it will take a couple hours of intense therapy to get over it, but ill manage somehow '                                                                     |               0.9083 |
+| '? <_repeat_> quotbest video <_url_> ? <_repeat_> ? <_repeat_> ? <_repeat_> ? <_repeat_> , ? <_repeat_> ? <_repeat_> ? <_repeat_> ? <_repeat_> ? <_repeat_> ! i already clicked it <_url_> ' |               0.5936 |
+| 'wii fit day 47. hang over prevented wii this morning. late night work meant i wasnt home til near midnight. 15 min walk then situps. '                                                      |               0.6522 |
+| '<_user_> were gettin alot of rain. we must be getting yours! '                                                                                                                              |               0.6998 |
+| 'im tired didnt do anything all day! except went to the craft store to get some hemp string '                                                                                                |               0.8360 |
 
-* **False Negatives**
+### False Negatives
 
 ```python
 pos_indices = sentiment_test == 1
@@ -416,25 +414,25 @@ print(tweets_test[false_negatives][samples])
 print(pred.reshape((-1))[false_negatives][samples])
 ```
 
-| Tweet | Positive Probability |
-| --- | ---: |
-| 'okay, a bath is a must. and then studying! i really have no life.' | 0.2401 |
-| '<*user*> so you hate me ' | 0.3220 |
-| 'catching up on my reading. <*repeat*> twitter n bf break ' | 0.4715 |
-| '<*user*> good thing when quotdj heroquot video game comes out there will be no more wanna be djs ' | 0.4940 |
-| 'gained 1 follower. i need more. haha! ' | 0.4358 |
-| 'thanks <*user*> it is the avatar i started with. hope all is well. had more storms here today though nothi. <*repeat*> )<*url*> ' | 0.2736 |
-| 'so <*elong*> have to piss right now, cant find the energy to want to unleash the fury ' | 0.0265 |
-| 'oh snap. <*repeat*> kinda nuts right now. <*repeat*> <*user*> ive told at least 27 thanks babes.' | 0.4799 |
-| 'ahh, worried about tomorrow. <*repeat*> will they turn up. <*repeat*> ? haha ' | 0.3653 |
-| 'my eyes are red. should sleep but dnt feel like it, haha. lilee is sitting on my chair so i have to sit on my bed ' | 0.1993 |
+| Tweet                                                                                                                              | Positive Probability |
+| ---------------------------------------------------------------------------------------------------------------------------------- | -------------------: |
+| 'okay, a bath is a must. and then studying! i really have no life.'                                                                |               0.2401 |
+| '<_user_> so you hate me '                                                                                                         |               0.3220 |
+| 'catching up on my reading. <_repeat_> twitter n bf break '                                                                        |               0.4715 |
+| '<_user_> good thing when quotdj heroquot video game comes out there will be no more wanna be djs '                                |               0.4940 |
+| 'gained 1 follower. i need more. haha! '                                                                                           |               0.4358 |
+| 'thanks <_user_> it is the avatar i started with. hope all is well. had more storms here today though nothi. <_repeat_> )<_url_> ' |               0.2736 |
+| 'so <_elong_> have to piss right now, cant find the energy to want to unleash the fury '                                           |               0.0265 |
+| 'oh snap. <_repeat_> kinda nuts right now. <_repeat_> <_user_> ive told at least 27 thanks babes.'                                 |               0.4799 |
+| 'ahh, worried about tomorrow. <_repeat_> will they turn up. <_repeat_> ? haha '                                                    |               0.3653 |
+| 'my eyes are red. should sleep but dnt feel like it, haha. lilee is sitting on my chair so i have to sit on my bed '               |               0.1993 |
 
-We can see that true positives and negatives are indeed positive and negative, respectively. It is worth mentioning one example from true positives ("*some writing, some dusting, and then work 59 with tricia!*") which is not obviously positive and, accordingly, received a lower probability. From the negatives, the tweet "*kittens are going soon. sad times. i love them too much*" remained almost uncertain to the model probably due to the "*i love them too much*" part.
+We can see that true positives and negatives are indeed positive and negative, respectively. It is worth mentioning one example from true positives ("_some writing, some dusting, and then work 59 with tricia!_") which is not obviously positive and, accordingly, received a lower probability. From the negatives, the tweet "_kittens are going soon. sad times. i love them too much_" remained almost uncertain to the model probably due to the "_i love them too much_" part.
 
-Some false positives or negatives don't have an explicit feeling to them - e.g "<*user*> were gettin alot of rain. we must be getting yours!", "catching up on my reading. <*repeat*> twitter n bf break"; without the label, its hard to classify them (most likely because *emoji* information was lost, and so the model incorrectly classified them but with probabilities close to 0.5. Some other mistakes are actually mislabeled data (e.g. "okay, a bath is a must. and then studying! i really have no life.", "<user> so you hate me", "my eyes are red. should sleep but dnt feel like it, haha. lilee is sitting on my chair so i have to sit on my bed", "ahh, worried about tomorrow. <repeat> will they turn up. <repeat> ? haha" - they should be all true negatives).
+Some false positives or negatives don't have an explicit feeling to them - e.g "<_user_> were gettin alot of rain. we must be getting yours!", "catching up on my reading. <_repeat_> twitter n bf break"; without the label, its hard to classify them (most likely because _emoji_ information was lost, and so the model incorrectly classified them but with probabilities close to 0.5). Some other mistakes are actually mislabeled data (e.g. "okay, a bath is a must. and then studying! i really have no life.", "\<user\> so you hate me", "my eyes are red. should sleep but dnt feel like it, haha. lilee is sitting on my chair so i have to sit on my bed", "ahh, worried about tomorrow. \<repeat\> will they turn up. \<repeat\> ? haha" - they should be all true negatives).
 
-There are, of course, some obvious mistakes, such as *"wii fit day 47. hang over prevented wii this morning. late night work meant i wasnt home til near midnight. 15 min walk then situps"* (incorrectly classified as a positive).
+There are, of course, some obvious mistakes, such as _"wii fit day 47. hang over prevented wii this morning. late night work meant i wasnt home til near midnight. 15 min walk then situps"_ (incorrectly classified as a positive).
 
-It's worth mentioning that the complex nature of our model gives it a black box nature. That is, **it's very hard to know why a tweet was classified in some particular way**. For example, the tweets "<*user*> not even in the land of ketchup, thats just wrong. did u ever try the ketchup fries?" (probability: 0.6687) and "<*user*> hi ryan! why you are getting so unfashionable lately?" (probability: 0.8097) were false positives, yet they can be classified as positives if we consider they're funny. Still, it's very far-fetched to assume that the model learned a sense of humor. It's also a mistery why the tweet "<*user*> thats okay. <repeat> it will take a couple hours of intense therapy to get over it, but ill manage somehow" was classified as a positive. Maybe because the person will manage it somehow, even though this might have (and probably has, in this context) a negative connotation.
+It's worth mentioning that the complex nature of our model gives it a black box nature. That is, **it's very hard to know why a tweet was classified in some particular way**. For example, the tweets "<_user_> not even in the land of ketchup, thats just wrong. did u ever try the ketchup fries?" (probability: 0.6687) and "<_user_> hi ryan! why you are getting so unfashionable lately?" (probability: 0.8097) were false positives, yet they can be classified as positives if we consider they're funny. Still, it's very far-fetched to assume that the model learned a sense of humor. It's also a mistery why the tweet "<_user_> thats okay. \<repeat\> it will take a couple hours of intense therapy to get over it, but ill manage somehow" was classified as a positive. Maybe because the person will manage it somehow, even though this might have (and probably has, in this context) a negative connotation.
 
-Finally, it's perceivable that this model has a greater ability to detect sentiment without obvious words (such as *love*, *hate*, *pain*, *happy*). This is the major improvement from the bag of words approach.
+Finally, it's perceivable that this model has a greater ability to detect sentiment without obvious words (such as _love_, _hate_, _pain_, _happy_). This is the major improvement from the bag of words approach.

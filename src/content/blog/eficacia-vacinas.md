@@ -13,23 +13,33 @@ No entanto, um foco excessivo foi dado à tal eficácia. Tomamos vacinas há mui
 
 Afinal de contas, o que é a _eficácia de uma vacina_? Vamos aqui definir a _eficácia_ e olhar o que ela **não é**. Definir o não é a eficácia é uma boa forma de remover interpretações equivocadas que já estão nas nossas mentes.
 
-A eficácia de uma vacina (Efi) é definida como:
+A eficácia de uma vacina (E) é definida como:
 
-$Efi = 1 - RR$
+$$
+E = 1 - RR
+$$
 
 Sendo RR o **Risco Relativo** entre os grupos que tomaram vacina ou placebo nos **testes de fase III**:
 
-$RR = \frac{Risco\ grupo\ vacinado}{Risco\ grupo\ placebo}$
+$$
+RR = \frac{Risco\ grupo\ vacinado}{Risco\ grupo\ placebo}
+$$
 
 Assim, se ao final de um estudo com 1000 pessoas em cada grupo há 340 infectados no grupo placebo e 79 no grupo vacinado, temos:
 
-$Risco\ grupo\ vacinado = \frac{79}{1000} = 0,079$
+$$
+Risco\ grupo\ vacinado = \frac{79}{1000} = 0.079
+$$
 
-$Risco\ grupo\ placebo = \frac{340}{1000} = 0,34$
+$$
+Risco\ grupo\ placebo = \frac{340}{1000} = 0.34
+$$
 
 A eficácia da vacina portanto é:
 
-$Efi = 1 - \frac{0,079}{0,34} = 1 - 0,232 = 0,768$
+$$
+E = 1 - \frac{0,079}{0,34} = 1 - 0.232 = 0.768
+$$
 
 Ou seja, a eficácia dessa vacina fictícia é de 76,8%. O que isso **não** significa?
 
@@ -42,11 +52,11 @@ Quando os resultados de eficácia da Coronavac saíram, houve analogias bem-inte
 <cite>Valor Econômico</cite> --- [Bolsonaro volta a lançar dúvidas sobre a CoronaVac, mas diz que ela é “do Brasil”](https://valor.globo.com/politica/noticia/2021/01/18/em-recado-a-doria-bolsonaro-diz-que-vacina-do-brasil-no-de-um-governador.ghtml)
 {: .small}
 
-Essa fala de Jair Bolsonaro é obviamente uma tentativa de prejudicar a imagem da Coronavac, mas carrega um erro comum sobre o que é a eficácia. A analogia com a moeda dá a entender que uma pessoa vacinada tem 50% de chance de não ficar doente e, portanto, 50% de chance de ficar doente. Isso é falso. Uma pessoa precisa _entrar em contato com uma quantidade suficiente de vírus por tempo suficiente_ para se infectar, e _somente essas_ podem ficar doentes ou não. A eficácia é uma redução do risco **relativo**, ou seja, em relação a um grupo não vacinado nos testes. Se a chance de ficar doente fosse "aleatória" como uma moeda jogada pro alto, as pessoas dos grupos placebo e vacina ficariam doentes na mesma proporção, levando a eficácia a 0. Assim, o cenário é bem melhor do que 50% de chance de ficar doente. Se sua probabilidade de ficar doente nos próximos 6 meses fosse, digamos, de 20%, com essa vacina ela seria de 10% (redução _relativa_ de 50%), se mais nada mudasse.
+Fora o carater político, a fala carrega um erro comum sobre o que é a eficácia. A analogia com a moeda dá a entender que uma pessoa vacinada tem 50% de chance de não ficar doente e, portanto, 50% de chance de ficar doente. Isso é falso. Uma pessoa precisa _entrar em contato com uma quantidade suficiente de vírus por tempo suficiente_ para se infectar, e _somente essas_ podem ficar doentes ou não. A eficácia é uma redução do risco **relativo**, ou seja, em relação a um grupo não vacinado nos testes. Se a chance de ficar doente fosse "aleatória" como uma moeda jogada pro alto, as pessoas dos grupos placebo e vacina ficariam doentes na mesma proporção, levando a eficácia a 0. Assim, o cenário é bem melhor do que 50% de chance de ficar doente. Se sua probabilidade de ficar doente nos próximos 6 meses fosse, digamos, de 20%, com essa vacina ela seria de 10% (redução _relativa_ de 50%), se mais nada mudasse.
 
 ## 2) Proporção de protegidos na população
 
-Uma ideia bem comum e que circula muito é que, se a eficácia de uma vacina é de 80%, então 80 em cada 100 vacinados. É bastante intuitivo. Mas essa explicação simplifica tanto o conceito que acaba transmitindo uma informação equivocada. Na realidade, as vacinas em geral induzem resposta imune em praticamente todos os vacinados (leia mais [aqui](https://www.uol.com.br/vivabem/noticias/redacao/2020/11/17/estudo-coronavac-induz-resposta-imune-em-97-dos-casos-butantan-comemora.htm) e [aqui](https://www.thelancet.com/journals/lancet/article/PIIS0140-6736(20)31604-4/fulltext)). É verdade que a resposta imune varia entre indivíduos, mas isso _não significa_ que, no caso de 50% de eficácia, _50% das pessoas estão desprotegidas_. Quase todos os vacinados apresentam resposta imune, mas dois fatores fazem com que alguns fiquem doentes mesmo assim: primeiro, há pessoas cujos sistemas imunes não funcionam tão bem, deixando-as mais suscetíveis a infecções; segundo mas não menos importante, se expor ao vírus brevemente no supermercado ou conversar por horas sem máscara com alguém infectado leva a uma exposição _muito_ diferente, o que aumenta a probabilidade de ficar doente mesmo estando vacinado. Uma mistura desses fatores imunológicos (variação entre as pessoas) e ambiental (exposição ao vírus) explica em grande parte porque é possível ficar doente mesmo após a vacinação. Na realidade, isso não é surpreendente, uma vez que é possível se reinfectar com diversas doenças.
+Uma ideia bem comum e que circula muito é que, se a eficácia de uma vacina é de 80%, então 80 em cada 100 vacinados. É bastante intuitivo. Mas essa explicação simplifica tanto o conceito que acaba transmitindo uma informação equivocada. Na realidade, as vacinas em geral induzem resposta imune em praticamente todos os vacinados (leia mais [aqui](https://www.uol.com.br/vivabem/noticias/redacao/2020/11/17/estudo-coronavac-induz-resposta-imune-em-97-dos-casos-butantan-comemora.htm) e [aqui](<https://www.thelancet.com/journals/lancet/article/PIIS0140-6736(20)31604-4/fulltext>)). É verdade que a resposta imune varia entre indivíduos, mas isso _não significa_ que, no caso de 50% de eficácia, _50% das pessoas estão desprotegidas_. Quase todos os vacinados apresentam resposta imune, mas dois fatores fazem com que alguns fiquem doentes mesmo assim: primeiro, há pessoas cujos sistemas imunes não funcionam tão bem, deixando-as mais suscetíveis a infecções; segundo mas não menos importante, se expor ao vírus brevemente no supermercado ou conversar por horas sem máscara com alguém infectado leva a uma exposição _muito_ diferente, o que aumenta a probabilidade de ficar doente mesmo estando vacinado. Uma mistura desses fatores imunológicos (variação entre as pessoas) e ambiental (exposição ao vírus) explica em grande parte porque é possível ficar doente mesmo após a vacinação. Na realidade, isso não é surpreendente, uma vez que é possível se reinfectar com diversas doenças.
 
 Lembrando da definição de eficácia: é um **risco relativo** entre vacinados e grupo placebo. Dizer a porcentagem de pessoas que não ficariam doentes após a vacinação seria um risco **absoluto**. Para calculá-lo, seria necessário propositalmente expor pessoas vacinadas ao vírus em um laboratório, o que seria obviamente antiético. Além disso, como vimos acima, a exposição ao vírus pode variar muito, tornando esse resultado de pouca utilidade no mundo real. Por isso, os estudos de fase III (para determinar eficácia) são feitos em grandes grupos que seguem sua vida normalmente sem saber se tomaram vacina ou placebo, para tentar mimetizar ao máximo as condições reais nas quais as pessoas se expõem ao vírus.
 
@@ -68,11 +78,15 @@ A alta eficácia contra casos graves deve aliviar os hospitais mesmo diante de u
 
 Vamos relembrar a definição da eficácia de uma vacina:
 
-$Efi = 1 - RR$
+$$
+E = 1 - RR
+$$
 
 Sendo RR o Risco Relativo entre os grupos que tomaram vacina ou placebo nos testes de fase III:
 
-$RR = \frac{Risco\ grupo\ vacinado}{Risco\ grupo\ placebo}$
+$$
+RR = \frac{Risco\ grupo\ vacinado}{Risco\ grupo\ placebo}
+$$
 
 A eficácia é a redução **relativa do risco** que pessoas vacinadas apresentam na _média_ em relação a um grupo não vacinado nos estudos. Assim, _todos os vacinados estão protegidos em alguma medida_, o que não quer dizer que não é possível ficar doente. Como essa redução é _relativa_, sua chance de se infectar estando vacinado depende diretamente do número de pessoas infectadas na sua região no momento. Soma-se a isso o fato de as pessoas _mudarem seu comportamento_ após tomar uma vacina: por se sentirem mais protegidas, elas acabam se permitindo correr mais risco. Isso é razoável, mas pode contribuir para um aumento dos novos casos enquanto uma minoria está vacinada.
 

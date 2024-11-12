@@ -7,7 +7,8 @@ tags:
 description: 'Nós devemos focar em explicar por que terapias ineficazes podem parecer serem muito eficazes e mostrar os benefícios de ensaios clínicos de qualidade.'
 pubDatetime: 2020-08-27
 ---
-_English version [here](https://mathpn.github.io/new-hcqs/)_
+
+> English version [here](/posts/new-hcqs/)
 
 ## Cloroquina e COVID-19
 Não é novidade que a cloroquina (ou hidroxicloroquina) já foi a droga prometida para derrotar (ou pelo menos amenizar) a pandemia de COVID-19 em curso. E todos sabemos que a história curta porém complicada da cloroquina (CQ, para encurtar) não é [animadora](https://sciencebasedmedicine.org/hydroxychloroquine-to-treat-covid-19-evidence-cant-seem-to-kill-it/).

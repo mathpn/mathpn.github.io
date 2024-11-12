@@ -110,7 +110,7 @@ ggheatmap <- ggplot(melted_matrix, aes(Var2, Var1, fill = value)) +
 show(ggheatmap)
 ```
 
-![](@assets/images/heart_failure/figure-gfm/unnamed-chunk-2-1.png)<!-- -->
+![](@assets/images/heart_failure/figure-gfm/unnamed-chunk-2-1.png)
 
 *Time* is the variable with the highest correlation to the outcome. This
 is a good time to actually understand how the data was generated. In the

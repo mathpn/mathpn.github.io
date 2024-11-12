@@ -13,6 +13,7 @@ Reporting only _p-values_ is becoming less acceptable, and for good reason. Scie
 But what exactly is a _p-value_? Many scientists have never thought about this question explicitly. So, let's define the _p-value_ and then look at what it is **not**. Defining what something is not is a great wat to remove misconceptions that may already be lurking in our heads.
 
 The American Statistical Association defines the _p-value_ as:
+
 > [...] The probability under a specified statistical model that a statistical summary of the data (e.g., the sample mean difference between two compared groups) would be equal to or more extreme than its observed value.
 
 <cite>American Statistical Association</cite> --- [ASA Statement on Statistical Significance and P-Values](https://amstat.tandfonline.com/doi/full/10.1080/00031305.2016.1154108)
@@ -25,11 +26,13 @@ So, the _p-value_ is the probability that, **given that H0 is true** (this is _e
 Let's look at what _p-values_ are **not**:
 
 ## 1) The probability that the results are due to chance
+
 Probably the most common misconception regarding _p-values_, it's easy to see why we fall into this statistical trap. Assuming that there is _no difference_ between the two groups, all the observed difference is due to chance. The problem here is that _p-value_ calculations **assume** that **every deviation from H0 is due to chance**. Thus, it cannot compute a probability of something it assumes to be true.
 
 _P-values_ tell us the probability that the observed results **_would_ come up due to chance alone _assuming H0 to be true_**, and **not** the chance that the observed results are due to chance, precisely because **we don't know if H0 is true or not**. Pause and think about the difference between these two statements. If the difference is not clear, it may become clearer with the next topic.
 
 ## 2) The probability that H1 is true
+
 This is a bit tricky to understand. H1 is the alternative hypothesis, in contrast to H0. Almost always, H1 states that the groups are different or that an estimator is different from zero.
 However, **_p-values_ tell us nothing about H1.** They tell us $P(observed\ difference \vert H0)$, or the probability of the observed difference _given that H0 is true_. Since H0 and H1 are complementary hypotheses, $P(H0) + P(H1) = 1$. Thus, $P(H1) = 1 - P(H0)$.
 
@@ -54,7 +57,7 @@ $P(+ \vert H0)$. **We assume the null hypothesis, therefore we cannot calculate 
 
 This mistake arises because we often report that a threshold of P < 0.05 was used (or that $\alpha = 0.05$). By assuming a 5% threshold, we assume a 5% type-I error rate. That is, **we will wrongly reject the null hypothesis 5% of the times that the null hypothesis was true. This does not mean an overall error rate of 5%**, because _it's impossible to know how many hypotheses are truly null in the first place_. The proportion of true and false hypotheses being tested in a study or even in a scientific field would be the prior (_a priori_) probabilities we talked about. That would be like knowing how many people are ill, but it's impossible in the case of hypothesis. We only use _p-values_ because it's impossible to know the proportion of true hypotheses being tested.
 
-Thus, if we reject the null hypothesis when P < 0.05, we will wrongly do so in 5% of *true null hypotheses*. But we can't know how many true null hypotheses there are in a study. Therefore we can't assume that 5% of results will be wrong according to the _p-value_. It might be much more.
+Thus, if we reject the null hypothesis when P < 0.05, we will wrongly do so in 5% of _true null hypotheses_. But we can't know how many true null hypotheses there are in a study. Therefore we can't assume that 5% of results will be wrong according to the _p-value_. It might be much more.
 
 This is why a **hypothesis must be very well-founded in the previous scientific evidence of reasonable quality**. The more hypothesis are incrementally built upon previous research, the bigger the chance that a new hypothesis will be true. Raising the proportion of true hypothesis among all those being tested is _fundamental_. A low true-hypothesis proportion is similar to a low prevalence disease, and we've seen that while testing for rare events (be it hypotheses or diseases) we make much more mistakes, especially false positives! If the _proportion of true hypothesis among all being tested is too low_, the **majority** of statistically significant results may be **false positives**. There is even a [study](https://journals.plos.org/plosmedicine/article?id=10.1371/journal.pmed.0020124) which explored this phenomenon and gained a lot of media attention.
 

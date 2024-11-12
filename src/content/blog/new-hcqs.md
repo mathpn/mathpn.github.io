@@ -4,12 +4,11 @@ tags:
   - Pandemic
   - Science
   - Statistics
-description: 'We should focus on explaining why ineffective therapies can appear to be very effective and show the benefits of proper clinical trials.'
+description: "We should focus on explaining why ineffective therapies can appear to be very effective and show the benefits of proper clinical trials."
 pubDatetime: 2020-08-26
 ---
-# TODO relative links
 
-_Versão em português [aqui](https://mathpn.github.io/novas-cloroquinas/)_
+> Versão em português [aqui](/posts/novas-cloroquinas/)
 
 ## Hydroxichloroquine and COVID-19
 
@@ -21,7 +20,7 @@ As it's always said: extraordinary claims require extraordinary evidence. But th
 
 Nonetheless, some political leaderships still defend HCQ with great passion and its use is still widely popular. In Brazil, not only does the president defend its widespread use, but health insurance companies are also distributing hideous ['COVID kits'](https://noticias.uol.com.br/saude/ultimas-noticias/redacao/2020/07/19/cloroquina-unimed-kit-covid.htm), that contain HCQ and other drugs, to infected patients.
 
-In the middle of this nonsense, one might wonder: how did we get to this point? This is not an easy question, with multiple factors coming into play - such as distrust in authorities and science, right-wing populism with denialistic shades, high hopes when no therapy exists, and many others. But from all the factors, I'd like to focus on one: how we, as scientists, are **failing to explain why well-controlled studies are necessary**. I won't even try to explain what randomized clinical trials are, there are great resources on this topic.
+In the middle of this nonsense, one might wonder: how did we get to this point? This is not an easy question, with multiple factors coming into play - such as distrust in authorities and science, populism, high hopes when no therapy exists, and many others. But from all the factors, I'd like to focus on one: how we, as scientists, are **failing to explain why well-controlled studies are necessary**. I won't even try to explain what randomized clinical trials are, there are great resources on this topic.
 
 I think this failure is partly due to a lack of intuitive understanding of basic statistical and scientific notions, which will be briefly explored here.
 
@@ -77,7 +76,7 @@ Nevertheless, **the fact that negative statements are never proven in scientific
 
 Science has an imperfect but the best-to-date available method to avoid unnecessary research: peer review. Every research funding request is evaluated by other members of the scientific community. It's very likely that without all the general public attention and pressure **HCQ would never have been tested as much as it has been**. Simply put: there was never enough evidence to consider it a viable therapy. Thus, if traditional peer review process were followed, **a huge amount of financial and human resources could have been better employed elsewhere**, in other and more promising trials to tackle the COVID-19 pandemic, for instance.
 
-This also happened in Brazil with [phosphoethanolamine](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC5102686/). A Professor started making unsupported claims that this drug was the "cure" for cancer. It quickly gained popularity and momentum, pressing politicians and regulators to test it or even allow its commercialization without any proven efficacy. Indeed, the current Brazilian president, Jair Bolsonaro, [wrote a bill that legalized its medical use](https://www.sciencemag.org/news/2016/04/brazil-president-signs-law-legalizing-renegade-cancer-pill) as a congressman, at the time. The bill was approved and then revoked by justice. Even human studies were conducted, failing to prove its efficacy against cancer ([here](https://sboc.org.br/noticias/item/826-estudo-sobre-fosfoetanolamina-e-suspenso-por-nao-constatar-beneficio)). Again, a huge amount of resources was spent on useless research because of pressure to test a therapy without good evidence from _in vitro_ nor animal studies.
+This also happened in Brazil with [phosphoethanolamine](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC5102686/). A Professor started making unsupported claims that this drug was the "cure" for cancer. It quickly gained popularity and momentum, pressing politicians and regulators to test it or even allow its commercialization without any proven efficacy. Indeed, [a bill that legalized its medical use](https://www.sciencemag.org/news/2016/04/brazil-president-signs-law-legalizing-renegade-cancer-pill) was approved at the time and later revoked by the judiciary. Even human studies were conducted, failing to prove its efficacy against cancer ([here](https://sboc.org.br/noticias/item/826-estudo-sobre-fosfoetanolamina-e-suspenso-por-nao-constatar-beneficio)). Again, a huge amount of resources was spent on useless research because of pressure to test a therapy without good evidence from _in vitro_ nor animal studies.
 
 # Conclusion
 

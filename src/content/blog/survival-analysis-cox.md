@@ -9,9 +9,6 @@ description: "Last time, we used decision trees, binarization and logistic regre
 pubDatetime: 2021-12-16
 ---
 
-Survival analysis with Cox reggression - heart failure data
-================
-
 Last time, we used decision trees, binarization and logistic regression
 to predict heart failure mortality in a public dataset. This approach
 yielded a very simple and parsimonious model, which, when dealing with
@@ -20,7 +17,7 @@ generalization.
 
 The original data is described in [this
 paper](https://journals.plos.org/plosone/article?id=10.1371/journal.pone.0181001).
-As we’ve discussed previously, the *time* variable refers to follow-up
+As we’ve discussed previously, the _time_ variable refers to follow-up
 time, that is, for how long each patient was observed. Whenever a
 patient that has not died reaches its follow-up time, it’s no longer
 observed and thus is a [censored
@@ -38,7 +35,7 @@ probability.
 
 Let’s load the data just like last time.
 
-``` r
+```r
 library(tidyverse)
 library(magrittr)
 library(survival)
@@ -59,7 +56,7 @@ data$sex <- factor(data$sex, labels = c("female", "male"))
 Using the ‘survival’ package, we’ll build a survival object and plot a
 survival curve:
 
-``` r
+```r
 surv_obj <- with(data, Surv(time, DEATH_EVENT))
 surv_fit <- survfit(surv_obj ~ 1, data = data)
 
@@ -69,11 +66,11 @@ autoplot(surv_fit) + ylab("Survival Probability") + xlab("Time (days)") + theme_
 ![](@assets/images/cox-regression/figure-gfm/unnamed-chunk-2-1.png)<!-- -->
 
 By the end of the study, only 55-60% of patients were still alive. Each
-*+* sign represents a censoring, that is, the end of one patient’s
+_+_ sign represents a censoring, that is, the end of one patient’s
 follow-up period. Let’s plot survival curves splitting by different
 variables:
 
-``` r
+```r
 p_anaemia <- autoplot(survfit(surv_obj ~ anaemia, data = data)) + ylab("Survival Probability") + xlab("Time (days)") + theme_bw() + theme(legend.position = "none") + ggtitle("Anaemia") + theme(plot.title = element_text(hjust = 0.5))
 
 p_diabetes <- autoplot(survfit(surv_obj ~ diabetes, data = data)) + ylab("Survival Probability") + xlab("Time (days)") + theme_bw() + theme(legend.position = "none") + ggtitle("Diabetes") + theme(plot.title = element_text(hjust = 0.5))
@@ -93,7 +90,7 @@ grid.arrange(p_anaemia, p_diabetes, p_pressure, p_sex, p_smoking, nrow = 3)
 Survival may differ only by anaemia and high blood pressure status.
 We’ll use the log-rank test to compare survival distributions:
 
-``` r
+```r
 survdiff(surv_obj ~ data$anaemia)
 ```
 
@@ -106,7 +103,7 @@ survdiff(surv_obj ~ data$anaemia)
     ##
     ##  Chisq= 2.7  on 1 degrees of freedom, p= 0.1
 
-``` r
+```r
 survdiff(surv_obj ~ data$high_blood_pressure)
 ```
 
@@ -126,7 +123,7 @@ continuous variables on survival. In order to explore these variables,
 we’ll turn them into categorical ones splitting them by their median
 value:
 
-``` r
+```r
 # Binning using the ntile function from dplyr
 # ntile(data$serum_creatinine, 2) generates a new factor variable with
 # two levels, that is, two 50th quantiles
@@ -162,32 +159,32 @@ survival curve by one variable at a time.
 ## Cox reggression
 
 This kind of model accepts categorical and continuous variables as
-predictors and estimates *hazard ratios*, that is, *relative risks*
+predictors and estimates _hazard ratios_, that is, _relative risks_
 compared to a reference factor level or numerical value. It is widely
 use in survival analysis as it can take as input a survival curve - a
 very peculiar type of data. Fitting survival data with normal linear
 models is troublesome (among other reasons) due to high censoring
 frequency (inherent to survival studies). Let’s fit a simple model:
 
-``` r
+```r
 cox_m <- coxph(Surv(time, DEATH_EVENT) ~ age + anaemia + creatinine_phosphokinase + diabetes + ejection_fraction + high_blood_pressure + platelets + serum_creatinine + serum_sodium + sex + smoking, data = data, x = TRUE)
 
 broom::tidy(cox_m) %>% kable()
 ```
 
-| term                      |   estimate | std.error |  statistic |   p.value |
-|:--------------------------|-----------:|----------:|-----------:|----------:|
-| age                       |  0.0464082 | 0.0093240 |  4.9772722 | 0.0000006 |
-| anaemia1                  |  0.4601347 | 0.2168366 |  2.1220349 | 0.0338348 |
-| creatinine\_phosphokinase |  0.0002207 | 0.0000992 |  2.2254993 | 0.0260477 |
-| diabetes1                 |  0.1398841 | 0.2231472 |  0.6268692 | 0.5307450 |
-| ejection\_fraction        | -0.0489417 | 0.0104758 | -4.6718816 | 0.0000030 |
-| high\_blood\_pressure1    |  0.4757489 | 0.2161970 |  2.2005342 | 0.0277690 |
-| platelets                 | -0.0000005 | 0.0000011 | -0.4115932 | 0.6806376 |
-| serum\_creatinine         |  0.3210324 | 0.0701701 |  4.5750627 | 0.0000048 |
-| serum\_sodium             | -0.0441875 | 0.0232657 | -1.8992585 | 0.0575305 |
-| sexmale                   | -0.2375215 | 0.2516090 | -0.9440101 | 0.3451645 |
-| smoking1                  |  0.1289221 | 0.2512236 |  0.5131767 | 0.6078277 |
+| term                     |   estimate | std.error |  statistic |   p.value |
+| :----------------------- | ---------: | --------: | ---------: | --------: |
+| age                      |  0.0464082 | 0.0093240 |  4.9772722 | 0.0000006 |
+| anaemia1                 |  0.4601347 | 0.2168366 |  2.1220349 | 0.0338348 |
+| creatinine_phosphokinase |  0.0002207 | 0.0000992 |  2.2254993 | 0.0260477 |
+| diabetes1                |  0.1398841 | 0.2231472 |  0.6268692 | 0.5307450 |
+| ejection_fraction        | -0.0489417 | 0.0104758 | -4.6718816 | 0.0000030 |
+| high_blood_pressure1     |  0.4757489 | 0.2161970 |  2.2005342 | 0.0277690 |
+| platelets                | -0.0000005 | 0.0000011 | -0.4115932 | 0.6806376 |
+| serum_creatinine         |  0.3210324 | 0.0701701 |  4.5750627 | 0.0000048 |
+| serum_sodium             | -0.0441875 | 0.0232657 | -1.8992585 | 0.0575305 |
+| sexmale                  | -0.2375215 | 0.2516090 | -0.9440101 | 0.3451645 |
+| smoking1                 |  0.1289221 | 0.2512236 |  0.5131767 | 0.6078277 |
 
 There are 6 significant predictors. Adding more variables will always
 reduce the error of a linear model. However, variables with little
@@ -201,20 +198,20 @@ so including too many variables might quickly result in overfitting.
 Thus, let’s reduce the model removing the variables which contribute
 very little to the final model above.
 
-``` r
+```r
 cox_m_reduced <- coxph(Surv(time, DEATH_EVENT) ~ age + anaemia + creatinine_phosphokinase + ejection_fraction + high_blood_pressure + serum_creatinine, data = data, x = TRUE)
 
 broom::tidy(cox_m_reduced) %>% kable
 ```
 
-| term                      |   estimate | std.error | statistic |   p.value |
-|:--------------------------|-----------:|----------:|----------:|----------:|
-| age                       |  0.0436066 | 0.0088530 |  4.925644 | 0.0000008 |
-| anaemia1                  |  0.3932590 | 0.2129360 |  1.846841 | 0.0647701 |
-| creatinine\_phosphokinase |  0.0001965 | 0.0000986 |  1.993298 | 0.0462289 |
-| ejection\_fraction        | -0.0517851 | 0.0100508 | -5.152359 | 0.0000003 |
-| high\_blood\_pressure1    |  0.4667524 | 0.2129496 |  2.191844 | 0.0283908 |
-| serum\_creatinine         |  0.3483455 | 0.0654972 |  5.318477 | 0.0000001 |
+| term                     |   estimate | std.error | statistic |   p.value |
+| :----------------------- | ---------: | --------: | --------: | --------: |
+| age                      |  0.0436066 | 0.0088530 |  4.925644 | 0.0000008 |
+| anaemia1                 |  0.3932590 | 0.2129360 |  1.846841 | 0.0647701 |
+| creatinine_phosphokinase |  0.0001965 | 0.0000986 |  1.993298 | 0.0462289 |
+| ejection_fraction        | -0.0517851 | 0.0100508 | -5.152359 | 0.0000003 |
+| high_blood_pressure1     |  0.4667524 | 0.2129496 |  2.191844 | 0.0283908 |
+| serum_creatinine         |  0.3483455 | 0.0654972 |  5.318477 | 0.0000001 |
 
 So far so good, or is it? The cox regression model, like all models,
 makes a few assumptions. We’ll check for proportional hazards,
@@ -223,11 +220,11 @@ influential observations and linearity in the covariates.
 Cox regression models are also called proportional hazards models. This
 means that these models assume that the effect of a covariate is
 constant throughout the time, that is, residuals are independent of
-time. We can check this using the *cox.zph* function from the *Survival*
+time. We can check this using the _cox.zph_ function from the _Survival_
 package and by graphically inspecting if Schoenfeld residuals are
 independent of time.
 
-``` r
+```r
 print(cox.zph(cox_m))
 ```
 
@@ -247,26 +244,26 @@ print(cox.zph(cox_m))
 
 It seems that ejection fraction does not follow the proportional hazards
 assumption. Still, let’s check the other assumptions and we’ll later
-come back to this issue. Using functions from the *survminer* package,
+come back to this issue. Using functions from the _survminer_ package,
 let’s check for influential observations and non-linearity in the
 covariates.
 
 First, let’s plot the estimated change in coefficients when each
 observation is removed from the model.
 
-``` r
+```r
 ggcoxdiagnostics(cox_m, type = 'dfbeta')
 ```
 
 ![](@assets/images/cox-regression/figure-gfm/unnamed-chunk-9-1.png)<!-- -->
 
-It seems that creatinine\_phosphokinase, serum\_creatinine and maybe
-serum\_sodium have a few very influential observations. Finally,
+It seems that creatinine_phosphokinase, serum_creatinine and maybe
+serum_sodium have a few very influential observations. Finally,
 continuous covariate effects are assumed to be linear. We can check this
-assumption plotting Martingale residuals using the *ggcoxfunctional*
-function from the *survminer* package:
+assumption plotting Martingale residuals using the _ggcoxfunctional_
+function from the _survminer_ package:
 
-``` r
+```r
 ggcoxfunctional(with(data, Surv(time, DEATH_EVENT)) ~ age + creatinine_phosphokinase + ejection_fraction + serum_creatinine + serum_sodium, data = data, ylim = c(-1, 1))
 ```
 
@@ -274,57 +271,57 @@ ggcoxfunctional(with(data, Surv(time, DEATH_EVENT)) ~ age + creatinine_phosphoki
 
 Now it’s clear why there are very influential observations. As the model
 assumer linear covariate effects, extremely high
-creatinine\_phosphokinase and serum\_creatinine values become largely
+creatinine_phosphokinase and serum_creatinine values become largely
 influential. In the previous post we used binning, thus this issue
 became irrelevant. Here, we can address right-skewed distributions by
-using a simple log. The slight lef-skewed distribution of serum\_sodium
+using a simple log. The slight lef-skewed distribution of serum_sodium
 might not be a problem. We’ll see.
 
 Let’s fit a new model using some log-transformed variables:
 
-``` r
+```r
 cox_m_log <- coxph(Surv(time, DEATH_EVENT) ~ age + anaemia + log(creatinine_phosphokinase) + diabetes + ejection_fraction + high_blood_pressure + platelets + log(serum_creatinine) + serum_sodium + sex + smoking, data = data, x = TRUE)
 
 broom::tidy(cox_m_log) %>% kable()
 ```
 
-| term                           |   estimate | std.error |  statistic |   p.value |
-|:-------------------------------|-----------:|----------:|-----------:|----------:|
-| age                            |  0.0432860 | 0.0095858 |  4.5156267 | 0.0000063 |
-| anaemia1                       |  0.4669577 | 0.2125600 |  2.1968271 | 0.0280328 |
-| log(creatinine\_phosphokinase) |  0.0903269 | 0.0985837 |  0.9162459 | 0.3595379 |
-| diabetes1                      |  0.1435858 | 0.2228758 |  0.6442412 | 0.5194190 |
-| ejection\_fraction             | -0.0423956 | 0.0102621 | -4.1312580 | 0.0000361 |
-| high\_blood\_pressure1         |  0.5045094 | 0.2143303 |  2.3538880 | 0.0185782 |
-| platelets                      | -0.0000004 | 0.0000011 | -0.3865251 | 0.6991078 |
-| log(serum\_creatinine)         |  0.9631057 | 0.2068949 |  4.6550491 | 0.0000032 |
-| serum\_sodium                  | -0.0330688 | 0.0234632 | -1.4093885 | 0.1587203 |
-| sexmale                        | -0.2644189 | 0.2517665 | -1.0502547 | 0.2936010 |
-| smoking1                       |  0.2084635 | 0.2522676 |  0.8263587 | 0.4086007 |
+| term                          |   estimate | std.error |  statistic |   p.value |
+| :---------------------------- | ---------: | --------: | ---------: | --------: |
+| age                           |  0.0432860 | 0.0095858 |  4.5156267 | 0.0000063 |
+| anaemia1                      |  0.4669577 | 0.2125600 |  2.1968271 | 0.0280328 |
+| log(creatinine_phosphokinase) |  0.0903269 | 0.0985837 |  0.9162459 | 0.3595379 |
+| diabetes1                     |  0.1435858 | 0.2228758 |  0.6442412 | 0.5194190 |
+| ejection_fraction             | -0.0423956 | 0.0102621 | -4.1312580 | 0.0000361 |
+| high_blood_pressure1          |  0.5045094 | 0.2143303 |  2.3538880 | 0.0185782 |
+| platelets                     | -0.0000004 | 0.0000011 | -0.3865251 | 0.6991078 |
+| log(serum_creatinine)         |  0.9631057 | 0.2068949 |  4.6550491 | 0.0000032 |
+| serum_sodium                  | -0.0330688 | 0.0234632 | -1.4093885 | 0.1587203 |
+| sexmale                       | -0.2644189 | 0.2517665 | -1.0502547 | 0.2936010 |
+| smoking1                      |  0.2084635 | 0.2522676 |  0.8263587 | 0.4086007 |
 
-Interestingly, the log-transformed creatinine\_phosphokinase variable
+Interestingly, the log-transformed creatinine_phosphokinase variable
 was no longer a significant predictor. It looks like the fitted
 coefficient was largely due to extreme observations. Although omitted
 here, variables which contribute the least to the final model were
 removed in a stepwise manner, reulting in the following model:
 
-``` r
+```r
 cox_m_log <- coxph(Surv(time, DEATH_EVENT) ~ age + anaemia + ejection_fraction + high_blood_pressure + log(serum_creatinine), data = data, x = TRUE)
 
 broom::tidy(cox_m_log) %>% kable()
 ```
 
-| term                   |   estimate | std.error | statistic |   p.value |
-|:-----------------------|-----------:|----------:|----------:|----------:|
-| age                    |  0.0400060 | 0.0091061 |  4.393341 | 0.0000112 |
-| anaemia1               |  0.3990274 | 0.2082361 |  1.916227 | 0.0553363 |
-| ejection\_fraction     | -0.0443934 | 0.0099631 | -4.455787 | 0.0000084 |
-| high\_blood\_pressure1 |  0.5084589 | 0.2112862 |  2.406494 | 0.0161065 |
-| log(serum\_creatinine) |  0.9932881 | 0.1892890 |  5.247469 | 0.0000002 |
+| term                  |   estimate | std.error | statistic |   p.value |
+| :-------------------- | ---------: | --------: | --------: | --------: |
+| age                   |  0.0400060 | 0.0091061 |  4.393341 | 0.0000112 |
+| anaemia1              |  0.3990274 | 0.2082361 |  1.916227 | 0.0553363 |
+| ejection_fraction     | -0.0443934 | 0.0099631 | -4.455787 | 0.0000084 |
+| high_blood_pressure1  |  0.5084589 | 0.2112862 |  2.406494 | 0.0161065 |
+| log(serum_creatinine) |  0.9932881 | 0.1892890 |  5.247469 | 0.0000002 |
 
 The non-proportional hazard issue, however, persists:
 
-``` r
+```r
 cox.zph(cox_m_log)
 ```
 
@@ -336,7 +333,7 @@ cox.zph(cox_m_log)
     ## log(serum_creatinine) 2.11537  1 0.15
     ## GLOBAL                6.65288  5 0.25
 
-``` r
+```r
 plot(cox.zph(cox_m_log)[3])
 abline(c(0,0), col = 2)
 abline(h = cox_m_log$coefficients[3], col = 3, lty = 2)
@@ -345,7 +342,7 @@ abline(h = cox_m_log$coefficients[3], col = 3, lty = 2)
 ![](@assets/images/cox-regression/figure-gfm/unnamed-chunk-13-1.png)<!-- -->
 
 In the plot above, the green dotted line is at the fitted coefficient
-fot ejection\_fraction. Althoug ejection fraction is a very important
+fot ejection_fraction. Althoug ejection fraction is a very important
 predictor, its effect is not constant over time. Early on it has a small
 negative effect on survival (close to 0 on the graph), but after 60 days
 its effect is much more pronounced. This is why this predictor violates
@@ -355,9 +352,9 @@ A possible solution is to fit different coefficients over different time
 intervals (as described in this excellent
 [vignette](https://cran.r-project.org/web/packages/survival/vignettes/timedep.pdf)).
 Visually, it seems that splitting the data at day 50 provide a good
-separation of distinct ejection\_fraction effects.
+separation of distinct ejection_fraction effects.
 
-``` r
+```r
 data_split <- survSplit(Surv(time, DEATH_EVENT) ~ ., data = data, cut = 50, episode = "tgroup", id = "id")
 
 cox_m_split <- coxph(Surv(tstart, time, DEATH_EVENT) ~ age + anaemia + ejection_fraction:strata(tgroup) + high_blood_pressure + log(serum_creatinine), data = data_split, x = TRUE)
@@ -365,20 +362,20 @@ cox_m_split <- coxph(Surv(tstart, time, DEATH_EVENT) ~ age + anaemia + ejection_
 broom::tidy(cox_m_split) %>% kable()
 ```
 
-| term                                      |   estimate | std.error | statistic |   p.value |
-|:------------------------------------------|-----------:|----------:|----------:|----------:|
-| age                                       |  0.0416812 | 0.0091931 |  4.533939 | 0.0000058 |
-| anaemia1                                  |  0.4445463 | 0.2098468 |  2.118433 | 0.0341384 |
-| high\_blood\_pressure1                    |  0.5382776 | 0.2117104 |  2.542519 | 0.0110057 |
-| log(serum\_creatinine)                    |  0.9723897 | 0.1895731 |  5.129364 | 0.0000003 |
-| ejection\_fraction:strata(tgroup)tgroup=1 | -0.0189745 | 0.0118908 | -1.595734 | 0.1105482 |
-| ejection\_fraction:strata(tgroup)tgroup=2 | -0.0869077 | 0.0176826 | -4.914874 | 0.0000009 |
+| term                                     |   estimate | std.error | statistic |   p.value |
+| :--------------------------------------- | ---------: | --------: | --------: | --------: |
+| age                                      |  0.0416812 | 0.0091931 |  4.533939 | 0.0000058 |
+| anaemia1                                 |  0.4445463 | 0.2098468 |  2.118433 | 0.0341384 |
+| high_blood_pressure1                     |  0.5382776 | 0.2117104 |  2.542519 | 0.0110057 |
+| log(serum_creatinine)                    |  0.9723897 | 0.1895731 |  5.129364 | 0.0000003 |
+| ejection_fraction:strata(tgroup)tgroup=1 | -0.0189745 | 0.0118908 | -1.595734 | 0.1105482 |
+| ejection_fraction:strata(tgroup)tgroup=2 | -0.0869077 | 0.0176826 | -4.914874 | 0.0000009 |
 
 The ejection fraction now only has a significant effect on tgroup = 2,
 that is, after day 50. This should remove the issue with the
 non-proportional hazard. Let’s check:
 
-``` r
+```r
 print(cox.zph(cox_m_split))
 ```
 
@@ -395,7 +392,7 @@ models we have built so far. For this step, we’ll split the data into
 training (70% of original data) and test (30%) datasets and refit the
 previous models using the training data.
 
-``` r
+```r
 set.seed(12)
 train_size = floor(0.7 * nrow(data))
 train_ind <- sample(seq_len(nrow(data)), size = train_size)
@@ -420,7 +417,7 @@ models_metrics %>% kable()
 ```
 
 | Model                     | Concordance |      AIC |
-|:--------------------------|------------:|---------:|
+| :------------------------ | ----------: | -------: |
 | All variables             |   0.7458686 | 606.5232 |
 | Selected variables        |   0.7391677 | 599.1368 |
 | Split time, selected var. |   0.7455159 | 593.9153 |
@@ -429,20 +426,20 @@ Our final model, which doesn’t violate the core model assumptions,
 presents better AIC compared to the previous ones and a very similar
 concordance compared to the model with all variables. But in practice
 this model will predict two separate survival curves, one for each
-*tgroup* (before or after day 50). Therefore, this model may be great to
+_tgroup_ (before or after day 50). Therefore, this model may be great to
 interpret the contribution of each variable, but it’s not very practical
 for prediction.
 
-Finally, we’ll build a random survival forest model using the *ranger*
-function from the *ranger* package. However, we’ll not go deep into this
+Finally, we’ll build a random survival forest model using the _ranger_
+function from the _ranger_ package. However, we’ll not go deep into this
 model. We’ll limit tree depth (max.depth) and set a higher minimal node
 size (min.node.size) to avoid overfitting.
 
-``` r
+```r
 ranger_m <- ranger(Surv(time, DEATH_EVENT) ~ age + anaemia + creatinine_phosphokinase + diabetes + ejection_fraction + high_blood_pressure + platelets + serum_creatinine + serum_sodium + sex + smoking, data = train_data, x = TRUE, importance = 'permutation', min.node.size = 5, max.depth = 5)
 ```
 
-The *riskRegression* package has a nice *Score* function that calculates
+The _riskRegression_ package has a nice _Score_ function that calculates
 [Brier scores](https://en.wikipedia.org/wiki/Brier_score) and [Index of
 Prediction
 Accuracy](https://cran.r-project.org/web/packages/riskRegression/vignettes/IPA.html),
@@ -450,7 +447,7 @@ which is 1 minus the ratio between the Brier score of the model against
 the Brier score of a null model. A positive IPA means a better
 probability prediction compared to the null model.
 
-``` r
+```r
 ipa_models <- Score(list("Cox - all variables" = cox_m_log, "Cox - few variables" = cox_m_log_reduced, "Reduced" = ranger_m), data = test_data, formula = Surv(time, DEATH_EVENT) ~ 1, summary = 'ipa', metrics = 'brier', contrasts = FALSE)
 
 print(ipa_models)
