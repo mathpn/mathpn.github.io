@@ -66,7 +66,11 @@ module.exports = {
       typography: {
         DEFAULT: {
           css: {
-            "--tw-prose-body": withOpacity("--color-text-base"),
+            kbd: {
+              "box-shadow": "0 0 0 1px rgba(var(--color-accent), 0.1)",
+            },
+            "--tw-prose-body": `var("--color-text-base")`,
+            "--tw-prose-kbd": `var("--color-text-base")`,
             pre: {
               color: false,
             },
