@@ -133,7 +133,7 @@ Em seguida:
 source etc/hadoop/hadoop-env.sh
 ```
 
-Adicione as seguintes linhas ao arquivo `etc/hadoop/core-site.xml`, substituindo a _tag_ `\<_configuration\>` vazia.
+Adicione as seguintes linhas ao arquivo `etc/hadoop/core-site.xml`, substituindo a _tag_ `<configuration>` vazia.
 
 ```xml
 <configuration>
@@ -144,7 +144,7 @@ Adicione as seguintes linhas ao arquivo `etc/hadoop/core-site.xml`, substituindo
 </configuration>
 ```
 
-Adicione as seguintes linhas ao arquivo `etc/hadoop/hdfs-site.xml`, **substituindo a tag `\<HOME\>` pelo caminho completo até sua pasta home** (algo como `/home/\<nome_do_usuario\>`).
+Adicione as seguintes linhas ao arquivo `etc/hadoop/hdfs-site.xml`, **substituindo a tag `<HOME>` pelo caminho completo até sua pasta home** (algo como `/home/<nome_do_usuario>`).
 
 ```xml
 <configuration>
@@ -201,7 +201,7 @@ sudo firewall-cmd --add-source=<IP> --zone=trusted
 
 ## Formatando o sistema de arquivos Hadoop
 
-Mais informações [aqui](https://hadoop.apache.org/docs/stable/hadoop-project-dist/hadoop-common/SingleCluster.html). Substitua `\<USERNAME\>` pelo seu nome de usuário do sistema.
+Mais informações [aqui](https://hadoop.apache.org/docs/stable/hadoop-project-dist/hadoop-common/SingleCluster.html). Substitua `<USERNAME>` pelo seu nome de usuário do sistema.
 
 ```bash
 bin/hdfs namenode -format
@@ -212,7 +212,7 @@ bin/hdfs dfs -mkdir /user/<USERNAME>
 
 ### Mais configurações do Hadoop
 
-Adicione às seguintes linhas ao arquivo `etc/hadoop/mapred-site.xml` no lugar da tag `\<configuration\>` vazia.
+Adicione às seguintes linhas ao arquivo `etc/hadoop/mapred-site.xml` no lugar da tag `<configuration>` vazia.
 
 ```xml
 <configuration>
@@ -227,7 +227,7 @@ Adicione às seguintes linhas ao arquivo `etc/hadoop/mapred-site.xml` no lugar d
 </configuration>
 ```
 
-Adicione as seguintes linhas ao arquivo `etc/hadoop/yarn-site.xml` no lugar da tag `\<configuration\>` vazia.
+Adicione as seguintes linhas ao arquivo `etc/hadoop/yarn-site.xml` no lugar da tag `<configuration>` vazia.
 
 ```xml
 <configuration>
@@ -246,7 +246,7 @@ Adicione as seguintes linhas ao arquivo `etc/hadoop/yarn-site.xml` no lugar da t
 
 Nesse ponto, o Apache Hadoop deve estar rodando no seu servidor! Verifique se consegue acessar o seguinte endereço no navegador da sua máquina principal.
 
-> http://\<IP\>:9870/
+`http://<IP>:9870/`
 
 Em que **\<IP\>** é o endereço IP local do seu servidor. Caso veja uma página com informações do Hadoop, verifique o campo **DFS Remaining** — deve haver pelo menos alguma memória livre. Caso a configuração do Hadoop tenha algum problema, é possível que não haja nenhum espaço livre detectado.
 
@@ -284,7 +284,7 @@ Rode o seguinte comando para as novas linhas terem efeito na sessão atual do Sh
 source ~/.bashrc
 ```
 
-Vá até à pasta `~/spark`. Adicione as seguintes linhas ao arquivo `conf/spark-env.sh.template` em que `\<IP\>` é o IP local do seu servidor.
+Vá até à pasta `~/spark`. Adicione as seguintes linhas ao arquivo `conf/spark-env.sh.template` em que `<IP>` é o IP local do seu servidor.
 
 ```bash
 SPARK_MASTER_HOST=<IP>

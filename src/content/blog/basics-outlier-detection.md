@@ -9,17 +9,17 @@ pubDatetime: 2019-05-23
 
 ## Outliers
 
-The word _outlier_ is frequently used in my field of research (basic biology and biomedicine). It refers to data observations that differ a lot from the others. Some very informative posts regarding outliers are already available (see here and here for examples). However, my experience is that biology researchers often don’t receive adequate statistical education and rely on possibly inadequate heuristics to determine what is an outlier. This post is intended to explain the basics of outlier detection and removal and, more specifically, to highlight some common mistakes. Outliers may arise from experimental errors, human mistakes, flawed techniques (eg a batch of experiments done with low-quality reagent), corrupt data, or simply sampling probability.
+The word _outlier_ is frequently used in my field of research (basic biology and biomedicine). It refers to data observations that differ a lot from the others. Some very informative posts regarding outliers are already available (see here and here for examples). However, my experience is that biology researchers often don’t receive adequate statistical education and rely on possibly inadequate heuristics to determine what is an outlier. This post is intended to explain the basics of outlier detection and removal and, more specifically, to highlight some common mistakes. Outliers may arise from experimental errors, human mistakes, flawed techniques (e.g., a batch of experiments done with low-quality reagent), corrupt data, or simply sampling probability.
 
 ## Why do people remove outliers?
 
-The question is valid: if data is obtained through standardized and reproducible procedures, why should valuable data points be tossed out? The answer is that standard statistical tests that rely on parametric assumptions are quite sensitive to outliers. This occurs mainly (but not exclusively) because the mean is very sensitive to extreme values (while the median is not, for example) - and the standard error is also sensitive in some way. So, as parametric tests usually rely solely on mean and variances to calculate the famous p-value, outliers often lead to weird results that do not seem plausible. For instance, let’s consider the following data:
+The question is valid: if we obtain data obtained through standardized and reproducible procedures, why should we discard valuable data points? The answer is that standard statistical tests that rely on parametric assumptions are quite sensitive to outliers. This occurs mainly (but not exclusively) because the mean is very sensitive to extreme values (while the median is not, for example) — and the standard error is also sensitive in some way. So, as parametric tests usually rely solely on mean and variances to calculate the famous p-value, outliers often lead to weird results that do not seem plausible. For instance, let’s consider the following data:
 
 `2.05, 3.27, 1.53, 3.82, 2.33`
 
 A one-sample t-test tests if the mean is significantly different from zero. The result is that, as one would expect, it is indeed:
 
-```
+```text
 ##  One Sample t-test
 ##
 ## data:  c(2.051501, 3.27815, 1.532082, 3.826658, 2.335235)
@@ -36,7 +36,7 @@ However, let’s now add a point that makes the data _even farther from zero_:
 
 `2.05, 3.27, 1.53, 3.82, 2.33, 20`
 
-```
+```text
 ##  One Sample t-test
 ##
 ## data:  c(2.051501, 3.27815, 1.532082, 3.826658, 2.335235, 20)
@@ -51,7 +51,7 @@ However, let’s now add a point that makes the data _even farther from zero_:
 
 Well, now there’s no significant difference. The standard deviation of the sample increases a lot with the artificial outlier and so does the standard error of the mean, which is used to calculate confidence intervals and p-values. Thus, back in time when parametric statistics were all that there was and sample sizes were very limited, the solution was to remove (or change the value of) the outlying values.
 
-Now, at this point it’s important to notice a few characteristics about outliers: by **definition**, outliers **must be rare**. If outliers are common (that is, more than a few percent of the observations at most), probably some data collection error has happened or the distribution is very far from a normal one. Another option is that the outlier detection method implemented **detects too much of them**.
+Now, at this point it’s important to notice a few characteristics about outliers: by **definition**, outliers **must be rare**. If outliers are common (that is, more than a few percent of the observations at most), probably some data collection error has happened, or the distribution is very far from a normal one. Another option is that the outlier detection method implemented **detects too much of them**.
 
 ## Detecting outliers
 
@@ -63,11 +63,11 @@ Z-scores are simply a way to standardize your data through rescaling. It shows h
 print(scale(c(2.051501, 3.27815, 1.532082, 3.826658, 2.335235, 20))[, 1])
 ```
 
-```
+```text
 ## [1] -0.4828334 -0.3112829 -0.5554757 -0.2345725 -0.4431524  2.0273168
 ```
 
-This shows that our artificial outlier is indeed above the threshold and could be removed. However, many people consider **2 a far too permissive threshold** and use **3 as a rule-of-thumb value**. The outlier threshold will always be arbitrary and there’s no right answer, but using a low value can lead to frequent outlier detection - and outliers _must be rare_.
+This shows that our artificial outlier is indeed above the threshold and could be removed. However, many people consider **2 a far too permissive threshold** and use **3 as a rule-of-thumb value**. The outlier threshold will always be arbitrary and there’s no right answer, but using a low value can lead to frequent outlier detection — and outliers _must be rare_.
 
 So, to sum it up, the z-score method is quite effective **if the distribution of the data is roughly normal**. The smaller the sample size, the more influence extreme values will have over the mean and the standard deviation. Thus, the z-score method **may fail to detect extreme values in small sample sizes**.
 
@@ -77,13 +77,13 @@ The interquartile range (or IQR) method was created by the great statistician Jo
 
 ![Histogram of a random variable with normal distribution and quantiles marked in red vertical lines](/src/assets/images/basics_outlier_detection/unnamed-chunk-4-1.png)
 
-The box-and-whisker plot (or boxplot) simply draws a box whose limits are the 25th and 75th percentiles, with the median (or 50th percentile) as a line in the middle. Then, whiskers of length 1.5 times IQR are drawn on both directions, that is, 1.5 times IQR below the 25th percentile and 1.5 times IQR above the 75th percentile. Values that are outside this range were considered outliers by Tukey. Here is the boxplot for the height data:
+The box-and-whisker plot (or box plot) simply draws a box whose limits are the 25th and 75th percentiles, with the median (or 50th percentile) as a line in the middle. Then, whiskers of length 1.5 times IQR are drawn on both directions, that is, 1.5 times IQR below the 25th percentile and 1.5 times IQR above the 75th percentile. Values that are outside this range were considered outliers by Tukey. Here is the box plot for the height data:
 
-![Box plot of heigh data in inches with two outliers](/src/assets/images/basics_outlier_detection/fig1-1.png)
+![Box plot of height data in inches with two outliers](/src/assets/images/basics_outlier_detection/fig1-1.png)
 
-Some outliers do appear, but they are very few. The main advantage of the IQR method is that it’s more robust to slightly skewed distributions and _it can detect outliers with smaller sample sizes_ as the median and IQR are much less influenced by extreme values than the mean and standard deviation, respectively. With z-scores, the presence of really extreme values can influence the mean and the standard deviation so much that it fails to detect other less extreme outliers, a phenomenon known as **masking**. In some cases, a factor of 2 or even 3 is used to multiply the IQR, detecting fewer outliers.
+Some outliers do appear, but they are very few. The main advantage of the IQR method is that it’s more robust to slightly skewed distributions. It can also detect outliers with smaller sample sizes as the median and IQR are much less influenced by extreme values than the mean and standard deviation, respectively. With z-scores, the presence of really extreme values can influence the mean and the standard deviation so much that it fails to detect other less extreme outliers, a phenomenon known as **masking**. In some cases, a factor of 2 or even 3 is used to multiply the IQR, detecting fewer outliers.
 
-Using our previous artificial data, let’s replace the outlier with a less extreme value of 8 and apply both detection methods:
+Using our previous artificial data, let's replace the outlier with a less extreme value of 8 and apply both detection methods:
 
 ```r
 print(scale(c(2.051501, 3.27815, 1.532082, 3.826658, 2.335235, 8))[, 1])
@@ -93,7 +93,7 @@ print(scale(c(2.051501, 3.27815, 1.532082, 3.826658, 2.335235, 8))[, 1])
 ## [1] -0.61670998 -0.09587028 -0.83725721  0.13702825 -0.49623548  1.90904470
 ```
 
-![Box plot with one outliers of value 8](/src/assets/images/basics_outlier_detection/fig2-1.png)
+![Box plot with one outlier of value 8](/src/assets/images/basics_outlier_detection/fig2-1.png)
 
 The z-score method does not detect the extreme value as an outlier, while the IQR method does so. Let’s increase the sample size and repeat the analysis. The new data will be:
 
@@ -120,14 +120,16 @@ $$
 M_i = \frac{0.6745(x_i - \tilde{x})}{MAD}
 $$
 
-Where $\tilde{x}$ is the sample median and xi is each observation. Various thresholds have been suggested, ranging between 2 and 3. Let’s apply this method to our artificial outlier of 8 with a threshold of 2.24 as suggested before (Iglewicz and Hoaglin 1993):
+Where $\tilde{x}$ is the sample median and xi is each observation. Various thresholds have been suggested, ranging between 2 and 3. Let’s apply this method to our artificial outlier of 8 with a threshold of 2.24 as suggested before [^outlier_book].
+
+[^outlier_book]: Iglewicz, Boris, and 1944- Hoaglin David C. (David Caster). 1993. How to Detect and Handle Outliers. Book; Book/Illustrated. Milwaukee, Wis. : ASQC Quality Press.
 
 ```r
 m_data <- c(2.051501, 3.27815, 1.532082, 3.826658, 2.335235, 8)
 print(0.6745*(m_data - median(m_data)) / mad(m_data))
 ```
 
-```
+```text
 ## [1] -0.3870867  0.2416539 -0.6533241  0.5228013 -0.2416539  2.6619214
 ```
 
@@ -137,7 +139,7 @@ The artificial outlier is indeed above the threshold. The M-score suffers even l
 
 ### False positives (type I error)
 
-When performing exploratory data analysis, all outlier detection methods listed above are valid and each one has its pros and cons. They are useful to detect possible flaws in data collection but are also very useful to detect novelty and new trends. However, when performing inferential analysis, type I error rates (false positives) should be accounted for. Here, we’ll accept a 5% type I error rate, as usual. The graphic below shows the type I error rate for a two-sample Welch t-test drawing samples from a population of 10000 normally distributed points (mean = 0, sd = 1). For each sample sizes, 10000 t-tests are performed on independent samples.
+When performing exploratory data analysis, all outlier detection methods listed above are valid and each one has its pros and cons. They are useful to detect possible flaws in data collection but are also very useful to detect novelty and new trends. However, when performing inferential analysis, type I error rates (false positives) should be accounted for. Here, we’ll accept a 5% type I error rate, as usual. The graphic below shows the type I error rate for a two-sample Welch t-test drawing samples from a population of 10000 normally distributed points (mean = 0, SD = 1). For each sample sizes, 10000 t-tests are performed on independent samples.
 
 ![A line graph showing type I error rate over sample size for four methods: None, Z(2), IQR (1.5), and M (2.24).](/src/assets/images/basics_outlier_detection/unnamed-chunk-8-1.png)
 
@@ -152,14 +154,10 @@ hist(population)
 
 ![A line graph showing a trend of type I error rates over sample size.](/src/assets/images/basics_outlier_detection/unnamed-chunk-10-1.png)
 
-The error inflation gets even worse when dealing with skewed distribution. Thus, caution should be taken before removing outliers with these methods as to whether the distribution is not heavily skewed.
+The error inflation gets even worse when dealing with skewed distribution. Thus, caution should be taken before removing outliers with these methods if the distribution is heavily skewed.
 
 ## Conclusions
 
-Outlier detection and removal should be **done with care** and with a well-defined method. Data that present distributions far from a normal one should not be subjected to the methods presented here. Removing outliers with _small sample sizes_ (eg less than 20 observations per group or condition) can inflate type I error rates substantially and should be avoided. Outlier removal must be decided without taking into account statistical significance and the same method must be applied throughout the whole study (at least to similar data).
+Outlier detection and removal should be **done with care** and with a well-defined method. Data that present distributions far from a normal one should not be subjected to the methods presented here. Removing outliers with _small sample sizes_ (e.g., less than 20 observations per group or condition) can inflate type I error rates substantially and should be avoided. Outlier removal must be decided without taking into account statistical significance and the same method must be applied throughout the whole study (at least to similar data).
 
-If outliers are removed, they must be rare (as a rule-of-thumb, they must account for less than 5% of the data - ideally less than 1%) and the method used to remove them as well as the number of observations removed must be clearly stated. Publishing the original data with outliers is also strongly advisable. Domain knowledge is key to determine when outliers are most likely due to error and not natural variability. Today, modern statistical techniques that are robust to extreme values exist and should be preferred whenever possible (for example, see the [WRS2](https://cran.r-project.org/web/packages/WRS2/index.html) package). Moreover, data that present non-normal distributions _should not be forced into a normal-like distribution through outlier removal_. The most important thing about outliers is to try to understand how they arise and to make efforts so that outliers don't even appear - thus, rendering its removal unnecessary in most cases. In my experience, most outliers arise due to pre-analytical mistakes and small sample sizes. Thus, well-standardized techniques combined with parsimonious sample sizes can mitigate the issue in many cases.
-
-## References
-
-Iglewicz, Boris, and 1944- Hoaglin David C. (David Caster). 1993. How to Detect and Handle Outliers. Book; Book/Illustrated. Milwaukee, Wis. : ASQC Quality Press.
+If we remove outliers, they must be rare (as a rule-of-thumb, they must account for less than 5% of the data — ideally less than 1%). The method used to remove them as well as the number of observations removed must be clearly stated. Publishing the original data with outliers is also strongly advisable. Domain knowledge is key to determine when outliers are most likely due to error and not natural variability. Today, modern statistical techniques that are robust to extreme values exist and should be preferred whenever possible (for example, see the [WRS2](https://cran.r-project.org/web/packages/WRS2/index.html) package). Moreover, data that present non-normal distributions _should not be forced into a normal-like distribution through outlier removal_. The most important thing about outliers is to try to understand how they arise and to make efforts so that outliers don't even appear — thus, rendering its removal unnecessary in most cases. In my experience, most outliers arise due to pre-analytical mistakes and small sample sizes. Thus, well-standardized techniques combined with suitable sample sizes can mitigate the issue in many cases.

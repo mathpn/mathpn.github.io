@@ -6,6 +6,7 @@ tags:
 description: Exploring the differences between lists in Go and Elixir
 pubDatetime: 2024-06-24
 ---
+
 We all know lists. Most if not all programming languages provide an implementation of a list-like data structure. Lists may be implemented in some different ways, for instance as singly-linked lists or arrays. Different concrete data structures may be used under the name list, as long as the implementation represents a finite number of ordered values and provide some common list operations.
 
 As we'll see, different implementations yield highly different performance in some operations. The decision on which concrete data structure to use as a list is also coupled with the language design itself. I'll compare lists in two languages: Elixir and Go.
@@ -72,9 +73,9 @@ func BenchmarkSlice(b *testing.B) {
 }
 ```
 
-The benchmark did not run in an isolated environment (e.g. a server with the least possible amount of running processes), so numbers should be taken with a grain of salt. These are the results:
+The benchmark did not run in an isolated environment (e.g., a server with the least possible amount of running processes), so numbers should be taken with a grain of salt. These are the results:
 
-```
+```text
                                  │ benchmark.log  │
                                  │     sec/op     │
 Slice/random_access_10000-16       0.01805n ± 39%
@@ -106,13 +107,13 @@ Time complexity is important to understand how well an algorithm scales. Some ti
 
 ### Back to Go slices
 
-Iterating over the list scales roughly linearly with input size. Random access doesn't scale with input size. This is because Go lists, called slices, are implemented as pointers to arrays. Since arrays are stored in contiguous memory block we can infer the exact memory location of all elements. Moreover, arrays may store pointers to values, allowing the program to follow these pointers and read the values. As a result, random access doesn't depend on the size of the array, making it O(1) and quite fast.
+Iterating over the list scales roughly linearly with input size. Random access doesn't scale with input size. This is because Go lists, called slices, are implemented as pointers to arrays. Since arrays are stored in contiguous memory block, we can infer the exact memory location of all elements. Moreover, arrays may store pointers to values, allowing the program to follow these pointers and read the values. As a result, random access doesn't depend on the size of the array, making it O(1) and quite fast.
 
-However, prepending an element to the list is different. Since arrays have fixed sizes, it's not possible to prepend or append values without copying the entire array. This means that each prepend operation runs in O(N) time, where N is the size of the array. 
+However, prepending an element to the list is different. Since arrays have fixed sizes, it's not possible to prepend or append values without copying the entire array. This means that each prepend operation runs in O(N) time, where N is the size of the array.
 
 But why is appending at least one order of magnitude faster than prepending? Then answer lies in Go's slice implementation using [dynamic arrays](https://en.wikipedia.org/wiki/Dynamic_array). As the [documentation](https://go.dev/blog/slices-intro) explains, the slice consists of a pointer to an array, the length of the array and the capacity. The drawing below illustrates how Go slices work under the hood:
 
-![Illustration of Go slices](@assets/images/list_benchmark/go_slices.svg)
+![Illustration of Go slices](@assets/images/list_comparison/go_slices.svg)
 
 When there's no capacity left, the `append` function creates a new array with _spare capacity_, that is, with some empty values at the right end. This allows it to simply set the appended value in memory and increase the slice length. Therefore, most append operations happen in O(1) time, occasionally requiring a new array creation in O(N) time.
 
@@ -126,7 +127,7 @@ But it doesn't have to be like this. Other programming languages take a differen
 
 Elixir is a functional language that runs on the BEAM virtual machine, which comes from the Erlang world. The _List_ module provides a singly-linked list implementation, which is explained in the [documentation](https://hexdocs.pm/elixir/1.12/List.html). The drawing below represents Elixir Lists:
 
-![Illustration of Elixir Lists](@assets/images/list_benchmark/elixir_lists.svg)
+![Illustration of Elixir Lists](@assets/images/list_comparison/elixir_lists.svg)
 
 Each entry in the list has a value (the yellow square) and a pointer to the next entry. The list can be represented as head and tail pairs. In the drawing, the outermost rectangle represents the first pair of head and tail. The head consists of the first value, while the tail contains the rest of the list. After following the pointer to the next value, we can once again represent the remaining of the list as a head and tail pair (the gray rectangle). This can be done recursively until the end of the list.
 
@@ -161,7 +162,7 @@ Benchee.run(
 
 Results:
 
-```
+```text
 ##### With input large #####
 Name                      ips        average  deviation         median         99th %
 prepend             1316.27 K        0.76 μs  ±4792.55%        0.65 μs        1.04 μs
@@ -170,7 +171,7 @@ iterate                7.62 K      131.23 μs     ±5.51%      131.00 μs      1
 iterate reverse        6.53 K      153.17 μs     ±9.10%      153.32 μs      180.12 μs
 append                 0.45 K     2229.11 μs     ±5.03%     2218.95 μs     2385.88 μs
 
-Comparison: 
+Comparison:
 prepend             1316.27 K
 random access         50.60 K - 26.01x slower +19.00 μs
 iterate                7.62 K - 172.73x slower +130.47 μs
@@ -185,7 +186,7 @@ iterate reverse       91.57 K       10.92 μs    ±57.64%        9.97 μs       
 random access         50.40 K       19.84 μs    ±19.88%       19.52 μs       25.23 μs
 append                 7.80 K      128.17 μs    ±17.34%      125.64 μs      157.04 μs
 
-Comparison: 
+Comparison:
 prepend             1321.36 K
 iterate              109.81 K - 12.03x slower +8.35 μs
 iterate reverse       91.57 K - 14.43x slower +10.16 μs
@@ -200,7 +201,7 @@ iterate reverse      867.27 K        1.15 μs  ±2445.71%        1.04 μs       
 append                56.23 K       17.78 μs    ±11.47%       17.05 μs       26.01 μs
 random access         50.28 K       19.89 μs    ±43.72%       19.54 μs       25.26 μs
 
-Comparison: 
+Comparison:
 prepend             1277.00 K
 iterate              979.84 K - 1.30x slower +0.24 μs
 iterate reverse      867.27 K - 1.47x slower +0.37 μs
