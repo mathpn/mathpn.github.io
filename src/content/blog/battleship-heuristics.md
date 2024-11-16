@@ -3,16 +3,16 @@ title: "Battleship Heuristics"
 pubDatetime: 2018-01-11
 tags:
   - Python
-description: Implementing an algorithm for playing Battleship that uses heuristics such as "hunt" and "attack" modes to estimate the probability of finding ships on a grid.
+description: Implementing an algorithm for playing Battleship that uses heuristics.
 ---
 
 Recently, I stumbled upon a very interesting [blog post](http://www.datagenetics.com/blog/december32011/) and a [Reddit thread](https://www.reddit.com/r/compsci/comments/2o044h/battleship_algorithms_this_is_awesome/) about an algorithm to play battleship in the best possible way. The blog post, however, does not explain how probabilities are calculated. So, I decided to give it a try and write my own code for this problem.
 
-_Disclaimer: this is my first ever Python script, as I'm used to write only in R. Thus, it's not a masterpiece and I'm sure there's room for improvement._
+_Disclaimer: this is my first ever Python script. Thus, it's not a masterpiece, and I'm sure there's room for improvement._
 
 ## Basic Code
 
-I started by writing a code that sets the boards and prepares the game of human versus the _computer_. I won't cover this section in much detail, as the code can be seen below. In a nutshell, the code places 5 ships of sizes 5, 4, 3, 3 and 2 squares on the board, making sure that they do not overlap (but touching is allowed). There's also an input option for the difficulty, in which the _easy_ mode corresponds to random guessing by the computer, while the _hard_ mode uses the algorithm that we'll develop.
+I started by writing a code that sets the boards and prepares the game of human versus the _computer_. I won't cover this section in much detail, as the code can be seen below. In a nutshell, the code places 5 ships of sizes 5, 4, 3, 3 and 2 squares on the board, making sure that they do not overlap (but they can touch each other). There's also an input option for the difficulty, in which the _easy_ mode corresponds to random guessing by the computer, while the _hard_ mode uses the algorithm that we'll develop.
 
 ```python
 board = []
@@ -96,19 +96,19 @@ def probability_hunt(board, ships, size, hit):
     return prob
 ```
 
-The solution of working with a board as a list of lists is far from elegant, and numpy arrays might have been a better option. However, to be honest, this piece of code was already written by the time I had this idea and it works!
+The solution of working with a board as a list of lists is far from elegant, and _numpy_ arrays might have been a better option. However, to be honest, I had already written this piece of code by the time I thought about this, and it works!
 
-![image](@assets/images/grad_1.svg){: .align-right}
+![Matrix showing higher probability of finding a ship near the center of the board](@assets/images/grad_1.svg){: .align-right}
 
-Considering a standard board of 10x10 squares, let's see a few examples to understand how the algorithm is working so far. In the beginning of the game, the computer will _always_ guess a square close to the centre of the board, as there's a higher probability that a ship is there (compared to the edges). It's very important to consider that the ships are placed randomly, and a human placing ships might even prefer the edges of the board. The function returns the following matrix:
+Considering a standard board of 10x10 squares, let's see a few examples to understand how the algorithm is working so far. In the beginning of the game, the computer will _always_ guess a square close to the center of the board, as there's a higher probability that a ship is there (compared to the edges). It's very important to consider that the ships are placed randomly, and a human placing ships might even prefer the edges of the board. The function returns the following matrix:
 
-After each incorrect guess, the matrix is recalculated considering the new information. Some examples are provided below:
+After each incorrect guess, we recalculate the matrix considering the new information. Below are some examples:
 
-![Example of hunt matrix](@assets/images/grad_hunt.png)
+![Examples of probability matrices after some guesses](@assets/images/grad_hunt.png)
 
-When a ship is finally hit by the computer, the algorithm enters an attack mode. This time, however, I decided to spice things up a little: in the blog post, the opponent should inform the length of the hit ship and when it sunk. In this version of the game, however, neither is required. I thought this would just save some coding, but it turned out to make the game _much_ harder.
+When the computer finally hits a ship, the algorithm enters an attack mode. This time, however, I decided to spice things up a little: in the blog post, the opponent should inform the length of the hit ship and when it sunk. In this version of the game, however, neither is required. I thought this would just save some coding, but it turned out to make the game _much_ harder.
 
-In the first version of the algorithm, when the computer hits a ship, it turns into an _attack_ mode. This function calculates all the possible ship configurations in which the hit(s) square(s) is(are) covered by a ship. In the original blog post, the computer would know when to switch back to _hunt_ mode - it simply did it when the ship being attacked sunk. However, in the absence of this information, I adopted the (completely arbitrary yet parsimonious) heuristic of returning to _hunt_ mode after 3 consecutive misses. The code for this is:
+In the first version of the algorithm, when the computer hits a ship, it enters into _attack_ mode. This function calculates all the possible ship configurations in which the hit(s) square(s) is(are) covered by a ship. In the original blog post, the computer would know when to switch back to _hunt_ mode -- it simply did it when the ship being attacked sunk. However, in the absence of this information, I adopted the (completely arbitrary yet reasonable) heuristic of returning to _hunt_ mode after 3 consecutive misses. The code for this is:
 
 ```python
 def probability_attack(board, hit, ships, size):
@@ -144,15 +144,15 @@ def probability_attack(board, hit, ships, size):
 
 This code produces some beautiful matrices, as shown in examples below. Again, the computer chooses the highest value in the matrix and if there's a tie the choice is randomly sampled from the tied highest values. In order to understand how this works, let's go through an example:
 
-![Examples of attack matrices](@assets/images/grad_attack.png)
+![Examples of attack mode matrices showing areas surrounding a hit with high probability](@assets/images/grad_attack.png)
 
 > Icons made by [Freepik](http://www.freepik.com) from [Flaticon](https://www.flaticon.com) are licensed by [Creative Commons BY 3.0](http://creativecommons.org/licenses/by/3.0/)
 
-While still in _hunt_ mode, the computer hit one ship. In the first matrix, we can see the estimated probabilities to whether the adjacent squares also contain a ship. The computer picks the highest value and hit the ship again! But in its next move, the computer misses. This changes the look of the matrices, and the computer begins to explore downwards. Again, it's a hit! However, as we don't know the size of the ship being hit, the computer iteratively consider **all** ships to estimate these values; thus, although the intuitive approach would be to keep exploring downwards, the computer decides to go left, as bigger ships could fit better in that direction compared to the small space of 2 squares downwards. It is, nonetheless, a miss. This process keeps going until 3 consecutive misses are done. Then, the computer goes back to _hunt_ mode, as seen in the last matrix.
+While still in _hunt_ mode, the computer hit one ship. In the first matrix, we can see the estimated probabilities to whether the adjacent squares also contain a ship. The computer picks the highest value and hit the ship again! But in its next move, the computer misses. This changes the look of the matrices, and the computer begins to explore downwards. Again, it's a hit! However, as we don't know the size of the ship being hit, the computer iteratively consider **all** ships to estimate these values; thus, although the intuitive approach would be to keep exploring downwards, the computer decides to go left, as bigger ships could fit better in that direction compared to the small space of 2 squares downwards. It is, nonetheless, a miss. This process keeps going until 3 consecutive misses. Then, the computer goes back to _hunt_ mode, as seen in the last matrix.
 
 ## Fine-Tuning
 
-The first issue with this approach is already visible: the algorithm avoids the edges of the table, making counter intuitive shifts in the orientation of its predictions. To tackle this issue, a list variable _hit_ is created, in which the computer appends its correct guesses recursively. The list is emptied when returning to hunt mode. The code checks the orientation of the collinear streak of hits and the values in this row or column are multiplied by 3. The multiplier is arbitrary and was chosen by trial and error, but I'm sure better approaches could estimate a more relevant value.
+The first issue with this approach is already visible: the algorithm avoids the edges of the table, making counterintuitive shifts in the orientation of its predictions. To tackle this issue, I've created a list variable `hit`, in which the computer appends its correct guesses recursively. The list is emptied when returning to hunt mode. The code checks the orientation of the collinear streak of hits and the values in this row or column are multiplied by 2. The multiplier is arbitrary and was chosen by trial and error, but I'm sure better approaches could estimate a more relevant value.
 
 ```python
 hit.append([guess_row, guess_col])
@@ -163,9 +163,9 @@ elif len(hit) > 1 and hit[-2][1] == hit[-1][1]:
     prob[:, hit[-1][1]] = np.prod([prob[:, hit[-1][1]], 3])
 ```
 
-Another issue is that the computer makes unnecessary misses when a situation similar to the sixth matrix above happens: when a streak of collinear hits has misses in both its ends, it's very likely that the ship has sunk. Still, ships cannot go over one another, but they can (and **do**) touch each other. Therefore, creating a constrain that does not let the algorithm change the orientation of its guesses could (and in fact it does) have a negative impact over its performance.
+Another issue is that the computer makes unnecessary misses when a situation similar to the sixth matrix above happens: when a streak of collinear hits has misses in both its ends, it's very likely that the ship has sunk. Still, ships cannot go over one another, but they can (and _do_) touch each other. Therefore, creating a constraint that does not let the algorithm change the orientation of its guesses could (and in fact _does_) have a negative impact over its performance.
 
-The proposed solution is to create yet another probability estimating function. Using again the _hit_ variable, the code checks again the orientation of the collinear streak of hits and if the sum of probabilities for the corresponding row or column is 0. This can only happen in a situation very similar to the one posed in the sixth matrix of the figure above: there's a streak of 3 vertical hits, but they are followed by misses in both of its ends. Therefore, the sum of all the values of that column is 0, strongly suggesting that the ship has sunk _or_ that there's another ship touching the already found one. If this condition is true, a variable named _count_ is set to 1 and the probability matrix is calculated as the average of the matrices returned by the _probability_hunt_ and the _probability_attack_ functions. In this way, the algorithm returns sooner to hunt mode - avoiding unnecessary misses - while keeping in part the values calculated by the _attack_ function. This seems like a parsimonious heuristic that allows finding touching ships while avoiding extra misses.
+The proposed solution is to create yet another probability estimating function. Using again the `hit` variable, the code checks again the orientation of the collinear streak of hits and if the sum of probabilities for the corresponding row or column is 0. This can only happen in a situation very similar to the one posed in the sixth matrix of the figure above: there's a streak of 3 vertical hits, but they are followed by misses in both of its ends. Therefore, the sum of all the values of that column is 0, strongly suggesting that the ship has sunk _or_ that there's another ship touching the already found one. If this condition is true, a variable named _count_ is set to 1 and the probability matrix is calculated as the average of the matrices returned by the `probability_hunt` and the `probability_attack` functions. In this way, the algorithm returns sooner to hunt mode — avoiding unnecessary misses — while keeping in part the values calculated by the _attack_ function.
 
 ```python
 def probability_mixed(board, hit, count, ships, size):
@@ -198,7 +198,7 @@ def probability_mixed(board, hit, count, ships, size):
     return prob3
 ```
 
-This seems like a reasonable solution, but it also exacerbates another problem: while the _probability_mixed_ function is below the 3 misses threshold, it can hit _another_ ship, unrelated to the previous hits, specially when the mixed matrix is used. This creates a weird situation: the computer may not leave the _attack_ mode for very long periods of time, making the _hit_ variable absurdly long. So, you may have guessed it, we are going to create yet another heuristic. It seems reasonable that the most recent hits should have a larger weight when estimating the matrix. However, this cannot be too heavy, or a shift in direction of guesses would become highly unlikely - jeopardizing the algorithm's performance. So, an additional term which came to my mind is the euclidean distance of one hit to the next one. As the distance increases, there's a much higher probability that we're not hitting one single ship, but rather two or more. Thus, joining these two ideas - with _yet another_ arbitrary value of 1.5 relative importance to the distance compared to the index (newer _versus_ older hits), a new empirical version of the _probability_attack_ function arises:
+This seems like a reasonable heuristic that allows finding touching ships while avoiding extra misses. However, it also exacerbates another problem: while the `probability_mixed` function is below the 3 misses threshold, it can hit _another_ ship, unrelated to the previous hits, specially when we use the mixed matrix. This creates a weird situation: the computer may not leave the _attack_ mode for a very long time, making the `hit` variable absurdly long. So, you may have guessed it, we are going to create yet another heuristic. It seems reasonable that the most recent hits should have a bigger weight when estimating the matrix. However, this cannot be overdone, or a shift in direction of guesses would become highly unlikely -- jeopardizing the algorithm's performance. So, an additional term which came to my mind is the euclidean distance of one hit to the next one. As the distance increases, there's a much higher probability that we're not hitting one single ship, but rather two or more. Thus, joining these two ideas — with _yet another_ arbitrary value of 1.5 relative importance to the distance compared to the index (newer _versus_ older hits), a new empirical version of the `probability_attack` function arises:
 
 ```python
 def probability_attack(board, hit, ships, size):
@@ -244,7 +244,7 @@ def distance(hit, i):
             return dist
 ```
 
-I think there are still two unsolved problems with this code: it does not take into account that ships cannot overlap. I tried to make two functions to detect adjacent ships and take into account this rule, which turned into the ridiculously long _if_ statements below:
+I think there are still two unsolved problems with this code: it does not take into account that ships cannot overlap. I tried to make two functions to detect adjacent ships and take into account this rule, which became the ridiculously long `if` statements below:
 
 ```python
 from copy import deepcopy as dc
@@ -252,17 +252,17 @@ pboard = dc(board)
 
 def adj_rows(k, row, board, pboard, ship):
     if k > 0:
-        if (row > 0 and row < 9 and board[row][k - 1] == 'B'\
-        and board[row - 1][k - 1] == 'B' and board[row + 1][k - 1] == 'B')\
-        or (row == 0 and board[row][k - 1] == 'B' and board[row + 1][k - 1] == 'B')\
+        if (row > 0 and row < 9 and board[row][k - 1] == 'B'
+        and board[row - 1][k - 1] == 'B' and board[row + 1][k - 1] == 'B')
+        or (row == 0 and board[row][k - 1] == 'B' and board[row + 1][k - 1] == 'B')
         or (row == 9 and board[row - 1][k - 1] == 'B' and board[row][k - 1] == 'B'):
             pboard[row][k - 1] == 'X'
             pboard[row - 1][k - 1] == 'X'
             pboard[row + 1][k - 1] == 'X'
     if (k + ship) < len(board[0]):
-        if (row > 0 and row < 9 and board[row][k + ship] == 'B'\
-        and board[row - 1][k + ship] == 'B' and board[row + 1][k + ship] == 'B')\
-        or (row == 0 and board[row][k + ship] == 'B' and board[row + 1][k + ship] == 'B')\
+        if (row > 0 and row < 9 and board[row][k + ship] == 'B'
+        and board[row - 1][k + ship] == 'B' and board[row + 1][k + ship] == 'B')
+        or (row == 0 and board[row][k + ship] == 'B' and board[row + 1][k + ship] == 'B')
         or (row == 9 and board[row - 1][k + ship] == 'B' and board[row][k + ship] == 'B'):
             pboard[row][k + ship] == 'X'
             pboard[row - 1][k + ship] == 'X'
@@ -271,17 +271,17 @@ def adj_rows(k, row, board, pboard, ship):
 
 def adj_cols(k, col, board, pboard, ship):
     if k > 0:
-        if (col > 0 and col < 9 and board[k - 1][col - 1] == 'B'\
-        and board[k - 1][col] == 'B' and board[k - 1][col + 1] == 'B')\
-        or (col == 0 and board[k - 1][col] == 'B' and board[k - 1][col + 1] == 'B')\
+        if (col > 0 and col < 9 and board[k - 1][col - 1] == 'B'
+        and board[k - 1][col] == 'B' and board[k - 1][col + 1] == 'B')
+        or (col == 0 and board[k - 1][col] == 'B' and board[k - 1][col + 1] == 'B')
         or (col == 9 and board[k - 1][col - 1] == 'B' and board[k - 1][col] == 'B'):
             pboard[k - 1][col - 1] = 'X'
             pboard[k - 1][col] = 'X'
             pboard[k - 1][col] = 'X'
     if (k + ship) < len(board[0]):
-        if (col > 0 and col < 9 and board[k + ship][col - 1] == 'B'\
-        and board[k + ship][col] == 'B' and board[k + ship][col + 1] == 'B')\
-        or (col == 0 and board[k + ship][col] == 'B' and board[k + ship][col + 1] == 'B')\
+        if (col > 0 and col < 9 and board[k + ship][col - 1] == 'B'
+        and board[k + ship][col] == 'B' and board[k + ship][col + 1] == 'B')
+        or (col == 0 and board[k + ship][col] == 'B' and board[k + ship][col + 1] == 'B')
         or (col == 9 and board[k + ship][col - 1] == 'B' and board[k + ship][col] == 'B'):
             pboard[k + ship][col - 1] = 'X'
             pboard[k + ship][col] = 'X'
@@ -295,12 +295,12 @@ The other one is that the algorithm does not take into account the probability t
 
 ## Evaluating Performance
 
-The number of turns required to complete a game (sink all ships) was recorded for 5000 simulations. The empirical cumulative distribution was estimated with a gaussian kernel for each version of the code. Version 1 corresponds to random guessing. Version 2 only guesses through the _hunt_ mode; version 3 includes the first version of the _attack_ mode; version 4 includes the heuristics of the _mixed_ matrix; and version 5 is the final one with the distance heuristics.
+The number of turns required to complete a game (sink all ships) was recorded for 5000 simulations. I've estimated the empirical cumulative distribution with a Gaussian kernel for each version of the code. Version 1 corresponds to random guessing. Version 2 only guesses through the _hunt_ mode; version 3 includes the first version of the _attack_ mode; version 4 includes the heuristics of the _mixed_ matrix; and version 5 is the final one with the distance heuristics.
 
 ![Performance plot with kernel cumulative probability of turns to complete the game](@assets/images/performance.png) {.align-right}
 
 The improvement was substantial until the third version, which included the basic _hunt/attack_ alternating algorithm. However, further improvement was very subtle. The Hedge's _g_ effect size estimator was used to compare each version with the next one, yielding the following values: versions 1 vs 2: $g = 5.062$; versions 2 vs 3: $g = 0.867$; versions 3 vs 4: $g = 0.176$; versions 4 vs 5: $g = 0.051$. Thus, it seems that until versions 4 there was significant improvement; however, the change between versions 4 and 5 is very subtle, suggesting that maybe the distance heuristic is not as good as it may look.
 
-The Python script for an interactive version of _Battleship_ implementing this algorithm is available through this [Github Repository](https://github.com/mathpn/battleship).
+The Python script for an interactive version of _Battleship_ implementing this algorithm is available through this [GitHub Repository](https://github.com/mathpn/battleship).
 
-This algorithm is not perfect and I'm sure there's room for improvement. If you have any ideas, please leave a comment!
+This algorithm is not perfect, and I'm sure there's room for improvement. If you have any ideas, please leave a comment!
