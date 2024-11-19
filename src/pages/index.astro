@@ -23,7 +23,7 @@ const socialCount = SOCIALS.filter((social) => social.active).length;
   <Header />
   <main id="main-content">
     <section id="hero">
-      <h1>Hey there</h1>
+      <h1>Hey there, welcome to MPN</h1>
       <a
         target="_blank"
         href="/rss.xml"
@@ -41,7 +41,17 @@ const socialCount = SOCIALS.filter((social) => social.active).length;
         <span class="sr-only">RSS Feed</span>
       </a>
 
-      <p>Yet another blog.</p>
+      <p>
+        Here you'll find posts about software development, statistics, machine
+        learning, and other topics.
+      </p>
+      <p>
+        If you're new here, consider reading the most recent posts below, or
+        search for topics by <a href="/tags">tag</a> or <a href="/search"
+          >keywords</a
+        >.
+      </p>
+      <p>Also, consider subscribing to the <a href="/rss.xml">RSS feed</a> to receive new posts.</p>
       {
         // only display if at least one social link is enabled
         socialCount > 0 && (
@@ -88,7 +98,7 @@ const socialCount = SOCIALS.filter((social) => social.active).length;
                     frontmatter={data}
                     secHeading={false}
                   />
-                ),
+                )
             )}
           </ul>
         </section>
@@ -116,7 +126,7 @@ const socialCount = SOCIALS.filter((social) => social.active).length;
     @apply pb-6 pt-8;
   }
   #hero h1 {
-    @apply my-4 inline-block text-3xl font-bold sm:my-8 sm:text-5xl;
+    @apply my-4 inline-block text-2xl font-bold sm:my-8 sm:text-4xl;
   }
   #hero .rss-link {
     @apply mb-6;
@@ -125,7 +135,10 @@ const socialCount = SOCIALS.filter((social) => social.active).length;
     @apply mb-2 h-6 w-6 scale-110 fill-skin-accent sm:mb-3 sm:scale-125;
   }
   #hero p {
-    @apply my-2;
+    @apply my-2 text-xl;
+  }
+  #hero a {
+    @apply !decoration-dashed underline underline-offset-8 hover:text-skin-accent;
   }
   .social-wrapper {
     @apply mt-4 flex flex-col sm:flex-row sm:items-center;
