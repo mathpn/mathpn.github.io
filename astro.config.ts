@@ -7,6 +7,7 @@ import sitemap from "@astrojs/sitemap";
 import { SITE } from "./src/config";
 import remarkMath from "remark-math";
 import rehypeKatex from "rehype-katex";
+import rehypeWrapTables from "./src/utils/table-wrapper-plugin.mjs";
 
 import mdx from "@astrojs/mdx";
 
@@ -32,7 +33,7 @@ export default defineConfig({
         },
       ],
     ],
-    rehypePlugins: [rehypeKatex],
+    rehypePlugins: [rehypeKatex, rehypeWrapTables],
     shikiConfig: {
       // For more themes, visit https://shiki.style/themes
       themes: { light: "min-light", dark: "night-owl" },

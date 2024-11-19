@@ -67,6 +67,15 @@
   .prose h2#table-of-contents + p {
     @apply hidden;
   }
+  .prose > .table-wrapper {
+    @apply overflow-x-auto w-full max-w-fit mx-auto;
+  }
+  .prose > .table-wrapper td {
+    @apply p-2;
+  }
+  .prose > .table-wrapper th {
+    @apply p-2;
+  }
 
   /* ===== scrollbar ===== */
   html {
