@@ -73,6 +73,13 @@ export default function SearchBar({ searchList }: Props) {
     }
   }, [inputVal]);
 
+  useEffect(() => {
+    // Focus the search input field when the component is loaded
+    if (inputRef.current) {
+      inputRef.current.focus();
+    }
+  }, []);
+
   return (
     <>
       <label className="relative block">
