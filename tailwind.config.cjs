@@ -64,7 +64,7 @@ module.exports = {
         serif: ['"Source Serif 4"', "serif"],
       },
 
-      typography: {
+      typography: (theme) => ({
         DEFAULT: {
           css: {
             kbd: {
@@ -78,9 +78,55 @@ module.exports = {
             code: {
               color: false,
             },
+            blockquote: {
+              quotes: '"\\201C""\\201D""\\2018""\\2019"',
+
+              // No quotes on regular blockquotes
+              "p:first-of-type::before": {
+                content: "no-open-quote",
+              },
+              "p:last-of-type::after": {
+                content: "no-close-quote",
+              },
+
+              // Target blockquotes that contain cite elements
+              "&:has(cite)": {
+                "border-left": "none",
+                padding: "0.5em 3em",
+                position: "relative",
+
+                "&::before": {
+                  content: '"\\201C"',
+                  "font-size": "4em",
+                  "line-height": "1",
+                  position: "absolute",
+                  left: "-0.1em",
+                  top: "-0.2em",
+                  color: theme("backgroundColor.skin.card-muted"),
+                },
+
+                "&::after": {
+                  content: '"\\201D"',
+                  "font-size": "4em",
+                  "line-height": "1",
+                  position: "absolute",
+                  right: "-0.1em",
+                  bottom: "-0.4em",
+                  color: theme("backgroundColor.skin.card-muted"),
+                },
+
+                cite: {
+                  display: "block",
+                  "margin-top": "1em",
+                  "text-align": "right",
+                  "font-style": "normal",
+                  "font-weight": "500",
+                },
+              },
+            },
           },
         },
-      },
+      }),
     },
   },
   plugins: [require("@tailwindcss/typography")],

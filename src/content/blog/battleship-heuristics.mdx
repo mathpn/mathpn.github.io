@@ -6,6 +6,9 @@ tags:
 description: Implementing an algorithm for playing Battleship that uses heuristics.
 ---
 
+import { Image } from "astro:assets";
+import FloatRightImage from "@components/FloatRightImage.astro";
+
 Recently, I stumbled upon a very interesting [blog post](http://www.datagenetics.com/blog/december32011/) and a [Reddit thread](https://www.reddit.com/r/compsci/comments/2o044h/battleship_algorithms_this_is_awesome/) about an algorithm to play battleship in the best possible way. The blog post, however, does not explain how probabilities are calculated. So, I decided to give it a try and write my own code for this problem.
 
 _Disclaimer: this is my first ever Python script. Thus, it's not a masterpiece, and I'm sure there's room for improvement._
@@ -98,9 +101,15 @@ def probability_hunt(board, ships, size, hit):
 
 The solution of working with a board as a list of lists is far from elegant, and _numpy_ arrays might have been a better option. However, to be honest, I had already written this piece of code by the time I thought about this, and it works!
 
-![Matrix showing higher probability of finding a ship near the center of the board](@assets/images/grad_1.svg){: .align-right}
-
 Considering a standard board of 10x10 squares, let's see a few examples to understand how the algorithm is working so far. In the beginning of the game, the computer will _always_ guess a square close to the center of the board, as there's a higher probability that a ship is there (compared to the edges). It's very important to consider that the ships are placed randomly, and a human placing ships might even prefer the edges of the board. The function returns the following matrix:
+
+import grad_1 from "@assets/images/grad_1.svg";
+
+<Image
+  src={grad_1}
+  alt="Matrix showing higher probability of finding a ship near the center of the board"
+  width="350"
+/>
 
 After each incorrect guess, we recalculate the matrix considering the new information. Below are some examples:
 
@@ -297,7 +306,12 @@ The other one is that the algorithm does not take into account the probability t
 
 The number of turns required to complete a game (sink all ships) was recorded for 5000 simulations. I've estimated the empirical cumulative distribution with a Gaussian kernel for each version of the code. Version 1 corresponds to random guessing. Version 2 only guesses through the _hunt_ mode; version 3 includes the first version of the _attack_ mode; version 4 includes the heuristics of the _mixed_ matrix; and version 5 is the final one with the distance heuristics.
 
-![Performance plot with kernel cumulative probability of turns to complete the game](@assets/images/performance.png) {.align-right}
+import performance from "@assets/images/performance.png";
+
+<FloatRightImage
+  src={performance}
+  alt="Performance plot with kernel cumulative probability of turns to complete the game"
+/>
 
 The improvement was substantial until the third version, which included the basic _hunt/attack_ alternating algorithm. However, further improvement was very subtle. The Hedge's _g_ effect size estimator was used to compare each version with the next one, yielding the following values: versions 1 vs 2: $g = 5.062$; versions 2 vs 3: $g = 0.867$; versions 3 vs 4: $g = 0.176$; versions 4 vs 5: $g = 0.051$. Thus, it seems that until versions 4 there was significant improvement; however, the change between versions 4 and 5 is very subtle, suggesting that maybe the distance heuristic is not as good as it may look.
 
