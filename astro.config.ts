@@ -8,6 +8,7 @@ import { SITE } from "./src/config";
 import remarkMath from "remark-math";
 import rehypeKatex from "rehype-katex";
 import rehypeWrapTables from "./src/utils/table-wrapper-plugin.mjs";
+import { remarkHyphenate } from "./src/utils/hyphenate.mjs";
 
 import mdx from "@astrojs/mdx";
 
@@ -26,6 +27,7 @@ export default defineConfig({
     remarkPlugins: [
       remarkMath,
       remarkToc,
+      remarkHyphenate,
       [
         remarkCollapse,
         {
