@@ -125,10 +125,10 @@ An **estimator of the fractal dimension** of an image can be obtained through th
 [Lacunarity](https://en.wikipedia.org/wiki/Lacunarity) is another useful measure to explore fractal-like patterns. It is a measure of **_"gappines"_ and, more generally, of heterogeneity (rotational invariance)**. Intuitively, it can be thought as a measure of how dense a pattern is and how self-similar it is when subjected to spatial transformations. It can be estimated with the box-counting algorithm using the following formula:
 
 $$
-\lambda_{\epsilon,g} = (CV_{\epsilon,g})^2 = \bigg(\frac{\sigma_{\epsilon,g}}{\mu_{\epsilon,g}}\bigg)^2
+\lambda_{\varepsilon,g} = (CV_{\varepsilon,g})^2 = \bigg(\frac{\sigma_{\varepsilon,g}}{\mu_{\varepsilon,g}}\bigg)^2
 $$
 
-where $\epsilon$ is the box size and $g$ is the orientation. Moreover, $\sigma$ and $\mu$ are the **standard-error and mean number of pixels per box**, recpectively.
+where $\varepsilon$ is the box size and $g$ is the orientation. Moreover, $\sigma$ and $\mu$ are the **standard-error and mean number of pixels per box**, recpectively.
 
 ## Full code
 
