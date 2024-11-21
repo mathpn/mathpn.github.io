@@ -4,4 +4,4 @@ This is the repo of my blog. It's built using [Astro](https://astro.build/) and 
 
 ## License
 
-The code is under MIT license. The content located in `src/content` is under CC-BY-SA-4.0 license.
+The code is under MIT license. The content located in `src/content`, `src/assets/images`, and `src/assets/js` is under CC-BY-SA-4.0 license.
