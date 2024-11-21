@@ -14,6 +14,7 @@ import rehypeWrapTables from "./src/utils/table-wrapper-plugin.mjs";
 // https://astro.build/config
 export default defineConfig({
   site: SITE.website,
+  base: "",
   integrations: [
     tailwind({
       applyBaseStyles: false,
