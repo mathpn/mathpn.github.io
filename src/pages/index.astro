@@ -26,7 +26,7 @@ const socialCount = SOCIALS.filter((social) => social.active).length;
       <h1>Hey there, welcome to MPN</h1>
       <a
         target="_blank"
-        href="/rss.xml"
+        href="/feed.xml"
         class="rss-link"
         aria-label="rss feed"
         title="RSS Feed"
@@ -51,7 +51,10 @@ const socialCount = SOCIALS.filter((social) => social.active).length;
           >keywords</a
         >.
       </p>
-      <p>Also, consider subscribing to the <a href="/rss.xml">RSS feed</a> to receive new posts.</p>
+      <p>
+        Also, consider subscribing to the <a href="/feed.xml">RSS feed</a> to receive
+        new posts.
+      </p>
       {
         // only display if at least one social link is enabled
         socialCount > 0 && (

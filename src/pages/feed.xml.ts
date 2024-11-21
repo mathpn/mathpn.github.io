@@ -7,6 +7,7 @@ export async function GET() {
   const posts = await getCollection("blog");
   const sortedPosts = getSortedPosts(posts);
   return rss({
+    stylesheet: "/rss/styles.xsl",
     title: SITE.title,
     description: SITE.desc,
     site: SITE.website,
