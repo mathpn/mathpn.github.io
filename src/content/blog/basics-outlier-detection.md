@@ -76,11 +76,11 @@ So, to sum it up, the z-score method is quite effective **if the distribution of
 
 The interquartile range (or IQR) method was created by the great statistician John Tukey and is embedded in the famous boxplot. The idea is to determine the 25th and 75th quantiles, that is, the values that leave 25% and 75% of the data below it, respectively. Then, the distance between them is the IQR. Below you can see a histogram of the famous height data from Sir Francis Galton in which those quantiles are marked with red lines. 50% of the data lies between the lines.
 
-![Histogram of a random variable with normal distribution and quantiles marked in red vertical lines](/src/assets/images/basics_outlier_detection/unnamed-chunk-4-1.png)
+![Histogram of a random variable with normal distribution and quantiles marked in red vertical lines](@assets/images/basics_outlier_detection/unnamed-chunk-4-1.png)
 
 The box-and-whisker plot (or box plot) simply draws a box whose limits are the 25th and 75th percentiles, with the median (or 50th percentile) as a line in the middle. Then, whiskers of length 1.5 times IQR are drawn on both directions, that is, 1.5 times IQR below the 25th percentile and 1.5 times IQR above the 75th percentile. Values that are outside this range were considered outliers by Tukey. Here is the box plot for the height data:
 
-![Box plot of height data in inches with two outliers](/src/assets/images/basics_outlier_detection/fig1-1.png)
+![Box plot of height data in inches with two outliers](@assets/images/basics_outlier_detection/fig1-1.png)
 
 Some outliers do appear, but they are very few. The main advantage of the IQR method is that it’s more robust to slightly skewed distributions. It can also detect outliers with smaller sample sizes as the median and IQR are much less influenced by extreme values than the mean and standard deviation, respectively. With z-scores, the presence of really extreme values can influence the mean and the standard deviation so much that it fails to detect other less extreme outliers, a phenomenon known as **masking**. In some cases, a factor of 2 or even 3 is used to multiply the IQR, detecting fewer outliers.
 
@@ -94,7 +94,7 @@ print(scale(c(2.051501, 3.27815, 1.532082, 3.826658, 2.335235, 8))[, 1])
 ## [1] -0.61670998 -0.09587028 -0.83725721  0.13702825 -0.49623548  1.90904470
 ```
 
-![Box plot with one outlier of value 8](/src/assets/images/basics_outlier_detection/fig2-1.png)
+![Box plot with one outlier of value 8](@assets/images/basics_outlier_detection/fig2-1.png)
 
 The z-score method does not detect the extreme value as an outlier, while the IQR method does so. Let’s increase the sample size and repeat the analysis. The new data will be:
 
@@ -142,7 +142,7 @@ The artificial outlier is indeed above the threshold. The M-score suffers even l
 
 When performing exploratory data analysis, all outlier detection methods listed above are valid and each one has its pros and cons. They are useful to detect possible flaws in data collection but are also very useful to detect novelty and new trends. However, when performing inferential analysis, type I error rates (false positives) should be accounted for. Here, we’ll accept a 5% type I error rate, as usual. The graphic below shows the type I error rate for a two-sample Welch t-test drawing samples from a population of 10000 normally distributed points (mean = 0, SD = 1). For each sample sizes, 10000 t-tests are performed on independent samples.
 
-![A line graph showing type I error rate over sample size for four methods: None, Z(2), IQR (1.5), and M (2.24).](/src/assets/images/basics_outlier_detection/unnamed-chunk-8-1.png)
+![A line graph showing type I error rate over sample size for four methods: None, Z(2), IQR (1.5), and M (2.24).](@assets/images/basics_outlier_detection/unnamed-chunk-8-1.png)
 
 It’s quite alarming that, when using a threshold of $|Z| > 2$, the error rate goes up as the sample size increases. This shows that, although this is a very common threshold in published studies, it greatly inflates error rates and can be considered a form of [_p-hacking_](https://en.wikipedia.org/wiki/Data_dredging). All methods resulted in error inflation, especially with smaller sample sizes. Let’s repeat this analysis using a population with skewed values:
 
@@ -151,9 +151,9 @@ population <- rgamma(10000, shape = 6)
 hist(population)
 ```
 
-![A histogram of population data.](/src/assets/images/basics_outlier_detection/unnamed-chunk-9-1.png)
+![A histogram of population data.](@assets/images/basics_outlier_detection/unnamed-chunk-9-1.png)
 
-![A line graph showing a trend of type I error rates over sample size.](/src/assets/images/basics_outlier_detection/unnamed-chunk-10-1.png)
+![A line graph showing a trend of type I error rates over sample size.](@assets/images/basics_outlier_detection/unnamed-chunk-10-1.png)
 
 The error inflation gets even worse when dealing with skewed distribution. Thus, caution should be taken before removing outliers with these methods if the distribution is heavily skewed.
 
