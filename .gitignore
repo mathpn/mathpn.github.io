@@ -1,3 +1,8 @@
-.astro
+version https://git-lfs.github.com/spec/v1
+oid sha256:438c4a425a2267e3d48a2598604e69ee3952fb0bfd0aa5b0913abbfb3929db02
+size 25
+
 node_modules
 dist
+.astro
+.vscode
