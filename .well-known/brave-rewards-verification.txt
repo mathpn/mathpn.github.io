@@ -1,4 +1,0 @@
-This is a Brave Rewards publisher verification file.
-
-Domain: hyperspaces.link
-Token: c291a86397821f23e20ed0b6670c58de69daecee66d223544f0f8c5ea2d94556

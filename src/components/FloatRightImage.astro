@@ -1,0 +1,12 @@
+---
+import type { LocalImageProps, RemoteImageProps } from "astro:assets";
+import { Image } from "astro:assets";
+import { union } from "astro:schema";
+
+type Props = LocalImageProps & RemoteImageProps;
+const { src, ...attrs } = Astro.props;
+---
+
+<div class="float-none sm:float-end w-full sm:w-2/4 max-w-full p-0 sm:px-4">
+  <Image src={src} {...attrs} />
+</div>

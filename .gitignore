@@ -1,29 +1,8 @@
-# Vim
-*~
-*.sw[p_]
+version https://git-lfs.github.com/spec/v1
+oid sha256:438c4a425a2267e3d48a2598604e69ee3952fb0bfd0aa5b0913abbfb3929db02
+size 25
 
-# Sublime Text
-*.sublime-project
-*.sublime-workspace
-
-# Ruby Gem
-*.gem
-.bundle
-Gemfile.lock
-**/vendor/bundle
-
-# Node.js and NPM
 node_modules
-npm-debug.log*
-package-lock.json
-codekit-config.json
-
-# macOS
-.DS_Store
-
-# Jekyll generated files
-.jekyll-cache
-.jekyll-metadata
-.sass-cache
-_asset_bundler_cache
-_site
+dist
+.astro
+.vscode
