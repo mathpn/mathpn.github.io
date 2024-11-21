@@ -5,6 +5,7 @@ tags:
   - Statistics
 description: "This post is intended to explain the basics of outlier detection and removal and, more specifically, to highlight some common mistakes."
 pubDatetime: 2019-05-23
+lang: "en-us"
 ---
 
 ## Outliers

@@ -6,6 +6,7 @@ tags:
   - Data Science
 description: "Tutorial de como transformar seu computador antigo em um servidor com Apache Spark e Apache Hadoop"
 pubDatetime: 2023-06-27
+lang: "pt-br"
 ---
 
 ## Introdução

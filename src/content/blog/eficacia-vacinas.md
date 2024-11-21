@@ -5,6 +5,7 @@ tags:
   - Science
 description: "O que exatamente é a eficácia de uma vacina? Esse número se tornou muito popular, mas nem todas as interpretações sobre ele estão corretas."
 pubDatetime: 2021-06-13
+lang: "pt-br"
 ---
 
 Felizmente, a vacinação contra a Covid-19 está acelerando muito em diversos países, fato que eventualmente levará a uma redução drástica no número de casos, internações e mortes pela doença. Durante o ano de 2020, voltamos nossa atenção ao desenvolvimento das vacinas, as quais, apesar de terem sido desenvolvidas em velocidade recorde, pareciam gerar novos dados a conta-gotas. Ao fim, a eficácia foi a grande estrela do noticiário: tínhamos não apenas uma, mas várias vacinas seguras e eficazes!

@@ -4,6 +4,7 @@ tags:
   - Python
 pubDatetime: 2018-12-27
 description: A sentiment classification project utilizing logistic regression on the Sentiment140 dataset.
+lang: "en-us"
 ---
 
 Sentiment classification is somewhat of a trend in [NLP](https://en.wikipedia.org/wiki/Natural_language_processing); it consists of classifying small texts according to its sentiment connotation: a positive or negative feeling. Today we'll use the [Sentiment140 dataset](http://www.sentiment140.com) to train a classifier model in python. The dataset consists of 1.6 million sentiment-labeled tweets. The encoding must be manually set.
@@ -80,7 +81,7 @@ We can see that not all tweets are obviously positive or negative, the less obvi
 
 ## Pre-Processing
 
-Pre-processing is a huge step in our analysis, as it **directly influences the model's performance**. We'll use python regex to indicate words that are all caps, replace URLs for URL, user mentions with USER, remove all special symbols, indicate punctuation repetitions with REPEAT, hashtags with HASHTAG and word end elongations (e.g. _heeyyyyyyy_) with ELONG. English contractions are split, extra spaces removed and, finally, everything is set to lower case.
+Pre-processing is a huge step in our analysis, as it **directly influences the model's performance**. We'll use python regex to indicate words that are all caps, replace URLs for URL, user mentions with USER, remove all special symbols, indicate punctuation repetitions with REPEAT, hashtags with HASHTAG and word end elongations (e.g. _heeyyyyyyy_) with `ELONG`. English contractions are split, extra spaces removed and, finally, everything is set to lower case.
 
 ```python
 def preprocess_tweets(tweet):
@@ -143,7 +144,7 @@ sentiment_test = np.array(test_data['sentiment'])
 tweets_test = np.array(test_data['tweet'].apply(preprocess_tweets))
 ```
 
-We'll build a **word2count dictionary that will have a key entry for each word** found in the data and a value corresponding to how many times that word was seen. Later, a parsimonious threshold that included slightly more than 95% of word occurrences was chosen.
+We'll build a **word2count dictionary that will have a key entry for each word** found in the data and a value corresponding to how many times that word was seen. Later, a reasonable threshold that included slightly more than 95% of word occurrences was chosen.
 
 ```python
 word2count = {}
@@ -159,7 +160,7 @@ total_count = np.array(list(word2count.values()))
 print(sum(total_count[total_count > 75]) / sum(total_count))
 ```
 
-```
+```text
 0.9551287692699321
 ```
 
@@ -231,7 +232,7 @@ auc4 = roc_auc_score(sentiment_test, pos_prob4)
 f14 = f1_score(sentiment_test, pred4, pos_label=4)
 ```
 
-```
+```text
 Model 1:
 AUC: 0.8782442518806748
 F1: 0.8017438980490371
@@ -260,18 +261,18 @@ print('Sparsity with L1 and C = 0.1: %.2f%%' % sparsity3)
 print('Sparsity with L2 and C = 1: %.2f%%' % sparsity4)
 ```
 
-```
+```text
 Sparsity with L1 and C = 1: 15.51%
 Sparsity with L1 and C = 0.5: 29.29%
 Sparsity with L1 and C = 0.1: 72.18%
 Sparsity with L2 and C = 1: 0.00%
 ```
 
-It's quite amazing that even with 72.18% of coefficients set to 0, model 3 was still able to achieve a performance almost identical to much more complex models. Also, as guessed, **sparsity rises model performance and makes it simpler**, as the L2 **model with no sparsity is much more complex and performs a bit worse** according to both metrics.
+It's quite amazing that even with 72.18% of coefficients set to 0, model 3 was still able to achieve a performance almost identical to much more complex models. Also, **sparsity raises model performance and makes it simpler**, as the L2 **model with no sparsity is much more complex and performs a bit worse** according to both metrics.
 
 ## Interpreting the model
 
-Let's see which words have the largest contribution for both positive and negative sentiment. The third model will be used as it's more sparse and allows for better interpretation.
+Let's see which words have the biggest contribution for both positive and negative sentiment. The third model will be used as it's more sparse and allows for better interpretation.
 
 ```python
 coefs = np.array(regressor3.coef_.ravel())
@@ -345,7 +346,7 @@ true_positives_rank = np.argsort(pos_prob1[true_positives])
 print(tweets_test[true_positives][true_positives_rank[range(-1, -11, -1)]])
 ```
 
-```
+```text
 ['<user> <url> <elong> you look great. and happy. smiling is good. haha. i love your smile.'
 '<user> glad it makes you happy. smile '
 '<user> welcome and thank you for the followfriday! '
@@ -368,7 +369,7 @@ true_negatives_rank = np.argsort(pos_prob1[true_negatives])
 print(tweets_test[true_negatives][true_negatives_rank[range(10)]])
 ```
 
-```
+```text
 ['is sad. i miss u . <repeat> '
 'i cant believe farrah fawcett died! so sad '
 'rip <allcaps> farrah fawcett! this is so sad '
@@ -389,7 +390,7 @@ false_negatives_rank = np.argsort(pos_prob1[false_negatives])
 print(tweets_test[false_negatives][false_negatives_rank[range(10)]])
 ```
 
-```
+```text
 ['<user> <allcaps> dont be sad. it doesnt make me sad '
 'im not sad anymore ' '<user> that is sad! '
 'dubsteppin. miss my lovies. '
@@ -410,7 +411,7 @@ false_positives_rank = np.argsort(pos_prob1[false_positives])
 print(tweets_test[false_positives][false_positives_rank[range(-1, -11, -1)]])
 ```
 
-```
+```text
 ['<user> cool! thank you thank you '
 '<user> hey say me something haha now that you in love, love, love 8 forget about me? haha luv ya and im so happy because u happy'
 '<user> i love you,i love you,i love you youre the most beautiful and sweet girl ever.'

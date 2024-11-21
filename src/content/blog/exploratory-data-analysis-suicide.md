@@ -6,17 +6,16 @@ tags:
   - Data visualization
 pubDatetime: 2018-12-11
 description: "Exploratory data analysis is essential to construct hypothesis. Today we’ll explore the WHO Suicide Statistics database (version from Kaggle). It consists of a single CSV table, with 43776 instances of merely 6 variables."
+lang: "en-us"
 ---
 
 > _Warning_: this post talks about suicide
 
 ## The Data
 
-[Exploratory data
-analysis](https://en.wikipedia.org/wiki/Exploratory_data_analysis) is
-essential to construct hypothesis. Today we’ll explore the publicly
-available [WHO Suicide
-Statistics](https://www.kaggle.com/szamil/who-suicide-statistics)
+[Exploratory data analysis](https://en.wikipedia.org/wiki/Exploratory_data_analysis) is
+essential to construct hypothesis. Today we’ll explore the publicly available
+[WHO Suicide Statistics](https://www.kaggle.com/szamil/who-suicide-statistics)
 database (version from Kaggle). It consists of a single CSV table, with
 43776 instances of merely 6 variables. We do not intend to speculate
 about suicide causes nor to make any judgements. This analysis was done using R and R markdown.
@@ -25,22 +24,24 @@ about suicide causes nor to make any judgements. This analysis was done using R 
 summary(who_suicide_statistics)
 ```
 
-    ##    country               year          sex                age
-    ##  Length:43776       Min.   :1979   Length:43776       Length:43776
-    ##  Class :character   1st Qu.:1990   Class :character   Class :character
-    ##  Mode  :character   Median :1999   Mode  :character   Mode  :character
-    ##                     Mean   :1999
-    ##                     3rd Qu.:2007
-    ##                     Max.   :2016
-    ##
-    ##   suicides_no        population
-    ##  Min.   :    0.0   Min.   :     259
-    ##  1st Qu.:    1.0   1st Qu.:   85113
-    ##  Median :   14.0   Median :  380655
-    ##  Mean   :  193.3   Mean   : 1664091
-    ##  3rd Qu.:   91.0   3rd Qu.: 1305698
-    ##  Max.   :22338.0   Max.   :43805214
-    ##  NA's   :2256      NA's   :5460
+```text
+##    country               year          sex                age
+##  Length:43776       Min.   :1979   Length:43776       Length:43776
+##  Class :character   1st Qu.:1990   Class :character   Class :character
+##  Mode  :character   Median :1999   Mode  :character   Mode  :character
+##                     Mean   :1999
+##                     3rd Qu.:2007
+##                     Max.   :2016
+##
+##   suicides_no        population
+##  Min.   :    0.0   Min.   :     259
+##  1st Qu.:    1.0   1st Qu.:   85113
+##  Median :   14.0   Median :  380655
+##  Mean   :  193.3   Mean   : 1664091
+##  3rd Qu.:   91.0   3rd Qu.: 1305698
+##  Max.   :22338.0   Max.   :43805214
+##  NA's   :2256      NA's   :5460
+```
 
 Clearly, we have a considerable amount of missing values, with data
 since 1979 to 2016, which is still quite recent. The sex and country
@@ -57,7 +58,7 @@ Next, the age variable should be an ordered factor:
 who_suicide_statistics$age <- factor(who_suicide_statistics$age, levels = c("5-14 years", "15-24 years", "25-34 years", "55-74 years", "75+ years"))
 ```
 
-Let’s take a look at our most important variable – suicide number:
+Let’s take a look at our most important variable –- suicide number:
 
 ![Histogram of suicide number with highly skewed distribution](@assets/images/who_suicide/unnamed-chunk-4-1.png)
 
@@ -82,7 +83,9 @@ plot some graphs to see the relationships between variables.
 library(ggplot2, dplyr)
 ```
 
-    ## Warning: package 'ggplot2' was built under R version 4.0.5
+```text
+## Warning: package 'ggplot2' was built under R version 4.0.5
+```
 
 ```r
 total_suicide <- who_suicide_statistics %>% group_by(year, country) %>% summarise(total_suicide = sum(suicides_no, na.rm = T), .groups = "drop_last")
@@ -90,15 +93,14 @@ total_suicide <- who_suicide_statistics %>% group_by(year, country) %>% summaris
 
 ![Line plot of suicide numbers per country over time](@assets/images/who_suicide/unnamed-chunk-7-1.png)
 
-# TODO fix horizontal axis name
-
 ![Line plot of suicide rate per country over time](@assets/images/who_suicide/unnamed-chunk-7-2.png)
+
 ![Violin plot of suicide rate per gender](@assets/images/who_suicide/unnamed-chunk-8-1.png)
 
 Men have higher suicide rates overall Let’s see which countries have the
 most and least suicides:
 
-**Top 10 countries and correspondent years with highest suicide rates**
+### Top 10 countries and correspondent years with highest suicide rates
 
 | country   | year | rate_suicide |
 | :-------- | ---: | -----------: |
@@ -113,8 +115,7 @@ most and least suicides:
 | Lithuania | 1997 |     485.0974 |
 | Hungary   | 1979 |     485.0378 |
 
-**Top 10 countries and correspondent years with lowest positive suicide
-rates**
+### Top 10 countries and correspondent years with lowest positive suicide rates
 
 | country | year | rate_suicide |
 | :------ | ---: | -----------: |
@@ -129,10 +130,9 @@ rates**
 | Egypt   | 2015 |    0.6084794 |
 | Egypt   | 2008 |    0.6107135 |
 
-Now let’s take an average over the last five years of data and see again
-the highs and lows:
+### Top 20 countries with highest suicide rates (2012-2016 average)
 
-**Top 20 countries with highest suicide rates (2012-2016 average)**
+Now let’s take an average over the last five years of data and see again the highs and lows.
 
 | country             | rate_suicide |
 | :------------------ | -----------: |
@@ -157,8 +157,7 @@ the highs and lows:
 | Mongolia            |     166.7801 |
 | Poland              |     166.0466 |
 
-**Top 20 countries with lowest positive suicide rates (2012-2016
-average)**
+### Top 20 countries with lowest positive suicide rates (2012-2016 average)
 
 | country                            | rate_suicide |
 | :--------------------------------- | -----------: |
@@ -183,9 +182,10 @@ average)**
 | Panama                             |    37.454562 |
 | Fiji                               |    40.871639 |
 
+## Democracy Index
+
 Let’s see if there’s any relationship between suicide rates (2012-2016)
-and [Democracy
-Index](https://dataspace.princeton.edu/jspui/bitstream/88435/dsp017p88ck01w/1/EIU-Democracy-Index-2015.pdf)
+and [Democracy Index](https://dataspace.princeton.edu/jspui/bitstream/88435/dsp017p88ck01w/1/EIU-Democracy-Index-2015.pdf)
 (2015) calculated by The Economist group. The democracy index data was
 manually curated to correspond to country names present in the WHO
 dataset.
@@ -202,7 +202,7 @@ democracy_compare_data$overall_score <- democracy$Overall_score
 ggplot(data = democracy_compare_data, aes(overall_score, rate_suicide)) + geom_point(size = 2, alpha = 0.75, colour = "dark blue") + theme_bw() + geom_smooth(formula = y ~ x, method = "loess", se = F) + xlab("Democracy score (overall)") + ylab("Suicide rate (per million people)")
 ```
 
-![Scatter plot between democracy score and suicide rate showing positive correlation](@assets/images/who_suicide/unnamed-chunk-13-1.png)<!-- -->
+![Scatter plot between democracy score and suicide rate showing positive correlation](@assets/images/who_suicide/unnamed-chunk-13-1.png)
 
 ```r
 tidy(cor.test(democracy$Overall_score, democracy_compare_data$rate_suicide, method = "pearson")) %>% kable()
@@ -305,8 +305,7 @@ tidy(cor.test(gender_ratio_dem$ratio, democracy_gender$Overall_score)) %>% kable
 There does not seem to be any association between gender ratios and
 Democracy Index nor _per capita_ GDP.
 
-**Top 10 countries with highest gender ratios (male-to-female)
-2012-2016**
+### Top 10 countries with the highest gender ratios (male-to-female) 2012-2016
 
 ```r
 head(gender_ratio %>% arrange(desc(ratio)), n = 20) %>% kable()
@@ -335,8 +334,7 @@ head(gender_ratio %>% arrange(desc(ratio)), n = 20) %>% kable()
 | Malta               | 4.980026 |
 | Georgia             | 4.875833 |
 
-**Top 10 countries with lowest positive gender ratios (male-to-female)
-2012-2016**
+### Top 10 countries with lowest positive gender ratios (male-to-female) 2012-2016
 
 ```r
 head(gender_ratio %>% filter(ratio > 0) %>% arrange(ratio), n = 20) %>% kable()
@@ -374,7 +372,7 @@ grows older.
 elderly_data <- who_suicide_statistics %>% filter(year >= 2012) %>% filter(age == "55-74 years" | age == "75+ years") %>% group_by(country) %>% summarise(rate_suicide = sum(suicides_no) * 1000000 / sum(population)) %>% na.omit %>% arrange(desc(rate_suicide))
 ```
 
-**Top 10 countries with highest elderly suicide rates (2012-2016)**
+### Top 10 countries with highest elderly suicide rates (2012-2016)
 
 ```r
 head(elderly_data, n = 10) %>% kable()
@@ -407,7 +405,7 @@ elderly_proportion <- data.frame(country = total_elderly$country, proportion = t
 elderly_proportion <- elderly_proportion[is.finite(elderly_proportion$proportion), ]
 ```
 
-**Top 10 countries with highest elderly suicide proportion (2012-2016)**
+### Top 10 countries with highest elderly suicide proportion (2012-2016)
 
 ```r
 head(elderly_proportion %>% arrange(desc(proportion)), n = 10) %>% kable()
@@ -441,7 +439,7 @@ US_data <- subset(who_suicide_statistics, country == "United States of America")
 ![Suicide rate over time in the USA, the number drops until the year 2000 and rises again](@assets/images/who_suicide/unnamed-chunk-27-2.png)
 
 ![Plot of suicide rate per gender showing higher rates in males (Brazil)](@assets/images/who_suicide/unnamed-chunk-28-1.png)
-![Plot of suicide rate per gender showing higher rates in males (USA)](@assets/images/who_suicide/unnamed-chunk-28-2.png)<!-- -->
+![Plot of suicide rate per gender showing higher rates in males (USA)](@assets/images/who_suicide/unnamed-chunk-28-2.png)
 
 Gender differences can be calculated over time:
 

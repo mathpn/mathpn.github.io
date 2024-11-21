@@ -7,6 +7,7 @@ tags:
   - Statistics
 description: "Last time, we used decision trees, binarization and logistic regression to predict heart failure mortality in a public dataset. Here, we'll use Cox regression to more adequately model survival data."
 pubDatetime: 2021-12-16
+lang: "en-us"
 ---
 
 Last time, we used decision trees, binarization and logistic regression to predict heart failure mortality in a public dataset. This approach yielded a very simple model, which, when dealing with noisy biological data and not many observations, is crucial to improve generalization.

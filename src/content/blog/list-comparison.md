@@ -5,6 +5,7 @@ tags:
   - Elixir
 description: Exploring the differences between lists in Go and Elixir
 pubDatetime: 2024-06-24
+lang: "en-us"
 ---
 
 We all know lists. Most if not all programming languages provide an implementation of a list-like data structure. Lists may be implemented in some different ways, for instance as singly-linked lists or arrays. Different concrete data structures may be used under the name list, as long as the implementation represents a finite number of ordered values and provide some common list operations.

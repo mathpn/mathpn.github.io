@@ -4,6 +4,7 @@ tags:
   - Python
 description: We'll use Recurrent Neural Networks to classify the Sentiment140 dataset into positive or negative tweets.
 pubDatetime: 2018-12-30
+lang: "en-us"
 ---
 
 > This is the part 2 of a series, please read [part 1](/posts/sentiment-classification-twitter-part1) before reading this.
@@ -57,7 +58,7 @@ def preprocess_tweets(tweet):
     return tweet
 ```
 
-This time, however, we'll split the data into train, test and validation sets. The **validation** set is used to **monitor overfitting during training**. The test set should be left untouched and unseen until its evaluation. It may sound counter-intuitive, but merely tweaking the model according to the validation set performance may produce indirect overfitting (indirect as the model never sees any of the validation data) and may jeopardize its generalization capability (that is, its ability to perform well in data other than what it was trained on).
+This time, however, we'll split the data into train, test, and validation sets. The **validation** set is used to **monitor overfitting during training**. The test set should be left untouched and unseen until its evaluation. It may sound counter-intuitive, but merely tweaking the model according to the validation set performance may produce indirect overfitting (indirect as the model never sees any of the validation data). Thus, jeopardizing its generalization capability (that is, its ability to perform well in data other than what it was trained on).
 
 ```python
 from sklearn.model_selection import train_test_split
@@ -82,7 +83,7 @@ sentiment_val = np.array(val_data['sentiment'])
 tweets_val = np.array(val_data['tweet'].apply(preprocess_tweets))
 ```
 
-Just like in the previous post, we'll count word occurrences and establish a parsimonious threshold. Words below this threshold will be replaced by the _OUT_ tag. This way, we limit model complexity while retaining most of information (more than 95% of word occurrences). Next, we build a word2int dictionary that assigns an integer value to each word in our dictionary. _PAD_, _OUT_, _EOS_ and _SOS_ tokens are also included in the dictionary. However, the _end-of-sentence_ (EOS) and _start-of-sentence_ (SOS) ended up not being used on this model.
+Just like in the previous post, we'll count word occurrences and establish a reasonable threshold. Words below this threshold will be replaced by the _OUT_ tag. This way, we limit model complexity while retaining most information (more than 95% of word occurrences). Next, we build a word2int dictionary that assigns an integer value to each word in our dictionary. _PAD_, _OUT_, _EOS_ and _SOS_ tokens are also included in the dictionary. However, the _end-of-sentence_ (EOS) and _start-of-sentence_ (SOS) ended up not being used on this model.
 
 ```python
 word2count = {}
@@ -115,8 +116,10 @@ int2word = {w_i: w for w, w_i in words2int.items()}
 print(len(words2int))
 ```
 
-    0.9551287692699321
-    9983
+```text
+0.9551287692699321
+9983
+```
 
 Thus, our final dictionary contains 9983 unique entries. Let's convert all of our tweets into series of integers according to our dictionary:
 
@@ -158,7 +161,7 @@ for _tweet in tweets_test:
 tweets_int = tweets_train_int + tweets_val_int + tweets_test_int
 ```
 
-Our recurrent neural network receive inputs of fixed length. Therefore, our sequences will be padded (the _PAD_ token will be added to the beginning of every tweet until it reaches our fixed length). Again, some tweets are extremely long due to repetitions and excessive punctuation. As a parsimonious length, the 99th percentile of all lengths was chosen, that is, 99% of all tweets will fit in our maximum padding length. Tweets longer than this will be truncated at the maximum length.
+Our recurrent neural network receive inputs of fixed length. Therefore, our sequences will be padded (the _PAD_ token will be added to the beginning of every tweet until it reaches our fixed length). Again, some tweets are extremely long due to repetitions and excessive punctuation. As a reasonable length, the 99th percentile of all lengths was chosen, that is, 99% of all tweets will fit in our maximum padding length. Tweets longer than this will be truncated at the maximum length.
 
 ```python
 lens = []
@@ -170,7 +173,9 @@ max_len = int(np.quantile(lens, 0.99))
 print(max_len)
 ```
 
-    34
+```text
+34
+```
 
 ```python
 from keras.preprocessing.sequence import pad_sequences
@@ -190,13 +195,13 @@ A [research paper](https://ieeexplore.ieee.org/document/8141873) suggests that a
 
 Neural networks cannot make sense of the dictionary-labeled integers for each word, so a one-hot-encoded vector is passed as its input. That is, each word becomes a **9983-dimensional vector** with all values set to 0 except one: the corresponding word is the set to one. This data structure is **extremely sparse** and would require a staggering amount of trainable parameters. Thus, a word embedding is included as a first layer to the model.
 
-An embedding is a form of dimensionality reduction. In the one-hot-encoded vector, every word is independent of all others, as each word has a single exclusive dimension for representation. In an embedding, each word is represented as a vector in a **n-dimensional space**, where **n is much smaller than the number of words**. This way, **words are dependent on each other** and, in a good embedding, **semantically similar words lay closer in the embedding space**. In our model, the embedding will be 200-dimensional. Learning how to embed words is not a simple task and many models use pre-trained embeddings. However, as our data consists of tweets, which contain many typos and idioms, I first wanted to use a untrained embedding, which is trained simultaneously with the model.
+An embedding is a form of dimensionality reduction. In the one-hot-encoded vector, every word is independent of all others, as each word has a single exclusive dimension for representation. In an embedding, each word is represented as a vector in a **n-dimensional space**, where **n is much smaller than the number of words**. This way, **words are dependent on each other** and, in a good embedding, **semantically similar words lay closer in the embedding space**. In our model, the embedding will be 200-dimensional. Learning how to embed words is not a simple task and many models use pre-trained embeddings. However, as our data consists of tweets, which contain many typos and idioms, I first wanted to use an untrained embedding, which is trained simultaneously with the model.
 
 After the embedding layer, two parallel networks exist: one is a series of **three 1D convolutions** that can master relationships between adjacent words (remember that the words will be represented as a vector containing its meaning laying in a 200-dimensional space); the other path is a **two-layered recurrent neural network composed of GRU units**. GRUs are fairly recent, they are easier to train than the classic LSTM units (as they have fewer parameters) and often result in similar performance. Thus, I wanted to give the still young GRU a try.
 
 A quite large dropout (0.5 rate) is used after the GRU layers as recurrent neural networks easily overfit. This rate is still smaller than the one suggested on the paper (0.7), although they used LSTM units.
 
-**The model architecture is represented on the scheme below:**
+### Model architecture
 
 ![Model architecture with parallel convolutional and RNN paths](@assets/images/sentiment140/architecture1.png)
 
@@ -244,54 +249,56 @@ model.compile(optimizer = Adam(lr = 1e-3, decay = 5e-6), loss = 'binary_crossent
 print(model.summary())
 ```
 
-    __________________________________________________________________________________________________
-    Layer (type)                    Output Shape         Param #     Connected to
-    ==================================================================================================
-    input_7 (InputLayer)            (None, 34)           0
-    __________________________________________________________________________________________________
-    embedding_7 (Embedding)         (None, 34, 200)      1996600     input_7[0][0]
-    __________________________________________________________________________________________________
-    dropout_19 (Dropout)            (None, 34, 200)      0           embedding_7[0][0]
-    __________________________________________________________________________________________________
-    conv1d_19 (Conv1D)              (None, 32, 128)      76928       dropout_19[0][0]
-    __________________________________________________________________________________________________
-    batch_normalization_19 (BatchNo (None, 32, 128)      512         conv1d_19[0][0]
-    __________________________________________________________________________________________________
-    activation_19 (Activation)      (None, 32, 128)      0           batch_normalization_19[0][0]
-    __________________________________________________________________________________________________
-    conv1d_20 (Conv1D)              (None, 29, 64)       32832       activation_19[0][0]
-    __________________________________________________________________________________________________
-    batch_normalization_20 (BatchNo (None, 29, 64)       256         conv1d_20[0][0]
-    __________________________________________________________________________________________________
-    activation_20 (Activation)      (None, 29, 64)       0           batch_normalization_20[0][0]
-    __________________________________________________________________________________________________
-    conv1d_21 (Conv1D)              (None, 27, 64)       12352       activation_20[0][0]
-    __________________________________________________________________________________________________
-    batch_normalization_21 (BatchNo (None, 27, 64)       256         conv1d_21[0][0]
-    __________________________________________________________________________________________________
-    activation_21 (Activation)      (None, 27, 64)       0           batch_normalization_21[0][0]
-    __________________________________________________________________________________________________
-    gru_17 (GRU)                    (None, 34, 128)      126336      dropout_19[0][0]
-    __________________________________________________________________________________________________
-    global_average_pooling1d_7 (Glo (None, 64)           0           activation_21[0][0]
-    __________________________________________________________________________________________________
-    gru_18 (GRU)                    (None, 128)          98688       gru_17[0][0]
-    __________________________________________________________________________________________________
-    dropout_20 (Dropout)            (None, 64)           0           global_average_pooling1d_7[0][0]
-    __________________________________________________________________________________________________
-    dropout_21 (Dropout)            (None, 128)          0           gru_18[0][0]
-    __________________________________________________________________________________________________
-    concatenate_7 (Concatenate)     (None, 192)          0           dropout_20[0][0]
-                                                                     dropout_21[0][0]
-    __________________________________________________________________________________________________
-    dense_7 (Dense)                 (None, 1)            193         concatenate_7[0][0]
-    ==================================================================================================
-    Total params: 2,344,953
-    Trainable params: 2,344,441
-    Non-trainable params: 512
-    __________________________________________________________________________________________________
+```text
+__________________________________________________________________________________________________
+Layer (type)                    Output Shape         Param #     Connected to
+==================================================================================================
+input_7 (InputLayer)            (None, 34)           0
+__________________________________________________________________________________________________
+embedding_7 (Embedding)         (None, 34, 200)      1996600     input_7[0][0]
+__________________________________________________________________________________________________
+dropout_19 (Dropout)            (None, 34, 200)      0           embedding_7[0][0]
+__________________________________________________________________________________________________
+conv1d_19 (Conv1D)              (None, 32, 128)      76928       dropout_19[0][0]
+__________________________________________________________________________________________________
+batch_normalization_19 (BatchNo (None, 32, 128)      512         conv1d_19[0][0]
+__________________________________________________________________________________________________
+activation_19 (Activation)      (None, 32, 128)      0           batch_normalization_19[0][0]
+__________________________________________________________________________________________________
+conv1d_20 (Conv1D)              (None, 29, 64)       32832       activation_19[0][0]
+__________________________________________________________________________________________________
+batch_normalization_20 (BatchNo (None, 29, 64)       256         conv1d_20[0][0]
+__________________________________________________________________________________________________
+activation_20 (Activation)      (None, 29, 64)       0           batch_normalization_20[0][0]
+__________________________________________________________________________________________________
+conv1d_21 (Conv1D)              (None, 27, 64)       12352       activation_20[0][0]
+__________________________________________________________________________________________________
+batch_normalization_21 (BatchNo (None, 27, 64)       256         conv1d_21[0][0]
+__________________________________________________________________________________________________
+activation_21 (Activation)      (None, 27, 64)       0           batch_normalization_21[0][0]
+__________________________________________________________________________________________________
+gru_17 (GRU)                    (None, 34, 128)      126336      dropout_19[0][0]
+__________________________________________________________________________________________________
+global_average_pooling1d_7 (Glo (None, 64)           0           activation_21[0][0]
+__________________________________________________________________________________________________
+gru_18 (GRU)                    (None, 128)          98688       gru_17[0][0]
+__________________________________________________________________________________________________
+dropout_20 (Dropout)            (None, 64)           0           global_average_pooling1d_7[0][0]
+__________________________________________________________________________________________________
+dropout_21 (Dropout)            (None, 128)          0           gru_18[0][0]
+__________________________________________________________________________________________________
+concatenate_7 (Concatenate)     (None, 192)          0           dropout_20[0][0]
+                                                                    dropout_21[0][0]
+__________________________________________________________________________________________________
+dense_7 (Dense)                 (None, 1)            193         concatenate_7[0][0]
+==================================================================================================
+Total params: 2,344,953
+Trainable params: 2,344,441
+Non-trainable params: 512
+__________________________________________________________________________________________________
+```
 
-The model contains **2.3 million trainable parameters** and takes a fairly large time to train using a mid-performance CUDA-capable GPU. Extra dropout layers with the rate set to 0 (rendering their presence irrelevant) were added to possibly tweak dropout rates during training.
+The model contains **2.3 million trainable parameters** and takes a fairly long time to train using a mid-performance CUDA-capable GPU. Extra dropout layers with the rate set to 0 (rendering their presence irrelevant) were added to possibly tweak dropout rates during training.
 
 ```python
 model.fit(x = pad_tweets_train, y = sentiment_train,\
@@ -300,16 +307,18 @@ model.fit(x = pad_tweets_train, y = sentiment_train,\
           callbacks = [early, board, check])
 ```
 
-    Epoch 1/20
-    1152000/1152000 [==============================] - 2382s 2ms/step - loss: 0.3939 - acc: 0.8220 - val_loss: 0.3654 - val_acc: 0.8380
-    Epoch 2/20
-    1152000/1152000 [==============================] - 2426s 2ms/step - loss: 0.3480 - acc: 0.8473 - val_loss: 0.3538 - val_acc: 0.8432
-    Epoch 3/20
-    1152000/1152000 [==============================] - 2596s 2ms/step - loss: 0.3225 - acc: 0.8608 - val_loss: 0.3527 - val_acc: 0.8441
-    Epoch 4/20
-    1152000/1152000 [==============================] - 2747s 2ms/step - loss: 0.2984 - acc: 0.8734 - val_loss: 0.3643 - val_acc: 0.8411
+```text
+Epoch 1/20
+1152000/1152000 [==============================] - 2382s 2ms/step - loss: 0.3939 - acc: 0.8220 - val_loss: 0.3654 - val_acc: 0.8380
+Epoch 2/20
+1152000/1152000 [==============================] - 2426s 2ms/step - loss: 0.3480 - acc: 0.8473 - val_loss: 0.3538 - val_acc: 0.8432
+Epoch 3/20
+1152000/1152000 [==============================] - 2596s 2ms/step - loss: 0.3225 - acc: 0.8608 - val_loss: 0.3527 - val_acc: 0.8441
+Epoch 4/20
+1152000/1152000 [==============================] - 2747s 2ms/step - loss: 0.2984 - acc: 0.8734 - val_loss: 0.3643 - val_acc: 0.8411
+```
 
-After the third epoch, the model reached its best performance on the validation set. The EarlyStopping callback makes sure that this is the model that is kept under the _model_ variable.
+After the third epoch, the model reached its best performance on the validation set. The `EarlyStopping` callback makes sure that this is the model that is kept under the _model_ variable.
 
 ## Model Evaluation
 
@@ -328,8 +337,10 @@ print('AUC: {}'.format(np.round(auc, 4)))
 print('F1-score: {}'.format(np.round(f1, 4)))
 ```
 
-    AUC: 0.9231
-    F1-score: 0.8452
+```text
+AUC: 0.9231
+F1-score: 0.8452
+```
 
 The best AUC achieved with the bag of words approach was **0.8782**, showing that the positional information added in this model really boosts performance. Still, it was a very **mild improvement**. This is expected as improvements in performance get exponentially more expensive with better models.
 
@@ -429,7 +440,7 @@ print(pred.reshape((-1))[false_negatives][samples])
 
 We can see that true positives and negatives are indeed positive and negative, respectively. It is worth mentioning one example from true positives ("_some writing, some dusting, and then work 59 with tricia!_") which is not obviously positive and, accordingly, received a lower probability. From the negatives, the tweet "_kittens are going soon. sad times. i love them too much_" remained almost uncertain to the model probably due to the "_i love them too much_" part.
 
-Some false positives or negatives don't have an explicit feeling to them - e.g "<_user_> were gettin alot of rain. we must be getting yours!", "catching up on my reading. <_repeat_> twitter n bf break"; without the label, its hard to classify them (most likely because _emoji_ information was lost, and so the model incorrectly classified them but with probabilities close to 0.5). Some other mistakes are actually mislabeled data (e.g. "okay, a bath is a must. and then studying! i really have no life.", "\<user\> so you hate me", "my eyes are red. should sleep but dnt feel like it, haha. lilee is sitting on my chair so i have to sit on my bed", "ahh, worried about tomorrow. \<repeat\> will they turn up. \<repeat\> ? haha" - they should be all true negatives).
+Some false positives or negatives don't have an explicit feeling to them - e.g "<_user_> were gettin alot of rain. we must be getting yours!", "catching up on my reading. <_repeat_> twitter n bf break"; without the label, it's hard to classify them (most likely because _emoji_ information was lost, and so the model incorrectly classified them but with probabilities close to 0.5). Some other mistakes are actually mislabeled data (e.g. "okay, a bath is a must. and then studying! i really have no life.", "\<user\> so you hate me", "my eyes are red. should sleep but dnt feel like it, haha. lilee is sitting on my chair so i have to sit on my bed", "ahh, worried about tomorrow. \<repeat\> will they turn up. \<repeat\> ? haha" - they should be all true negatives).
 
 There are, of course, some obvious mistakes, such as _"wii fit day 47. hang over prevented wii this morning. late night work meant i wasnt home til near midnight. 15 min walk then situps"_ (incorrectly classified as a positive).
 

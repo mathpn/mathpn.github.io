@@ -4,7 +4,10 @@ tags:
   - Statistics
 description: Exploring regression to the mean
 pubDatetime: 2024-07-15
+lang: "en-us"
 ---
+
+import { Image } from "astro:assets";
 
 Regression to the mean (RTM) is the statistical tendency for extreme measurements to be followed by values closer to the mean. In simpler terms, things tend to even out. Most of us have an intuitive grasp of this concept, but it's useful to understand it in more depth.
 
@@ -16,9 +19,15 @@ Let's consider a series of independent events. For instance, the score of a sequ
 
 Now, let's consider the relationship between two consecutive dart throws. Since they are independent, we expect on average 0 correlation between their scores. Therefore, if the first throw had a high score, we couldn't infer anything about the second throw. This is the most extreme form of RTM, since the first measurement has no influence over the second one.
 
-![perfect correlation scatter plot](@assets/images/regression_mean/no_correlation_scatter_plot.png){: width="400" }
+import no_corr from "@assets/images/regression_mean/no_correlation_scatter_plot.png";
 
-Therefore, a lucky throw doesn't change the probability of getting extreme (high or low) scores on the next throw. The score of the second throw will be centered -- of course -- around the mean, regardless of the first score.
+<Image
+  src={no_corr}
+  alt="Scatter plot of points of two dart throws showing no correlation"
+  width="400"
+/>
+
+Therefore, a lucky throw doesn't change the probability of getting extreme (high or low) scores on the next throw. The score of the second throw will be centered — of course — around the mean, regardless of the first score.
 
 This example may seem useless, but it lies on the heart of RTM. Values tend to regress to the mean simply because the mean is the most likely value when the variable is approximately normally distributed. The normality assumption may seem restrictive, but a huge number of things are somewhat normally distributed. Even when the distribution is skewed, some form of regression still happens.
 
@@ -28,7 +37,13 @@ This example may seem useless, but it lies on the heart of RTM. Values tend to r
 
 Consider you are a physician taking a look at patient records. You notice that for many patients there are two measurements of their height and decide to plot these two values together. Consider there is no error when measuring height. You should get something like this:
 
-![perfect correlation scatter plot](@assets/images/regression_mean/perfect_correlation_scatter_plot.png){: width="400" }
+import perf_corr from "@assets/images/regression_mean/perfect_correlation_scatter_plot.png";
+
+<Image
+  src={perf_corr}
+  alt="Scatter plot showing perfect correlation between two measurements"
+  width="400"
+/>
 
 Since both measurements capture the same value (patient height), they are _perfectly correlated_. In this case, there is no RTM. Knowing the value of one measurement completely _determines_ the value of the other, therefore extreme values in the first measurement remain extreme in the second one. In fact, it hardly makes sense to talk about RTM in this case, since there are no truly independent values between which the value may regress to the mean. Still, it's important to understand that RTM doesn't happen in this scenario and why.
 

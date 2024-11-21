@@ -5,6 +5,7 @@ tags:
   - Home server
 description: "Learn how to use a USB key file to unlock your LUKS encrypted root partition"
 pubDatetime: 2024-11-07
+lang: "en-us"
 ---
 
 I've been using [Linux Unified Key Setup (LUKS)](https://en.wikipedia.org/wiki/Linux_Unified_Key_Setup) for full disk encryption on my home server, but entering a long password on every boot can be quite inconvenient. That's why I was searching for a way to use a key file in a USB stick to unlock the root partition.

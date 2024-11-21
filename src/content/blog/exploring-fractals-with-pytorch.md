@@ -4,11 +4,12 @@ tags:
   - Python
 pubDatetime: 2018-12-05
 description: Let's use PyTorch to analyze 3D fractals by implementing the box-counting algorithm and calculate the fractal dimension and lacunarity of a given image.
+lang: "en-us"
 ---
 
 [FracLac](https://imagej.nih.gov/ij/plugins/fraclac/FLHelp/Introduction.htm) is a great package for fractal analysis in ImageJ. Unfortunately, no similar Python package is available. There are pieces of code that perform the box-counting algorithm.
 
-Most implementations use the numpy _reduceat_ function. However, this does not scale well, especially in 3 dimensions. Thus, here we use [**PyTorch**](https://pytorch.org/) to make use of GPU performance on 3D fractal analysis.
+Most implementations use the numpy `reduceat` function. However, this does not scale well, especially in 3 dimensions. Thus, here we use [**PyTorch**](https://pytorch.org/) to make use of GPU performance on 3D fractal analysis.
 
 ## Generating Fractals
 
@@ -99,7 +100,7 @@ This can be easily generalized to three dimensions substituting squares for cube
 
 ![Illustration of the box-counting algorithm using the Great-Britain map contour](@assets/images/fractal_GB.png)
 
-> By [Prokofiev - Own work](https://commons.wikimedia.org/w/index.php?curid=12042116), CC BY-SA 3.0
+> By [Prokofiev -- Own work](https://commons.wikimedia.org/w/index.php?curid=12042116), CC BY-SA 3.0
 
 This count is performed for each box size and the box slides through the image with a predefined stride, in our case, the stride was defined as half the box side. Using pytorch `AvgPool3d` function, we can detect edges as follows: if the average pooling is 0, there is no edge; if it's 1, the object completely fills the box, without edges. Thus, **a pooling between 0 and 1 means that there's an edge**. This can be achieved with the following code:
 
@@ -237,6 +238,6 @@ class Fractal:
 
 First, the array is converted to a binary one according to a provided threshold. Following, the get_sizes function calculates box sizes as powers of 2, without exceeding half the size of the array's smaller dimension.
 
-The `get_count` function performs the magic. The `while` loop ensures that a maximum of 4 orientations is used for each box size to decrease bias. Then, the AvgPool3d combined with the torch.where functions perform the box-counting, which is added to the `count_u` variable for each iteration. Also, for each iteration, a lacunarity value is calculated. The final count value is just the sum of all orientations for each size, while the final lacunarity value is the average for all orientations at a given box size.
+The `get_count` function performs the magic. The `while` loop ensures that a maximum of 4 orientations is used for each box size to decrease bias. Then, the AvgPool3d combined with the `torch.where` functions perform the box-counting, which is added to the `count_u` variable for each iteration. Also, for each iteration, a lacunarity value is calculated. The final count value is just the sum of all orientations for each size, while the final lacunarity value is the average for all orientations at a given box size.
 
 The fractal shown in the GIF image has a **2.05795 fractal dimension** and a **1.19497 mean lacunarity**. If you want a more in-depth view of fractal analysis, consider reading [this article](https://academic.oup.com/gji/article/132/2/275/671597).

@@ -31,8 +31,6 @@ export function remarkHyphenate() {
     }
 
     const hyphenateText = hyphenators.get(hyphenLang);
-    console.log(hyphenateText);
-    console.log(hyphenLang);
     const promises = [];
 
     visit(tree, "text", function (node) {

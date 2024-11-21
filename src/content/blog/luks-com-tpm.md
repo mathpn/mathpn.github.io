@@ -6,11 +6,12 @@ tags:
   - Security
 description: "Tutorial de como criptografar um disco com LUKS, TPM + senha no Linux"
 pubDatetime: 2024-02-06
+lang: "pt-br"
 ---
 
 ## Motivação
 
-O disco principal do meu computador é criptografado usando LUKS. Se o seu disco principal não é criptografado, recomendo fortemente que use algum tipo de criptografia para proteger seus dados. Sem criptografia, _qualquer pessoa_ pode remover o disco do computador e ler _todos_ os arquivos. Cada sistema operacional oferece uma ou mais soluções para criptografar um disco inteiro, como o Bitlocker no Windows e o LUKS no Linux.
+O disco principal do meu computador é criptografado usando LUKS. Se o seu disco principal não é criptografado, recomendo fortemente que use alguma forma de criptografia para proteger seus dados. Sem criptografia, _qualquer pessoa_ pode remover o disco do computador e ler _todos_ os arquivos. Cada sistema operacional oferece uma ou mais soluções para criptografar um disco inteiro, como o Bitlocker no Windows e o LUKS no Linux.
 
 Porém, a segurança de um disco criptografado é tão boa quanto a força da sua senha. Memorizar e digitar uma senha enorme toda vez que ligar seu PC não é muito conveniente. Portanto, procurei uma solução para trazer mais segurança sem precisar aumentar a complexidade da sua senha. É aí que entra o TPM, um padrão de _hardware_ dedicado a funções de segurança. No cenário mais comum o _chip_ TPM é usado como única chave criptográfica do dispositivo, o que significa que seria muito difícil ler os dados ao retirar o disco do computador. Mas como não há nenhuma senha, o sistema operacional vai iniciar automaticamente ao ligar o PC, o que também não é muito seguro.
 
@@ -22,7 +23,7 @@ As etapas foram testadas no Fedora 39, mas devem funcionar em todas as distros q
 
 E, é claro, recomendo ter _backup_ de todas as informações importantes antes de tentar seguir estas etapas.
 
-**É essencial ter pelo menos uma outra senha registrada na partição LUKS** para não correr o risco de perder completamente seu acesso. O recomendado é ter uma senha bem longa (como uma sequência de 8-12 palavras, por exemplo), a qual será usada apenas até configurar a outra senha atrelada à chave do TPM ou caso o TPM falhe por algum motivo. Se você já tem uma partição LUKS com uma senha menor, basta adicionar a senha grande antes de prosseguir. Você pode pular essas etapas se quiser manter sua senha atual como senha de recuperação caso o TPM falhe.
+**É essencial ter pelo menos uma outra senha registrada na partição LUKS** para não correr o risco de perder completamente seu acesso. O recomendado é ter uma senha bem longa (como uma sequência de 8 a 12 palavras, por exemplo), a qual será usada apenas até configurar a outra senha atrelada à chave do TPM ou caso o TPM falhe por algum motivo. Se você já tem uma partição LUKS com uma senha menor, basta adicionar a senha grande antes de prosseguir. Você pode pular essas etapas se quiser manter sua senha atual como senha de recuperação caso o TPM falhe.
 
 ### Listar _slots_ da partição LUKS
 
@@ -46,7 +47,7 @@ systemd-cryptenroll /dev/disk --password
 
 ### Remover senha antiga (opcional)
 
-A partir do resultado da primeira etapa, sabemos qual _slot_ contém a senha antiga a ser apagada. É interessante apagar a senha antiga pois ela provavelmente não é tão forte quanto a senha de recuperação nova, mas é uma etapa opcional. **Tenha muito cuidado ao limpar _slots_ da partição LUKS**, você pode acabar sem acesso à partição se não fizer corretamente. **Recomendo ter um _backup_ de todas as informações**.
+A partir do resultado da primeira etapa, sabemos qual _slot_ contém a senha antiga a ser apagada. É interessante apagar a senha antiga, pois ela provavelmente não é tão forte quanto a senha de recuperação nova, mas é uma etapa opcional. **Tenha muito cuidado ao limpar _slots_ da partição LUKS**, você pode acabar sem acesso à partição se não fizer corretamente. **Recomendo ter um _backup_ de todas as informações**.
 
 **Antes de apagar a senha antiga, reinicie e verifique se é possível usar a senha nova com sucesso**. Somente depois disso, execute:
 
@@ -64,7 +65,7 @@ Primeiro, é necessário instalar `tpm-tss2`, que provavelmente estará disponí
 add_dracutmodules+=" tpm2-tss "
 ```
 
-Geramos o _initramfs_ com o módulo tpm2-tss:
+Geramos o _initramfs_ com o módulo `tpm2-tss`:
 
 ```bash
 dracut --hostonly --no-hostonly-cmdline /boot/initramfs-linux.img
@@ -96,7 +97,7 @@ Copie o UUID da partição LUKS usando o comando `lsblk -o NAME,FSTYPE,UUID,MOUN
 
 Adicionar ao arquivo `etc/crypttab.initramfs`:
 
-```
+```text
 root  UUID=XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX  none  tpm2-device=auto
 ```
 

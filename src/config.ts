@@ -4,7 +4,7 @@ export const SITE: Site = {
   website: "https://mathpn.com/",
   author: "Matheus Pedroni",
   profile: "https://github.com/mathpn/",
-  desc: "A minimal, responsive and SEO-friendly Astro blog theme.",
+  desc: "Blog about technology, statistics, and other fun stuff.",
   title: "MPN",
   ogImage: "astropaper-og.jpg",
   lightAndDarkMode: true,
