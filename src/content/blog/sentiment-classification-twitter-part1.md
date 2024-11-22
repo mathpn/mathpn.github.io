@@ -168,7 +168,7 @@ Zipf's Law is an empirical approximation which states that the second most frequ
 
 ![zipfs_law](@assets/images/sentiment140/zipf.png)
 
-Thus, word frequency exponentially decreases and words that are rarely seen provide little to none information to our model and make it much more complex and sparse. Therefore, **only relatively frequent words are included while still holding most of information**.
+Thus, word frequency exponentially decreases and words that are rarely seen provide little to none information to our model and make it much more complex and sparse. Therefore, **only relatively frequent words are included while still holding most of the information**.
 
 ## Vectorizing
 

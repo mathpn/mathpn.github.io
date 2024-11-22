@@ -238,6 +238,6 @@ class Fractal:
 
 First, the array is converted to a binary one according to a provided threshold. Following, the get_sizes function calculates box sizes as powers of 2, without exceeding half the size of the array's smaller dimension.
 
-The `get_count` function performs the magic. The `while` loop ensures that a maximum of 4 orientations is used for each box size to decrease bias. Then, the AvgPool3d combined with the `torch.where` functions perform the box-counting, which is added to the `count_u` variable for each iteration. Also, for each iteration, a lacunarity value is calculated. The final count value is just the sum of all orientations for each size, while the final lacunarity value is the average for all orientations at a given box size.
+The `get_count` function performs the magic. The `while` loop ensures that a maximum of 4 orientations is used for each box size to decrease bias. Then, the `AvgPool3d` combined with the `torch.where` functions perform the box-counting, which is added to the `count_u` variable for each iteration. Also, for each iteration, a lacunarity value is calculated. The final count value is just the sum of all orientations for each size, while the final lacunarity value is the average for all orientations at a given box size.
 
 The fractal shown in the GIF image has a **2.05795 fractal dimension** and a **1.19497 mean lacunarity**. If you want a more in-depth view of fractal analysis, consider reading [this article](https://academic.oup.com/gji/article/132/2/275/671597).

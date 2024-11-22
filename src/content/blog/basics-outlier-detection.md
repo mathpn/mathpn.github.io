@@ -58,7 +58,7 @@ Now, at this point it’s important to notice a few characteristics about outlie
 
 ### Z-scores
 
-Z-scores are simply a way to standardize your data through rescaling. It shows how many standard deviations a given point, well, deviates from the mean. One can set an **arbitrary threshold** and exclude points that are above the positive threshold value or below the negative one. Let’s apply the z-score to our artificial data with a threshold value of 2:
+Z-scores are simply a way to standardize your data through scaling. It shows how many standard deviations a given point, well, deviates from the mean. One can set an **arbitrary threshold** and exclude points that are above the positive threshold value or below the negative one. Let’s apply the z-score to our artificial data with a threshold value of 2:
 
 ```r
 print(scale(c(2.051501, 3.27815, 1.532082, 3.826658, 2.335235, 20))[, 1])
@@ -74,7 +74,7 @@ So, to sum it up, the z-score method is quite effective **if the distribution of
 
 ### IQR method
 
-The interquartile range (or IQR) method was created by the great statistician John Tukey and is embedded in the famous boxplot. The idea is to determine the 25th and 75th quantiles, that is, the values that leave 25% and 75% of the data below it, respectively. Then, the distance between them is the IQR. Below you can see a histogram of the famous height data from Sir Francis Galton in which those quantiles are marked with red lines. 50% of the data lies between the lines.
+The interquartile range (or IQR) method was created by the great statistician John Tukey and is embedded in the famous box plot. The idea is to determine the 25th and 75th quantiles, that is, the values that leave 25% and 75% of the data below it, respectively. Then, the distance between them is the IQR. Below you can see a histogram of the famous height data from Sir Francis Galton in which those quantiles are marked with red lines. 50% of the data lies between the lines.
 
 ![Histogram of a random variable with normal distribution and quantiles marked in red vertical lines](@assets/images/basics_outlier_detection/unnamed-chunk-4-1.png)
 
@@ -90,7 +90,7 @@ Using our previous artificial data, let's replace the outlier with a less extrem
 print(scale(c(2.051501, 3.27815, 1.532082, 3.826658, 2.335235, 8))[, 1])
 ```
 
-```
+```text
 ## [1] -0.61670998 -0.09587028 -0.83725721  0.13702825 -0.49623548  1.90904470
 ```
 
@@ -104,7 +104,7 @@ The z-score method does not detect the extreme value as an outlier, while the IQ
 print(scale(c(2.0515010, 3.2781500, 1.5320820, 3.8266580, 2.3352350, 3.4745626, 0.3231792, 3.3983499, 2.7515991, 4.5479615, 1.3167715, 1.8196742, 2.1908817, 1.8590404, 2.6546580, 3.5424431, 2.9777304, 2.6038048, 4.5722174, 8))[, 1])
 ```
 
-```
+```text
 ##  [1] -0.56445751  0.20373600 -0.88974560  0.54724118 -0.38676803
 ##  [6]  0.32674012 -1.64682548  0.27901164 -0.12601846  0.99896019
 ## [11] -1.02458460 -0.70963991 -0.47716983 -0.68498668 -0.18672819

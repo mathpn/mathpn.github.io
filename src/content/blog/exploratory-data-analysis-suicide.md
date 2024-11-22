@@ -18,7 +18,7 @@ essential to construct hypothesis. Today we’ll explore the publicly available
 [WHO Suicide Statistics](https://www.kaggle.com/szamil/who-suicide-statistics)
 database (version from Kaggle). It consists of a single CSV table, with
 43776 instances of merely 6 variables. We do not intend to speculate
-about suicide causes nor to make any judgements. This analysis was done using R and R markdown.
+about suicide causes nor to make any judgments. This analysis was done using R and R markdown.
 
 ```r
 summary(who_suicide_statistics)
@@ -76,7 +76,7 @@ hist(total_suicide_rate$rate_suicide, xlab = "Suicide rate", main = NA)
 
 ![Histogram of suicide rate](@assets/images/who_suicide/unnamed-chunk-5-1.png)
 
-Much less variance, but still a very broad range. Let’s summarise and
+Much less variance, but still a very broad range. Let's summarize and
 plot some graphs to see the relationships between variables.
 
 ```r
@@ -100,7 +100,7 @@ total_suicide <- who_suicide_statistics %>% group_by(year, country) %>% summaris
 Men have higher suicide rates overall Let’s see which countries have the
 most and least suicides:
 
-### Top 10 countries and correspondent years with highest suicide rates
+### Top 10 countries and correspondent years with the highest suicide rates
 
 | country   | year | rate_suicide |
 | :-------- | ---: | -----------: |
@@ -115,7 +115,7 @@ most and least suicides:
 | Lithuania | 1997 |     485.0974 |
 | Hungary   | 1979 |     485.0378 |
 
-### Top 10 countries and correspondent years with lowest positive suicide rates
+### Top 10 countries and correspondent years with the lowest positive suicide rates
 
 | country | year | rate_suicide |
 | :------ | ---: | -----------: |
@@ -130,7 +130,7 @@ most and least suicides:
 | Egypt   | 2015 |    0.6084794 |
 | Egypt   | 2008 |    0.6107135 |
 
-### Top 20 countries with highest suicide rates (2012-2016 average)
+### Top 20 countries with the highest suicide rates (2012-2016 average)
 
 Now let’s take an average over the last five years of data and see again the highs and lows.
 
@@ -157,7 +157,7 @@ Now let’s take an average over the last five years of data and see again the h
 | Mongolia            |     166.7801 |
 | Poland              |     166.0466 |
 
-### Top 20 countries with lowest positive suicide rates (2012-2016 average)
+### Top 20 countries with the lowest positive suicide rates (2012-2016 average)
 
 | country                            | rate_suicide |
 | :--------------------------------- | -----------: |
@@ -372,7 +372,7 @@ grows older.
 elderly_data <- who_suicide_statistics %>% filter(year >= 2012) %>% filter(age == "55-74 years" | age == "75+ years") %>% group_by(country) %>% summarise(rate_suicide = sum(suicides_no) * 1000000 / sum(population)) %>% na.omit %>% arrange(desc(rate_suicide))
 ```
 
-### Top 10 countries with highest elderly suicide rates (2012-2016)
+### Top 10 countries with the highest elderly suicide rates (2012-2016)
 
 ```r
 head(elderly_data, n = 10) %>% kable()
@@ -426,7 +426,7 @@ head(elderly_proportion %>% arrange(desc(proportion)), n = 10) %>% kable()
 
 ## USA and Brazil: a case-study
 
-I’ve selected two countries for further analysis: **Brazil and USA**,
+I've selected two countries for further analysis: **Brazil and USA**,
 both very big countries with reliable data.
 
 ```r
@@ -477,8 +477,8 @@ age_data_usbr <- who_suicide_statistics %>% group_by(year, country, age) %>% sum
 ![Suicide rates per age group in Brazil. Elderly people show higher rates](@assets/images/who_suicide/unnamed-chunk-33-1.png)
 ![Suicide rates per age group in the USA. Elderly people show higher rates](@assets/images/who_suicide/unnamed-chunk-33-2.png)
 
-Both countries present highest suicide rates for the elderly. However,
-in both cases, **the gap between adults (25-34 years) and elderly (55+
+Both countries present the highest suicide rates for the elderly. However,
+in both cases, **the gap between adults (25–34 years) and elderly (55+
 years) is getting narrower** since the 2000s, which shows that adult
 suicide is more likely now than compared to the past (1990s).
 

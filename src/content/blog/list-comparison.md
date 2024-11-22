@@ -100,7 +100,7 @@ Slice/prepend_1000000-16             9.463µ ± 11%
 
 The time complexity of an algorithm or data structure operation refers to how the time it takes to execute such task scales as the input size grows. Typically, the worse-case time complexity is considered.
 
-This relationship is commonly expressed using [big O notation](https://en.wikipedia.org/wiki/Big_O_notation). All constant factors are dropped. For instance, if the time a task takes doesn't depend on input size at all, it has a O(1) or constant time complexity. If the time scales linearly with the input size, it has linear time complexity or O(N), where N is the input size.
+This relationship is commonly expressed using [big O notation](https://en.wikipedia.org/wiki/Big_O_notation). All constant factors are dropped. For instance, if the time a task takes doesn't depend on input size at all, it has an O(1) or constant time complexity. If the time scales linearly with the input size, it has linear time complexity or O(N), where N is the input size.
 
 Even though we drop all constant factors, they should not be forgotten. An O(1) algorithm can be slower than an O(N) one due to these constant factors. However, as input size grows, the O(N) algorithm will eventually become slower.
 

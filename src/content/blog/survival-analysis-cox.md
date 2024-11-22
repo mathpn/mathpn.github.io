@@ -13,7 +13,7 @@ lang: "en-us"
 Last time, we used decision trees, binarization and logistic regression to predict heart failure mortality in a public dataset. This approach yielded a very simple model, which, when dealing with noisy biological data and not many observations, is crucial to improve generalization.
 
 The original data is described in [this paper](https://journals.plos.org/plosone/article?id=10.1371/journal.pone.0181001).
-As we’ve discussed previously, the _time_ variable refers to follow-up
+As we've discussed previously, the _time_ variable refers to follow-up
 time, that is, for how long each patient was observed. Whenever a patient that has not died reaches its follow-up time, it’s no longer
 observed and thus is a [censored observation](https://en.wikipedia.org/wiki/Survival_analysis#Censoring).
 
@@ -413,7 +413,7 @@ models_metrics %>% kable()
 | Selected variables        |       0.740 | 599.1 |
 | Split time, selected var. |       0.746 | 593.9 |
 
-Our final model, which doesn’t violate the core model assumptions,
+Our final model, which doesn't violate the core model assumptions,
 presents better AIC compared to the previous ones and a very similar
 concordance compared to the model with all variables. But in practice
 this model will predict two separate survival curves, one for each
