@@ -2,11 +2,14 @@ import mdx from "@astrojs/mdx";
 import react from "@astrojs/react";
 import sitemap from "@astrojs/sitemap";
 import tailwind from "@astrojs/tailwind";
+import type { ThemeRegistration } from "@shikijs/types";
 import { defineConfig } from "astro/config";
 import rehypeKatex from "rehype-katex";
 import remarkCollapse from "remark-collapse";
 import remarkMath from "remark-math";
 import remarkToc from "remark-toc";
+import gruvboxThemeDarkHard from "./public/themes/gruvbox-dark-hard.json";
+import gruvboxThemeDarkMedium from "./public/themes/gruvbox-dark-medium.json";
 import { SITE } from "./src/config";
 import { remarkHyphenate } from "./src/utils/hyphenate.mjs";
 import rehypeWrapTables from "./src/utils/table-wrapper-plugin.mjs";
@@ -37,15 +40,12 @@ export default defineConfig({
     ],
     rehypePlugins: [rehypeKatex, rehypeWrapTables],
     shikiConfig: {
-      // For more themes, visit https://shiki.style/themes
-      themes: { light: "min-light", dark: "night-owl" },
+      themes: {
+        light: gruvboxThemeDarkMedium as ThemeRegistration,
+        dark: gruvboxThemeDarkHard as ThemeRegistration,
+      },
       wrap: true,
     },
-    // remarkRehype: {
-    //   footnoteLabelProperties: {
-    //     className: [""],
-    //   },
-    // },
   },
   vite: {
     optimizeDeps: {
