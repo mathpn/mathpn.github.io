@@ -119,6 +119,10 @@
     word-wrap: break-word;
   }
 
+  .prose-lg pre code {
+    @apply !text-base
+  }
+
   pre > code {
     white-space: pre;
   }
