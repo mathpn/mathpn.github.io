@@ -54,7 +54,7 @@ module.exports = {
         },
       },
       fontFamily: {
-        mono: ["IBM Plex Mono", "monospace"],
+        mono: ['"Fira Code"', "monospace"],
         serif: ['"Source Serif 4"', "serif"],
         sans: ['"Source Sans 3"', "sans"],
       },

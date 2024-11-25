@@ -54,7 +54,7 @@ const allPosts = posts.map(({ data: { title }, slug }) => ({
   title,
 }));
 
-const currentPostIndex = allPosts.findIndex(a => a.slug === post.slug);
+const currentPostIndex = allPosts.findIndex((a) => a.slug === post.slug);
 
 const prevPost = currentPostIndex !== 0 ? allPosts[currentPostIndex - 1] : null;
 const nextPost =
@@ -91,7 +91,7 @@ const nextPost =
     </article>
 
     <ul class="clear-both font-mono my-8">
-      {tags.map(tag => <Tag tag={slugifyStr(tag)} />)}
+      {tags.map((tag) => <Tag tag={slugifyStr(tag)} />)}
     </ul>
 
     <div
@@ -141,7 +141,9 @@ const nextPost =
             </svg>
             <div>
               <span>Previous Post</span>
-              <div class="text-sm text-skin-accent/85">{prevPost.title}</div>
+              <div class="text-sm sm:text-base text-skin-accent">
+                {prevPost.title}
+              </div>
             </div>
           </a>
         )
@@ -154,7 +156,9 @@ const nextPost =
           >
             <div>
               <span>Next Post</span>
-              <div class="text-sm text-skin-accent/85">{nextPost.title}</div>
+              <div class="text-sm sm:text-base text-skin-accent">
+                {nextPost.title}
+              </div>
             </div>
             <svg
               xmlns="http://www.w3.org/2000/svg"
