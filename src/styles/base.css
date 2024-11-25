@@ -10,7 +10,7 @@
     --color-accent: 140, 70, 35;
     --color-card: 221, 214, 204;
     --color-card-muted: 163, 157, 150;
-    --color-border: 204, 198, 193;
+    --color-border: 117, 112, 109;
   }
   html[data-theme="dark"] {
     --color-fill: 22, 22, 22;
