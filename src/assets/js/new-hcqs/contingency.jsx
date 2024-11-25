@@ -4,9 +4,9 @@ const ContingencyTable1 = () => {
       <table className="w-full border-collapse">
         <thead>
           <tr>
-            <th className="p-0 w-1/3 relative h-16">
-              <div className="w-full h-full relative">
-                <svg className="absolute top-0 left-0 w-full h-full">
+            <th className="w-1/3 relative h-16">
+              <div className="absolute inset-0">
+                <svg className="w-full h-full">
                   <line
                     x1="0"
                     y1="0"
@@ -17,7 +17,7 @@ const ContingencyTable1 = () => {
                   />
                 </svg>
                 <div className="absolute bottom-1 left-1 text-xl">Death</div>
-                <div className="absolute top-1 right-1 text-xl">WI</div>
+                <div className="p-1 absolute top-1 right-1 text-xl">WI</div>
               </div>
             </th>
             <th className="p-2 text-center w-1/3 text-2xl">Yes</th>
@@ -47,9 +47,9 @@ const ContingencyTable1Pt = () => {
       <table className="w-full border-collapse">
         <thead>
           <tr>
-            <th className="p-0 w-1/3 relative h-16">
-              <div className="w-full h-full relative">
-                <svg className="absolute top-0 left-0 w-full h-full">
+            <th className="w-1/3 relative h-16">
+              <div className="absolute inset-0">
+                <svg className="w-full h-full">
                   <line
                     x1="0"
                     y1="0"
@@ -60,7 +60,7 @@ const ContingencyTable1Pt = () => {
                   />
                 </svg>
                 <div className="absolute bottom-1 left-1 text-xl">Morte</div>
-                <div className="absolute top-1 right-1 text-xl">VQ</div>
+                <div className="p-1 absolute top-1 right-1 text-xl">VQ</div>
               </div>
             </th>
             <th className="p-2 text-center w-1/3 text-2xl">Sim</th>
@@ -90,9 +90,9 @@ const ContingencyTable2 = () => {
       <table className="w-full border-collapse">
         <thead>
           <tr>
-            <th className="p-0 w-1/3 relative h-16">
-              <div className="w-full h-full relative">
-                <svg className="absolute top-0 left-0 w-full h-full">
+            <th className="w-1/3 relative h-16">
+              <div className="absolute inset-0">
+                <svg className="w-full h-full">
                   <line
                     x1="0"
                     y1="0"
@@ -103,7 +103,7 @@ const ContingencyTable2 = () => {
                   />
                 </svg>
                 <div className="absolute bottom-1 left-1 text-xl">Death</div>
-                <div className="absolute top-1 right-1 text-xl">WI</div>
+                <div className="p-1 absolute top-1 right-1 text-xl">WI</div>
               </div>
             </th>
             <th className="p-2 text-center w-1/3 text-2xl">Yes</th>
@@ -133,9 +133,9 @@ const ContingencyTable2Pt = () => {
       <table className="w-full border-collapse">
         <thead>
           <tr>
-            <th className="p-0 w-1/3 relative h-16">
-              <div className="w-full h-full relative">
-                <svg className="absolute top-0 left-0 w-full h-full">
+            <th className="w-1/3 relative h-16">
+              <div className="absolute inset-0">
+                <svg className="w-full h-full">
                   <line
                     x1="0"
                     y1="0"
@@ -146,7 +146,7 @@ const ContingencyTable2Pt = () => {
                   />
                 </svg>
                 <div className="absolute bottom-1 left-1 text-xl">Morte</div>
-                <div className="absolute top-1 right-1 text-xl">VQ</div>
+                <div className="p-1 absolute top-1 right-1 text-xl">VQ</div>
               </div>
             </th>
             <th className="p-2 text-center w-1/3 text-2xl">Sim</th>
@@ -176,9 +176,9 @@ const ContingencyTable3 = () => {
       <table className="w-full border-collapse">
         <thead>
           <tr>
-            <th className="p-0 w-1/3 relative h-16">
-              <div className="w-full h-full relative">
-                <svg className="absolute top-0 left-0 w-full h-full">
+            <th className="w-1/3 relative h-16">
+              <div className="absolute inset-0">
+                <svg className="w-full h-full">
                   <line
                     x1="0"
                     y1="0"
@@ -189,7 +189,7 @@ const ContingencyTable3 = () => {
                   />
                 </svg>
                 <div className="absolute bottom-1 left-1 text-xl">Death</div>
-                <div className="absolute top-1 right-1 text-xl">WI</div>
+                <div className="p-1 absolute top-1 right-1 text-xl">WI</div>
               </div>
             </th>
             <th className="p-2 text-center w-1/3 text-2xl">Yes</th>
@@ -219,9 +219,9 @@ const ContingencyTable3Pt = () => {
       <table className="w-full border-collapse">
         <thead>
           <tr>
-            <th className="p-0 w-1/3 relative h-16">
-              <div className="w-full h-full relative">
-                <svg className="absolute top-0 left-0 w-full h-full">
+            <th className="w-1/3 relative h-16">
+              <div className="absolute inset-0">
+                <svg className="w-full h-full">
                   <line
                     x1="0"
                     y1="0"
@@ -232,7 +232,7 @@ const ContingencyTable3Pt = () => {
                   />
                 </svg>
                 <div className="absolute bottom-1 left-1 text-xl">Morte</div>
-                <div className="absolute top-1 right-1 text-xl">VQ</div>
+                <div className="p-1 absolute top-1 right-1 text-xl">VQ</div>
               </div>
             </th>
             <th className="p-2 text-center w-1/3 text-2xl">Sim</th>

@@ -4,9 +4,9 @@ const ContingencyTable = () => {
       <table className="w-full border-collapse">
         <thead>
           <tr>
-            <th className="p-0 w-1/3 relative h-16">
-              <div className="w-full h-full relative">
-                <svg className="absolute top-0 left-0 w-full h-full">
+            <th className="w-1/3 relative h-16">
+              <div className="absolute inset-0">
+                <svg className="w-full h-full">
                   <line
                     x1="0"
                     y1="0"
@@ -16,8 +16,8 @@ const ContingencyTable = () => {
                     strokeWidth="1"
                   />
                 </svg>
-                <div className="absolute bottom-1 left-1 text-xl">Test</div>
-                <div className="absolute top-1 right-1 text-xl">Ill</div>
+                <div className="p-1 absolute bottom-1 left-1 text-xl">Test</div>
+                <div className="p-1 absolute top-1 right-1 text-xl">Ill</div>
               </div>
             </th>
             <th className="p-2 text-center w-1/3 text-2xl">Yes</th>
