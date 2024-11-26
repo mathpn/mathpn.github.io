@@ -101,7 +101,7 @@ const socialCount = SOCIALS.filter((social) => social.active).length;
                     frontmatter={data}
                     secHeading={false}
                   />
-                )
+                ),
             )}
           </ul>
         </section>
@@ -138,13 +138,13 @@ const socialCount = SOCIALS.filter((social) => social.active).length;
     @apply mb-2 h-6 w-6 scale-110 fill-skin-accent sm:mb-3 sm:scale-125;
   }
   #hero p {
-    @apply my-2 text-xl;
+    @apply my-2 text-base sm:text-lg lg:text-xl;
   }
   #hero a {
     @apply !decoration-dashed underline underline-offset-8 hover:text-skin-accent;
   }
   .social-wrapper {
-    @apply mt-4 flex flex-col sm:flex-row sm:items-center;
+    @apply mt-4 flex flex-col sm:flex-row sm:items-center text-base sm:text-lg lg:text-xl;
   }
   .social-links {
     @apply mb-1 mr-2 whitespace-nowrap sm:mb-0;
@@ -160,6 +160,6 @@ const socialCount = SOCIALS.filter((social) => social.active).length;
     @apply text-2xl sm:text-3xl font-semibold tracking-wide font-sans;
   }
   .all-posts-btn-wrapper {
-    @apply my-8 text-center;
+    @apply my-8 text-center text-base sm:text-lg lg:text-xl;
   }
 </style>

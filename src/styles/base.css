@@ -33,7 +33,7 @@
   }
   section,
   footer {
-    @apply mx-auto max-w-3xl px-4;
+    @apply mx-auto max-w-3xl lg:max-w-4xl px-4;
   }
   a {
     @apply outline-2 outline-offset-1 outline-skin-fill focus-visible:no-underline focus-visible:outline-dashed;
@@ -121,6 +121,10 @@
 
   .prose-lg pre code {
     @apply !text-base
+  }
+
+  .prose-xl pre code {
+    @apply !text-lg
   }
 
   pre > code {

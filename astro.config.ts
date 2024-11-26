@@ -8,11 +8,11 @@ import rehypeKatex from "rehype-katex";
 import remarkCollapse from "remark-collapse";
 import remarkMath from "remark-math";
 import remarkToc from "remark-toc";
-import gruvboxThemeDarkHard from "./public/themes/gruvbox-dark-hard.json";
-import gruvboxThemeDarkMedium from "./public/themes/gruvbox-dark-medium.json";
 import { SITE } from "./src/config";
 import { remarkHyphenate } from "./src/utils/hyphenate.mjs";
 import rehypeWrapTables from "./src/utils/table-wrapper-plugin.mjs";
+import gruvboxThemeDarkHard from "./themes/gruvbox-dark-hard.json";
+import gruvboxThemeDarkMedium from "./themes/gruvbox-dark-medium.json";
 
 // https://astro.build/config
 export default defineConfig({

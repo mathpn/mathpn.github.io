@@ -33,7 +33,7 @@ const { Content } = await post.render();
 const ogImageUrl = typeof ogImage === "string" ? ogImage : ogImage?.src;
 const ogUrl = new URL(
   ogImageUrl ?? `/posts/${slugifyStr(title)}.png`,
-  Astro.url.origin
+  Astro.url.origin,
 ).href;
 
 const layoutProps = {
@@ -64,7 +64,7 @@ const nextPost =
 <Layout {...layoutProps}>
   <Header />
 
-  <div class="mx-auto flex w-full max-w-3xl justify-start px-2">
+  <div class="mx-auto flex w-full max-w-3xl lg:max-w-4xl justify-start px-2">
     <button
       class="focus-outline mb-2 mt-8 flex hover:opacity-75"
       onclick="(() => (history.length === 1) ? window.location = '/' : history.back())()"
@@ -86,7 +86,10 @@ const nextPost =
       editPost={editPost}
       postId={post.id}
     />
-    <article id="article" class="prose sm:prose-lg mx-auto mt-8 max-w-3xl">
+    <article
+      id="article"
+      class="prose md:prose-lg lg:prose-xl mx-auto mt-8 max-w-3xl lg:max-w-4xl"
+    >
       <Content />
     </article>
 
@@ -187,10 +190,10 @@ const nextPost =
 
 <style>
   main {
-    @apply mx-auto w-full max-w-3xl px-4 pb-12;
+    @apply mx-auto w-full max-w-3xl lg:max-w-4xl px-4 pb-12;
   }
   .post-title {
-    @apply text-2xl sm:text-3xl font-semibold text-skin-accent;
+    @apply text-2xl sm:text-3xl lg:text-4xl font-semibold text-skin-accent;
   }
 </style>
 
@@ -240,7 +243,7 @@ const nextPost =
    *  allowing sharing of sections easily */
   function addHeadingLinks() {
     const headings = Array.from(
-      document.querySelectorAll("h2, h3, h4, h5, h6")
+      document.querySelectorAll("h2, h3, h4, h5, h6"),
     );
     for (const heading of headings) {
       heading.classList.add("group");
@@ -312,6 +315,6 @@ const nextPost =
 
   /* Go to page start after page swap */
   document.addEventListener("astro:after-swap", () =>
-    window.scrollTo({ left: 0, top: 0, behavior: "instant" })
+    window.scrollTo({ left: 0, top: 0, behavior: "instant" }),
   );
 </script>
