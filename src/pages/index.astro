@@ -11,10 +11,12 @@ import getSortedPosts from "@utils/getSortedPosts";
 import { SITE, SOCIALS } from "@config";
 
 const posts = await getCollection("blog");
+const tils = await getCollection("til");
 
 const sortedPosts = getSortedPosts(posts);
 const featuredPosts = sortedPosts.filter(({ data }) => data.featured);
-const recentPosts = sortedPosts.filter(({ data }) => !data.featured);
+
+const sortedTils = getSortedPosts(tils);
 
 const socialCount = SOCIALS.filter((social) => social.active).length;
 ---
@@ -24,23 +26,6 @@ const socialCount = SOCIALS.filter((social) => social.active).length;
   <main id="main-content">
     <section id="hero">
       <h1>Hey there, welcome to MPN</h1>
-      <a
-        target="_blank"
-        href="/feed.xml"
-        class="rss-link"
-        aria-label="rss feed"
-        title="RSS Feed"
-      >
-        <svg xmlns="http://www.w3.org/2000/svg" class="rss-icon"
-          ><path
-            d="M19 20.001C19 11.729 12.271 5 4 5v2c7.168 0 13 5.832 13 13.001h2z"
-          ></path><path
-            d="M12 20.001h2C14 14.486 9.514 10 4 10v2c4.411 0 8 3.589 8 8.001z"
-          ></path><circle cx="6" cy="18" r="2"></circle>
-        </svg>
-        <span class="sr-only">RSS Feed</span>
-      </a>
-
       <p>
         Here you'll find posts about software development, statistics, machine
         learning, and other topics.
@@ -83,17 +68,36 @@ const socialCount = SOCIALS.filter((social) => social.active).length;
               ))}
             </ul>
           </section>
-          {recentPosts.length > 0 && <Hr />}
+          {sortedPosts.length > 0 && <Hr />}
         </>
       )
     }
 
     {
-      recentPosts.length > 0 && (
+      sortedPosts.length > 0 && (
         <section id="recent-posts">
-          <h2>Recent Posts</h2>
+        <h2>
+          Recent Posts
+          <a
+            target="_blank"
+            href="/feed.xml"
+            class="rss-link"
+            aria-label="rss feed"
+            title="Posts RSS Feed"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" class="rss-icon"
+              ><path
+                d="M19 20.001C19 11.729 12.271 5 4 5v2c7.168 0 13 5.832 13 13.001h2z"
+              ></path><path
+                d="M12 20.001h2C14 14.486 9.514 10 4 10v2c4.411 0 8 3.589 8 8.001z"
+              ></path><circle cx="6" cy="18" r="2"></circle>
+            </svg>
+            <span class="sr-only">Posts RSS Feed</span>
+          </a>
+        </h2>
+
           <ul>
-            {recentPosts.map(
+            {sortedPosts.map(
               ({ data, slug }, index) =>
                 index < SITE.postPerIndex && (
                   <Card
@@ -118,6 +122,57 @@ const socialCount = SOCIALS.filter((social) => social.active).length;
         </svg>
       </LinkButton>
     </div>
+
+
+    {
+      sortedTils.length > 0 && (
+        <Hr />
+        <section id="recent-tils">
+        <h2>
+          Recent <a href="/about-til">TILs</a>
+          <a
+            target="_blank"
+            href="/feed-til.xml"
+            class="rss-link"
+            aria-label="rss feed"
+            title="TIL RSS Feed"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" class="rss-icon"
+              ><path
+                d="M19 20.001C19 11.729 12.271 5 4 5v2c7.168 0 13 5.832 13 13.001h2z"
+              ></path><path
+                d="M12 20.001h2C14 14.486 9.514 10 4 10v2c4.411 0 8 3.589 8 8.001z"
+              ></path><circle cx="6" cy="18" r="2"></circle>
+            </svg>
+            <span class="sr-only">TIL RSS Feed</span>
+          </a>
+        </h2>
+
+          <ul>
+            {sortedTils.map(
+              ({ data, slug }, index) =>
+                index < SITE.postPerIndex && (
+                  <Card
+                    href={`/til/${slug}/`}
+                    frontmatter={data}
+                    secHeading={false}
+                  />
+                ),
+            )}
+          </ul>
+        </section>
+        <div class="all-posts-btn-wrapper">
+          <LinkButton href="/til/">
+            All TILs 
+            <svg xmlns="http://www.w3.org/2000/svg"
+              ><path
+                d="m11.293 17.293 1.414 1.414L19.414 12l-6.707-6.707-1.414 1.414L15.586 11H6v2h9.586z"
+              ></path>
+            </svg>
+          </LinkButton>
+        </div>
+      )
+    }
   </main>
 
   <Footer />
@@ -131,16 +186,16 @@ const socialCount = SOCIALS.filter((social) => social.active).length;
   #hero h1 {
     @apply my-4 inline-block text-2xl font-bold sm:my-8 sm:text-4xl;
   }
-  #hero .rss-link {
+  #recent-posts .rss-link, #recent-tils .rss-link {
     @apply mb-6;
   }
-  #hero .rss-icon {
-    @apply mb-2 h-6 w-6 scale-110 fill-skin-accent sm:mb-3 sm:scale-125;
+  #recent-posts .rss-icon, #recent-tils .rss-icon {
+    @apply h-6 w-6 scale-110 fill-skin-accent sm:scale-125;
   }
   #hero p {
     @apply my-2 text-base sm:text-lg lg:text-xl;
   }
-  #hero a {
+  #hero a, #recent-tils a {
     @apply !decoration-dashed underline underline-offset-8 hover:text-skin-accent;
   }
   .social-wrapper {
@@ -152,11 +207,13 @@ const socialCount = SOCIALS.filter((social) => social.active).length;
 
   /* ===== Featured & Recent Posts Sections ===== */
   #featured,
-  #recent-posts {
+  #recent-posts,
+  #recent-tils {
     @apply pb-6 pt-12;
   }
   #featured h2,
-  #recent-posts h2 {
+  #recent-posts h2,
+  #recent-tils h2 {
     @apply text-2xl sm:text-3xl font-semibold tracking-wide font-sans;
   }
   .all-posts-btn-wrapper {

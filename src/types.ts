@@ -1,4 +1,9 @@
 import type socialIcons from "@assets/socialIcons";
+import type { CollectionEntry } from "astro:content";
+
+export type PostCollectionEntry =
+  | CollectionEntry<"blog">
+  | CollectionEntry<"til">;
 
 export type Site = {
   website: string;
@@ -10,6 +15,7 @@ export type Site = {
   lightAndDarkMode: boolean;
   postPerIndex: number;
   postPerPage: number;
+  tilPerPage: number;
   scheduledPostMargin: number;
   showArchives?: boolean;
   editPost?: {
