@@ -1,0 +1,22 @@
+---
+import { SITE } from "@config";
+import Til from "@layouts/Til.astro";
+import type { GetStaticPaths } from "astro";
+import { getCollection } from "astro:content";
+import getSortedPosts from "@utils/getSortedPosts";
+import type { Page } from "astro";
+import type { CollectionEntry } from "astro:content";
+
+export const getStaticPaths = (async ({ paginate }) => {
+  const posts = await getCollection("til", ({ data }) => !data.draft);
+  return paginate(getSortedPosts(posts), { pageSize: SITE.tilPerPage });
+}) satisfies GetStaticPaths;
+
+interface Props {
+  page: Page<CollectionEntry<"til">>;
+}
+
+const { page } = Astro.props;
+---
+
+<Til {page} />

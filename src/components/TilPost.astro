@@ -1,0 +1,91 @@
+---
+import Tag from "@components/Tag.astro";
+import { slugifyStr } from "@utils/slugify";
+import type { CollectionEntry } from "astro:content";
+
+export interface Props {
+  post: CollectionEntry<"til">;
+}
+
+const { post } = Astro.props;
+
+const { title, pubDatetime, modDatetime, tags } = post.data;
+
+const { Content } = await post.render();
+
+const latestDatetime = modDatetime || pubDatetime;
+---
+
+<h1 transition:name={slugifyStr(title)} class="post-title">
+  {latestDatetime.toISOString().split("T")[0]}: {title}
+</h1>
+<article
+  id="article"
+  class="prose md:prose-lg lg:prose-xl mx-auto mt-8 max-w-3xl lg:max-w-4xl"
+>
+  <Content />
+</article>
+
+<ul class="clear-both font-mono my-8">
+  {tags.map((tag) => <Tag tag={slugifyStr(tag)} />)}
+</ul>
+
+<div
+  class="clear-both flex flex-col-reverse items-center justify-between gap-6 sm:flex-row-reverse sm:items-end sm:gap-4"
+>
+</div>
+
+<hr class="my-6 border-dashed" />
+
+<style>
+  main {
+    @apply mx-auto w-full max-w-3xl lg:max-w-4xl px-4 pb-12;
+  }
+  .post-title {
+    @apply text-2xl sm:text-3xl lg:text-4xl font-semibold text-skin-accent;
+  }
+</style>
+
+<script is:inline data-astro-rerun>
+  /** Attaches copy buttons to code blocks in the document,
+   * allowing users to copy code easily. */
+  function attachCopyButtons() {
+    const copyButtonLabel = "Copy";
+    const codeBlocks = Array.from(document.querySelectorAll("pre"));
+
+    for (const codeBlock of codeBlocks) {
+      const wrapper = document.createElement("div");
+      wrapper.style.position = "relative";
+
+      const copyButton = document.createElement("button");
+      copyButton.className =
+        "copy-code absolute right-3 -top-3 rounded bg-skin-card px-2 py-1 text-xs leading-4 text-skin-base font-medium";
+      copyButton.innerHTML = copyButtonLabel;
+      codeBlock.setAttribute("tabindex", "0");
+      codeBlock.appendChild(copyButton);
+
+      // wrap codebock with relative parent element
+      codeBlock?.parentNode?.insertBefore(wrapper, codeBlock);
+      wrapper.appendChild(codeBlock);
+
+      copyButton.addEventListener("click", async () => {
+        await copyCode(codeBlock, copyButton);
+      });
+    }
+
+    async function copyCode(block, button) {
+      const code = block.querySelector("code");
+      const text = code?.innerText;
+
+      await navigator.clipboard.writeText(text ?? "");
+
+      // visual feedback that task is completed
+      button.innerText = "Copied";
+
+      setTimeout(() => {
+        button.innerText = copyButtonLabel;
+      }, 700);
+    }
+  }
+  attachCopyButtons();
+</script>

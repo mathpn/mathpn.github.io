@@ -1,5 +1,5 @@
 ---
-title: "Home server security: LUKS with USB unlock"
+title: "LUKS with USB unlock"
 tags:
   - Security
   - Home server
