@@ -16,6 +16,7 @@ const tils = await getCollection("til");
 
 const sortedPosts = getSortedPosts(posts) as CollectionEntry<"posts">[];
 const featuredPosts = sortedPosts.filter(({ data }) => data.featured) as CollectionEntry<"posts">[];
+const recentPosts = sortedPosts.filter(({data}) => !data.featured) as CollectionEntry<"posts">[];
 
 const sortedTils = getSortedPosts(tils);
 
@@ -60,9 +61,9 @@ const socialCount = SOCIALS.filter((social) => social.active).length;
           <section id="featured">
             <h2>Featured</h2>
             <ul>
-              {featuredPosts.map(({ data, slug }) => (
+              {featuredPosts.map(({collection, slug, data}) => (
                 <Card
-                  href={`/posts/${slug}/`}
+                  href={`/${collection}/${slug}/`}
                   frontmatter={data}
                   secHeading={false}
                 />
@@ -75,7 +76,7 @@ const socialCount = SOCIALS.filter((social) => social.active).length;
     }
 
     {
-      sortedPosts.length > 0 && (
+      recentPosts.length > 0 && (
         <section id="recent-posts">
         <h2>
           Recent Posts
@@ -98,11 +99,11 @@ const socialCount = SOCIALS.filter((social) => social.active).length;
         </h2>
 
           <ul>
-            {sortedPosts.map(
-              ({ data, slug }, index) =>
+            {recentPosts.map(
+              ({collection, slug, data}, index) =>
                 index < SITE.postPerIndex && (
                   <Card
-                    href={`/posts/${slug}/`}
+                    href={`/${collection}/${slug}/`}
                     frontmatter={data}
                     secHeading={false}
                   />
@@ -151,10 +152,10 @@ const socialCount = SOCIALS.filter((social) => social.active).length;
 
           <ul>
             {sortedTils.map(
-              ({ data, slug }, index) =>
+              ({collection, slug, data}, index) =>
                 index < SITE.postPerIndex && (
                   <Card
-                    href={`/til/${slug}/`}
+                    href={`/${collection}/${slug}/`}
                     frontmatter={data}
                     secHeading={false}
                   />

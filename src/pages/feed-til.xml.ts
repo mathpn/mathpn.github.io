@@ -11,8 +11,8 @@ export async function GET() {
     title: SITE.title + " - TIL",
     description: "Today I learned (TIL) section feed.",
     site: SITE.website,
-    items: sortedPosts.map(({ data, slug }) => ({
-      link: `posts/${slug}/`,
+    items: sortedPosts.map(({ collection, data, slug }) => ({
+      link: `${collection}/${slug}/`,
       title: data.title,
       description: data.description,
       pubDate: new Date(data.modDatetime ?? data.pubDatetime),
