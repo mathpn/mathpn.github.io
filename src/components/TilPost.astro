@@ -5,9 +5,10 @@ import type { CollectionEntry } from "astro:content";
 
 export interface Props {
   post: CollectionEntry<"til">;
+  href?: string;
 }
 
-const { post } = Astro.props;
+const { post, href } = Astro.props;
 
 const { title, pubDatetime, modDatetime, tags } = post.data;
 
@@ -16,9 +17,19 @@ const { Content } = await post.render();
 const latestDatetime = modDatetime || pubDatetime;
 ---
 
-<h1 transition:name={slugifyStr(title)} class="post-title">
-  {latestDatetime.toISOString().split("T")[0]}: {title}
-</h1>
+{
+  href ? (
+    <a href={href}>
+      <h1 transition:name={slugifyStr(title)} class="post-title">
+        {latestDatetime.toISOString().split("T")[0]}: {title}
+      </h1>
+    </a>
+  ) : (
+    <h1 transition:name={slugifyStr(title)} class="post-title">
+      {latestDatetime.toISOString().split("T")[0]}: {title}
+    </h1>
+  )
+}
 <article
   id="article"
   class="prose md:prose-lg lg:prose-xl mx-auto mt-8 max-w-3xl lg:max-w-4xl"
@@ -38,6 +49,7 @@ const latestDatetime = modDatetime || pubDatetime;
 <hr class="my-6 border-dashed" />
 
 <style>
+  /* used? */
   main {
     @apply mx-auto w-full max-w-3xl lg:max-w-4xl px-4 pb-12;
   }

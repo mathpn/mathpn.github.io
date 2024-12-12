@@ -9,12 +9,13 @@ import Card from "@components/Card";
 import Socials from "@components/Socials.astro";
 import getSortedPosts from "@utils/getSortedPosts";
 import { SITE, SOCIALS } from "@config";
+import type { CollectionEntry } from "astro:content";
 
 const posts = await getCollection("blog");
 const tils = await getCollection("til");
 
-const sortedPosts = getSortedPosts(posts);
-const featuredPosts = sortedPosts.filter(({ data }) => data.featured);
+const sortedPosts = getSortedPosts(posts) as CollectionEntry<"blog">[];
+const featuredPosts = sortedPosts.filter(({ data }) => data.featured) as CollectionEntry<"blog">[];
 
 const sortedTils = getSortedPosts(tils);
 
