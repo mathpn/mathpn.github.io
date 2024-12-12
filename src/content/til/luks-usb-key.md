@@ -3,7 +3,6 @@ title: "LUKS with USB unlock"
 tags:
   - Security
   - Home server
-description: "Learn how to use a USB key file to unlock your LUKS encrypted root partition"
 pubDatetime: 2024-11-07
 lang: "en-us"
 ---

@@ -20,15 +20,7 @@ const { page } = Astro.props;
   <Header activeNav="til" />
   <Main pageTitle="TIL" pageDesc="Today I learned (TIL) entries.">
     <ul>
-      {
-        page.data.map((post) => (
-          <>
-            <a href={`/til/${post.slug}`}>
-              <TilPost post={post} />
-            </a>
-          </>
-        ))
-      }
+      {page.data.map((post) => <TilPost post={post} href={post.slug} />)}
     </ul>
   </Main>
 

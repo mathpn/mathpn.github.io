@@ -30,6 +30,7 @@ const blog = defineCollection({
           appendFilePath: z.boolean().optional(),
         })
         .optional(),
+      lang: z.string().optional(),
     }),
 });
 
@@ -42,7 +43,6 @@ const til = defineCollection({
       pubDatetime: z.date(),
       modDatetime: z.date().optional().nullable(),
       title: z.string(),
-      featured: z.boolean().optional(),
       draft: z.boolean().optional(),
       tags: z.array(z.string()).default(["others"]),
       ogImage: image()
@@ -51,7 +51,7 @@ const til = defineCollection({
         })
         .or(z.string())
         .optional(),
-      description: z.string(),
+      description: z.string().optional(),
       canonicalURL: z.string().optional(),
       editPost: z
         .object({
@@ -61,6 +61,7 @@ const til = defineCollection({
           appendFilePath: z.boolean().optional(),
         })
         .optional(),
+      lang: z.string().optional(),
     }),
 });
 
