@@ -3,7 +3,6 @@ title: "Exploratory data analysis: the WHO suicide dataset"
 tags:
   - Data Analysis
   - R
-  - Data visualization
 pubDatetime: 2018-12-11
 description: "Exploratory data analysis is essential to construct hypothesis. Today we’ll explore the WHO Suicide Statistics database (version from Kaggle). It consists of a single CSV table, with 43776 instances of merely 6 variables."
 lang: "en-us"

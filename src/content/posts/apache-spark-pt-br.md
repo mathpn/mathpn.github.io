@@ -1,9 +1,8 @@
 ---
 title: "Como configurar e usar um cluster de Apache Spark em sua rede local"
 tags:
-  - Python
   - Tutorial
-  - Data Science
+  - Linux
 description: "Tutorial de como transformar seu computador antigo em um servidor com Apache Spark e Apache Hadoop"
 pubDatetime: 2023-06-27
 lang: "pt-br"

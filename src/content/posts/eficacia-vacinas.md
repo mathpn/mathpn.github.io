@@ -1,7 +1,6 @@
 ---
 title: "O que NÃO É a eficácia de uma vacina"
 tags:
-  - Pandemic
   - Science
 description: "O que exatamente é a eficácia de uma vacina? Esse número se tornou muito popular, mas nem todas as interpretações sobre ele estão corretas."
 pubDatetime: 2021-06-13
