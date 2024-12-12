@@ -10,8 +10,8 @@ import ShareLinks from "@components/ShareLinks.astro";
 import { SITE } from "@config";
 
 export interface Props {
-  post: CollectionEntry<"blog">;
-  posts: CollectionEntry<"blog">[];
+  post: CollectionEntry<"posts">;
+  posts: CollectionEntry<"posts">[];
 }
 
 const { post, posts } = Astro.props;

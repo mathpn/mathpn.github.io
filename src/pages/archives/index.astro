@@ -13,7 +13,7 @@ if (!SITE.showArchives) {
   return Astro.redirect("/404");
 }
 
-const posts = await getCollection("blog", ({ data }) => !data.draft);
+const posts = await getCollection("posts", ({ data }) => !data.draft);
 
 const MonthMap: Record<string, string> = {
   "1": "January",

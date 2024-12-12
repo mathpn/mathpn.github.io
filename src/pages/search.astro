@@ -11,10 +11,10 @@ import type { CollectionEntry } from "astro:content";
 
 // Retrieve all published articles
 const posts = (await getCollection(
-  "blog",
+  "posts",
   ({ data }) => !data.draft,
-)) as CollectionEntry<"blog">[];
-const sortedPosts = getSortedPosts(posts) as CollectionEntry<"blog">[];
+)) as CollectionEntry<"posts">[];
+const sortedPosts = getSortedPosts(posts) as CollectionEntry<"posts">[];
 
 // List of items to search in
 const searchList = sortedPosts.map(({ data, slug }) => ({

@@ -2,7 +2,7 @@ import type socialIcons from "@assets/socialIcons";
 import type { CollectionEntry } from "astro:content";
 
 export type PostCollectionEntry =
-  | CollectionEntry<"blog">
+  | CollectionEntry<"posts">
   | CollectionEntry<"til">;
 
 export type Site = {

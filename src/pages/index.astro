@@ -11,11 +11,11 @@ import getSortedPosts from "@utils/getSortedPosts";
 import { SITE, SOCIALS } from "@config";
 import type { CollectionEntry } from "astro:content";
 
-const posts = await getCollection("blog");
+const posts = await getCollection("posts");
 const tils = await getCollection("til");
 
-const sortedPosts = getSortedPosts(posts) as CollectionEntry<"blog">[];
-const featuredPosts = sortedPosts.filter(({ data }) => data.featured) as CollectionEntry<"blog">[];
+const sortedPosts = getSortedPosts(posts) as CollectionEntry<"posts">[];
+const featuredPosts = sortedPosts.filter(({ data }) => data.featured) as CollectionEntry<"posts">[];
 
 const sortedTils = getSortedPosts(tils);
 
