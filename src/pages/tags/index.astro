@@ -1,19 +1,16 @@
 ---
-import { getCollection } from "astro:content";
-import Header from "@components/Header.astro";
 import Footer from "@components/Footer.astro";
+import Header from "@components/Header.astro";
+import Tag from "@components/Tag.astro";
+import { SITE } from "@config";
 import Layout from "@layouts/Layout.astro";
 import Main from "@layouts/Main.astro";
-import Tag from "@components/Tag.astro";
+import getSortedEntries from "@utils/getSortedEntries";
 import getUniqueTags from "@utils/getUniqueTags";
-import { SITE } from "@config";
-import type { PostCollectionEntry } from "types";
 
-const posts = await getCollection("posts") as PostCollectionEntry[];
-const tils = await getCollection("til") as PostCollectionEntry[];
-const allPosts = posts.concat(tils);
+const allEntries = await getSortedEntries();
 
-let tags = getUniqueTags(allPosts);
+let tags = getUniqueTags(allEntries);
 ---
 
 <Layout title={`Tags | ${SITE.title}`}>

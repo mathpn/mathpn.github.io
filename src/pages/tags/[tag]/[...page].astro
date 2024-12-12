@@ -2,15 +2,12 @@
 import { SITE } from "@config";
 import TagPosts from "@layouts/TagPosts.astro";
 import getPostsByTag from "@utils/getPostsByTag";
+import getSortedEntries from "@utils/getSortedEntries";
 import getUniqueTags from "@utils/getUniqueTags";
 import type { GetStaticPathsOptions } from "astro";
-import { getCollection } from "astro:content";
-import type { PostCollectionEntry } from "types";
 
 export async function getStaticPaths({ paginate }: GetStaticPathsOptions) {
-  const posts = (await getCollection("posts")) as PostCollectionEntry[];
-  const tils = (await getCollection("til")) as PostCollectionEntry[];
-  const allPosts = posts.concat(tils);
+  const allPosts = await getSortedEntries();
   const tags = getUniqueTags(allPosts);
 
   return tags.flatMap(({ tag, tagName }) => {
