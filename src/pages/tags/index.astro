@@ -10,8 +10,10 @@ import { SITE } from "@config";
 import type { PostCollectionEntry } from "types";
 
 const posts = await getCollection("posts") as PostCollectionEntry[];
+const tils = await getCollection("til") as PostCollectionEntry[];
+const allPosts = posts.concat(tils);
 
-let tags = getUniqueTags(posts);
+let tags = getUniqueTags(allPosts);
 ---
 
 <Layout title={`Tags | ${SITE.title}`}>

@@ -8,11 +8,13 @@ import { getCollection } from "astro:content";
 import type { PostCollectionEntry } from "types";
 
 export async function getStaticPaths({ paginate }: GetStaticPathsOptions) {
-  const tags = getUniqueTags(posts);
   const posts = (await getCollection("posts")) as PostCollectionEntry[];
+  const tils = (await getCollection("til")) as PostCollectionEntry[];
+  const allPosts = posts.concat(tils);
+  const tags = getUniqueTags(allPosts);
 
   return tags.flatMap(({ tag, tagName }) => {
-    const tagPosts = getPostsByTag(posts, tag);
+    const tagPosts = getPostsByTag(allPosts, tag);
 
     return paginate(tagPosts, {
       params: { tag },
