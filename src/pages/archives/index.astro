@@ -1,5 +1,4 @@
 ---
-import { getCollection } from "astro:content";
 import Card from "@components/Card";
 import Footer from "@components/Footer.astro";
 import Header from "@components/Header.astro";
@@ -7,13 +6,14 @@ import { SITE } from "@config";
 import Layout from "@layouts/Layout.astro";
 import Main from "@layouts/Main.astro";
 import getPostsByGroupCondition from "@utils/getPostsByGroupCondition";
+import getSortedEntries from "@utils/getSortedEntries";
 
 // Redirect to 404 page if `showArchives` config is false
 if (!SITE.showArchives) {
   return Astro.redirect("/404");
 }
 
-const posts = await getCollection("posts", ({ data }) => !data.draft);
+const entries = (await getSortedEntries()).filter(({ data }) => !data.draft);
 
 const MonthMap: Record<string, string> = {
   "1": "January",
@@ -36,9 +36,9 @@ const MonthMap: Record<string, string> = {
   <Main pageTitle="Archives" pageDesc="All the articles I've archived.">
     {
       Object.entries(
-        getPostsByGroupCondition(posts, (post) =>
-          post.data.pubDatetime.getFullYear(),
-        ),
+        getPostsByGroupCondition(entries, (post) =>
+          post.data.pubDatetime.getFullYear()
+        )
       )
         .sort(([yearA], [yearB]) => Number(yearB) - Number(yearA))
         .map(([year, yearGroup]) => (
@@ -48,8 +48,8 @@ const MonthMap: Record<string, string> = {
             {Object.entries(
               getPostsByGroupCondition(
                 yearGroup,
-                (post) => post.data.pubDatetime.getMonth() + 1,
-              ),
+                (post) => post.data.pubDatetime.getMonth() + 1
+              )
             )
               .sort(([monthA], [monthB]) => Number(monthB) - Number(monthA))
               .map(([month, monthGroup]) => (
@@ -63,6 +63,7 @@ const MonthMap: Record<string, string> = {
                       <Card
                         href={`/${collection}/${slug}`}
                         frontmatter={data}
+                        collection={collection}
                       />
                     ))}
                   </ul>

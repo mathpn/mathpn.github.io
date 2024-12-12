@@ -120,6 +120,7 @@ export default function SearchBar({ searchList }: Props) {
             <Card
               href={`/${item.collection}/${item.slug}/`}
               frontmatter={item.data}
+              collection={item.collection}
               key={`${refIndex}-${item.slug}`}
             />
           ))}

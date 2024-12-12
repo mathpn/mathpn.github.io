@@ -66,6 +66,7 @@ const socialCount = SOCIALS.filter((social) => social.active).length;
                   href={`/${collection}/${slug}/`}
                   frontmatter={data}
                   secHeading={false}
+                  collection={collection}
                 />
               ))}
             </ul>
@@ -106,6 +107,7 @@ const socialCount = SOCIALS.filter((social) => social.active).length;
                     href={`/${collection}/${slug}/`}
                     frontmatter={data}
                     secHeading={false}
+                    collection={collection}
                   />
                 ),
             )}
@@ -158,6 +160,7 @@ const socialCount = SOCIALS.filter((social) => social.active).length;
                     href={`/${collection}/${slug}/`}
                     frontmatter={data}
                     secHeading={false}
+                    collection={collection}
                   />
                 ),
             )}

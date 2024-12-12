@@ -29,7 +29,11 @@ const { page, tag, tagName } = Astro.props;
     <ul>
       {
         page.data.map(({ collection, slug, data }) => (
-          <Card href={`/${collection}/${slug}/`} frontmatter={data} />
+          <Card
+            href={`/${collection}/${slug}/`}
+            frontmatter={data}
+            collection={collection}
+          />
         ))
       }
     </ul>
