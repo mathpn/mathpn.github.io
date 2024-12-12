@@ -1,4 +1,5 @@
 import type { CollectionEntry } from "astro:content";
+import type { PostCollectionEntry } from "types";
 
 type GroupKey = string | number | symbol;
 
@@ -7,10 +8,10 @@ interface GroupFunction<T> {
 }
 
 const getPostsByGroupCondition = (
-  posts: CollectionEntry<"posts">[],
-  groupFunction: GroupFunction<CollectionEntry<"posts">>
+  posts: PostCollectionEntry[],
+  groupFunction: GroupFunction<PostCollectionEntry>
 ) => {
-  const result: Record<GroupKey, CollectionEntry<"posts">[]> = {};
+  const result: Record<GroupKey, PostCollectionEntry[]> = {};
   for (let i = 0; i < posts.length; i++) {
     const item = posts[i];
     const groupKey = groupFunction(item, i);

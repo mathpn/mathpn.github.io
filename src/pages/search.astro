@@ -13,6 +13,7 @@ const entries = await getSortedEntries();
 const searchList = entries.map(({ collection, data, slug }) => ({
   title: data.title,
   description: data.description,
+  tags: data.tags,
   collection: collection,
   data,
   slug,

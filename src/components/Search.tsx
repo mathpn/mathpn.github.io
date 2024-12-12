@@ -6,6 +6,7 @@ import type { PostCollectionEntry } from "types";
 export type SearchItem = {
   title: string;
   description: string | undefined;
+  tags: string[];
   data: PostCollectionEntry["data"];
   collection: PostCollectionEntry["collection"];
   slug: string;
@@ -34,7 +35,7 @@ export default function SearchBar({ searchList }: Props) {
   const fuse = useMemo(
     () =>
       new Fuse(searchList, {
-        keys: ["title", "description"],
+        keys: ["title", "description", "tags"],
         includeMatches: true,
         minMatchCharLength: 2,
         threshold: 0.5,
