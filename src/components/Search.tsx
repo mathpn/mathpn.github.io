@@ -1,12 +1,14 @@
-import Fuse from "fuse.js";
-import { useEffect, useRef, useState, useMemo, type FormEvent } from "react";
 import Card from "@components/Card";
-import type { CollectionEntry } from "astro:content";
+import Fuse from "fuse.js";
+import { useEffect, useMemo, useRef, useState, type FormEvent } from "react";
+import type { PostCollectionEntry } from "types";
 
 export type SearchItem = {
   title: string;
-  description: string;
-  data: CollectionEntry<"blog">["data"];
+  description: string | undefined;
+  tags: string[];
+  data: PostCollectionEntry["data"];
+  collection: PostCollectionEntry["collection"];
   slug: string;
 };
 
@@ -33,7 +35,7 @@ export default function SearchBar({ searchList }: Props) {
   const fuse = useMemo(
     () =>
       new Fuse(searchList, {
-        keys: ["title", "description"],
+        keys: ["title", "description", "tags"],
         includeMatches: true,
         minMatchCharLength: 2,
         threshold: 0.5,
@@ -116,8 +118,9 @@ export default function SearchBar({ searchList }: Props) {
         {searchResults &&
           searchResults.map(({ item, refIndex }) => (
             <Card
-              href={`/posts/${item.slug}/`}
+              href={`/${item.collection}/${item.slug}/`}
               frontmatter={item.data}
+              collection={item.collection}
               key={`${refIndex}-${item.slug}`}
             />
           ))}

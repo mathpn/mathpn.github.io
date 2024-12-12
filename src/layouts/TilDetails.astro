@@ -27,8 +27,8 @@ const {
 
 const ogImageUrl = typeof ogImage === "string" ? ogImage : ogImage?.src;
 const ogUrl = new URL(
-  ogImageUrl ?? `/posts/${slugifyStr(title)}.png`,
-  Astro.url.origin
+  ogImageUrl ?? `/${post.collection}/${slugifyStr(title)}.png`,
+  Astro.url.origin,
 ).href;
 
 const layoutProps = {
@@ -98,7 +98,7 @@ const nextPost =
       {
         prevPost && (
           <a
-            href={`/til/${prevPost.slug}`}
+            href={`/${post.collection}/${prevPost.slug}`}
             class="flex w-full gap-1 hover:opacity-75"
           >
             <svg
@@ -130,7 +130,7 @@ const nextPost =
       {
         nextPost && (
           <a
-            href={`/til/${nextPost.slug}`}
+            href={`/${post.collection}/${nextPost.slug}`}
             class="flex w-full justify-end gap-1 text-right hover:opacity-75 sm:col-start-2"
           >
             <div>
@@ -219,7 +219,7 @@ const nextPost =
    *  allowing sharing of sections easily */
   function addHeadingLinks() {
     const headings = Array.from(
-      document.querySelectorAll("h2, h3, h4, h5, h6")
+      document.querySelectorAll("h2, h3, h4, h5, h6"),
     );
     for (const heading of headings) {
       heading.classList.add("group");
@@ -249,6 +249,6 @@ const nextPost =
 
   /* Go to page start after page swap */
   document.addEventListener("astro:after-swap", () =>
-    window.scrollTo({ left: 0, top: 0, behavior: "instant" })
+    window.scrollTo({ left: 0, top: 0, behavior: "instant" }),
   );
 </script>

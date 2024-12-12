@@ -2,6 +2,7 @@
 title: "Exploring Fractals With Pytorch"
 tags:
   - Python
+  - Coding
 pubDatetime: 2018-12-05
 description: Let's use PyTorch to analyze 3D fractals by implementing the box-counting algorithm and calculate the fractal dimension and lacunarity of a given image.
 lang: "en-us"

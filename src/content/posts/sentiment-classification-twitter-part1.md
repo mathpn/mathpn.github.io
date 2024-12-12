@@ -2,6 +2,7 @@
 title: "Twitter sentiment classification - Part 1"
 tags:
   - Python
+  - Machine learning
 pubDatetime: 2018-12-27
 description: A sentiment classification project utilizing logistic regression on the Sentiment140 dataset.
 lang: "en-us"

@@ -3,6 +3,7 @@ title: Different lists
 tags:
   - Go
   - Elixir
+  - Coding
 description: Exploring the differences between lists in Go and Elixir
 pubDatetime: 2024-06-24
 lang: "en-us"
