@@ -10,13 +10,13 @@ import getSortedEntries from "@utils/getSortedEntries";
 const entries = await getSortedEntries();
 
 // List of items to search in
-const searchList = entries.map(({ collection, data, slug }) => ({
+const searchList = entries.map(({ collection, data, id }) => ({
   title: data.title,
   description: data.description,
   tags: data.tags,
   collection: collection,
   data,
-  slug,
+  id,
 }));
 ---
 

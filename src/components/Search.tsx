@@ -9,7 +9,7 @@ export type SearchItem = {
   tags: string[];
   data: PostCollectionEntry["data"];
   collection: PostCollectionEntry["collection"];
-  slug: string;
+  id: string;
 };
 
 interface Props {
@@ -25,7 +25,7 @@ export default function SearchBar({ searchList }: Props) {
   const inputRef = useRef<HTMLInputElement>(null);
   const [inputVal, setInputVal] = useState("");
   const [searchResults, setSearchResults] = useState<SearchResult[] | null>(
-    null
+    null,
   );
 
   const handleChange = (e: FormEvent<HTMLInputElement>) => {
@@ -40,7 +40,7 @@ export default function SearchBar({ searchList }: Props) {
         minMatchCharLength: 2,
         threshold: 0.5,
       }),
-    [searchList]
+    [searchList],
   );
 
   useEffect(() => {
@@ -118,10 +118,10 @@ export default function SearchBar({ searchList }: Props) {
         {searchResults &&
           searchResults.map(({ item, refIndex }) => (
             <Card
-              href={`/${item.collection}/${item.slug}/`}
+              href={`/${item.collection}/${item.id}/`}
               frontmatter={item.data}
               collection={item.collection}
-              key={`${refIndex}-${item.slug}`}
+              key={`${refIndex}-${item.id}`}
             />
           ))}
       </ul>

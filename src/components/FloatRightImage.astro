@@ -1,7 +1,6 @@
 ---
 import type { LocalImageProps, RemoteImageProps } from "astro:assets";
 import { Image } from "astro:assets";
-import { union } from "astro:schema";
 
 type Props = LocalImageProps & RemoteImageProps;
 const { src, ...attrs } = Astro.props;
