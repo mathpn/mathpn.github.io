@@ -6,7 +6,6 @@ export const SITE: Site = {
   profile: "https://github.com/mathpn/",
   desc: "Blog about technology, statistics, and other fun stuff.",
   title: "MPN",
-  ogImage: "astropaper-og.jpg",
   lightAndDarkMode: true,
   postPerIndex: 4,
   postPerPage: 10,
