@@ -44,12 +44,12 @@ const layoutProps = {
 
 /* ========== Prev/Next Posts ========== */
 
-const allPosts = posts.map(({ data: { title }, slug }) => ({
-  slug,
+const allPosts = posts.map(({ data: { title }, id}) => ({
+  id,
   title,
 }));
 
-const currentPostIndex = allPosts.findIndex((a) => a.slug === post.slug);
+const currentPostIndex = allPosts.findIndex((a) => a.id === post.id);
 
 const prevPost = currentPostIndex !== 0 ? allPosts[currentPostIndex - 1] : null;
 const nextPost =
@@ -98,7 +98,7 @@ const nextPost =
       {
         prevPost && (
           <a
-            href={`/${post.collection}/${prevPost.slug}`}
+            href={`/${post.collection}/${prevPost.id}`}
             class="flex w-full gap-1 hover:opacity-75"
           >
             <svg
@@ -130,7 +130,7 @@ const nextPost =
       {
         nextPost && (
           <a
-            href={`/${post.collection}/${nextPost.slug}`}
+            href={`/${post.collection}/${nextPost.id}`}
             class="flex w-full justify-end gap-1 text-right hover:opacity-75 sm:col-start-2"
           >
             <div>

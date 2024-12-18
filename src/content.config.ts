@@ -3,8 +3,7 @@ import { glob } from "astro/loaders";
 import { defineCollection, z } from "astro:content";
 
 const posts = defineCollection({
-  type: "content_layer",
-  loader: glob({ pattern: "**/*.md", base: "./src/content/posts" }),
+  loader: glob({ pattern: "**/*.{md,mdx}", base: "./src/content/posts" }),
   schema: ({ image }) =>
     z.object({
       author: z.string().default(SITE.author),
@@ -35,8 +34,7 @@ const posts = defineCollection({
 });
 
 const til = defineCollection({
-  type: "content_layer",
-  loader: glob({ pattern: "**/*.md", base: "./src/content/til" }),
+  loader: glob({ pattern: "**/*.{md,mdx}", base: "./src/content/til" }),
   schema: ({ image }) =>
     z.object({
       author: z.string().default(SITE.author),

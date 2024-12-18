@@ -1,7 +1,7 @@
 ---
 import { LOCALE, SITE } from "@config";
 import "@styles/base.css";
-import { ViewTransitions } from "astro:transitions";
+import { ClientRouter } from "astro:transitions";
 
 const googleSiteVerification = import.meta.env.PUBLIC_GOOGLE_SITE_VERIFICATION;
 
@@ -117,6 +117,7 @@ const structuredData = {
     <!-- Google JSON-LD Structured data -->
     <script
       type="application/ld+json"
+      is:inline
       set:html={JSON.stringify(structuredData)}
     />
 
@@ -142,7 +143,7 @@ const structuredData = {
       )
     }
 
-    <ViewTransitions />
+    <ClientRouter />
 
     <script is:inline src="/toggle-theme.js" async></script>
     <link

@@ -2,6 +2,7 @@
 import Tag from "@components/Tag.astro";
 import { slugifyStr } from "@utils/slugify";
 import type { CollectionEntry } from "astro:content";
+import { render } from "astro:content";
 
 export interface Props {
   post: CollectionEntry<"til">;
@@ -12,7 +13,7 @@ const { post, href } = Astro.props;
 
 const { title, pubDatetime, modDatetime, tags } = post.data;
 
-const { Content } = await post.render();
+const { Content } = await render(post);
 
 const latestDatetime = modDatetime || pubDatetime;
 ---
