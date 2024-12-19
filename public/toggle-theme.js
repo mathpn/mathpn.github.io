@@ -18,9 +18,28 @@ function getPreferTheme() {
 
 let themeValue = getPreferTheme();
 
+function getGiscusTheme() {
+  const theme = document.firstElementChild?.getAttribute("data-theme");
+  return theme === "dark" ? "noborder_dark" : "noborder_light";
+}
+
+function setGiscusTheme() {
+  function sendMessage(message) {
+    const iframe = document.querySelector("iframe.giscus-frame");
+    if (!iframe) return;
+    iframe.contentWindow.postMessage({ giscus: message }, "https://giscus.app");
+  }
+  sendMessage({
+    setConfig: {
+      theme: getGiscusTheme(),
+    },
+  });
+}
+
 function setPreference() {
   localStorage.setItem("theme", themeValue);
   reflectPreference();
+  setGiscusTheme();
 }
 
 function reflectPreference() {

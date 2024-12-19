@@ -1,14 +1,15 @@
 ---
-import Layout from "@layouts/Layout.astro";
-import Header from "@components/Header.astro";
-import Footer from "@components/Footer.astro";
-import Tag from "@components/Tag.astro";
 import Datetime from "@components/Datetime";
-import type { CollectionEntry} from "astro:content";
-import { render } from "astro:content";
-import { slugifyStr} from "@utils/slugify";
+import Footer from "@components/Footer.astro";
+import Header from "@components/Header.astro";
 import ShareLinks from "@components/ShareLinks.astro";
+import Tag from "@components/Tag.astro";
 import { SITE } from "@config";
+import Layout from "@layouts/Layout.astro";
+import { slugifyStr } from "@utils/slugify";
+import type { CollectionEntry } from "astro:content";
+import { render } from "astro:content";
+import Giscus from "components/Giscus.tsx";
 
 export interface Props {
   post: CollectionEntry<"posts">;
@@ -34,7 +35,7 @@ const { Content } = await render(post);
 const ogImageUrl = typeof ogImage === "string" ? ogImage : ogImage?.src;
 const ogUrl = new URL(
   ogImageUrl ?? `/${post.collection}/${slugifyStr(title)}.png`,
-  Astro.url.origin,
+  Astro.url.origin
 ).href;
 
 const layoutProps = {
@@ -50,7 +51,7 @@ const layoutProps = {
 
 /* ========== Prev/Next Posts ========== */
 
-const allPosts = posts.map(({ data: { title }, id}) => ({
+const allPosts = posts.map(({ data: { title }, id }) => ({
   id,
   title,
 }));
@@ -185,6 +186,9 @@ const nextPost =
         )
       }
     </div>
+
+    <Giscus client:only />
+    <hr class="my-6 border-dashed" />
   </main>
   <Footer />
 </Layout>
@@ -244,7 +248,7 @@ const nextPost =
    *  allowing sharing of sections easily */
   function addHeadingLinks() {
     const headings = Array.from(
-      document.querySelectorAll("h2, h3, h4, h5, h6"),
+      document.querySelectorAll("h2, h3, h4, h5, h6")
     );
     for (const heading of headings) {
       heading.classList.add("group");
@@ -316,6 +320,6 @@ const nextPost =
 
   /* Go to page start after page swap */
   document.addEventListener("astro:after-swap", () =>
-    window.scrollTo({ left: 0, top: 0, behavior: "instant" }),
+    window.scrollTo({ left: 0, top: 0, behavior: "instant" })
   );
 </script>
