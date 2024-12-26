@@ -2,6 +2,7 @@
 title: "WAL and durability"
 tags:
   - Databases
+  - Bookmarks
 pubDatetime: 2024-12-13
 lang: "en-us"
 ---

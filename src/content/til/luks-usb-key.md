@@ -3,6 +3,7 @@ title: "LUKS with USB unlock"
 tags:
   - Security
   - Home server
+  - Bookmarks
 pubDatetime: 2024-11-07
 lang: "en-us"
 ---
