@@ -33,8 +33,8 @@ const posts = defineCollection({
     }),
 });
 
-const til = defineCollection({
-  loader: glob({ pattern: "**/*.{md,mdx}", base: "./src/content/til" }),
+const notes = defineCollection({
+  loader: glob({ pattern: "**/*.{md,mdx}", base: "./src/content/notes" }),
   schema: ({ image }) =>
     z.object({
       author: z.string().default(SITE.author),
@@ -63,4 +63,4 @@ const til = defineCollection({
     }),
 });
 
-export const collections = { posts, til };
+export const collections = { posts, notes };

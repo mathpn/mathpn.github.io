@@ -1,0 +1,17 @@
+/* source-sans-3-extralight-italic */
+@font-face {
+	font-family: "Source Sans 3";
+	font-style: italic;
+	font-weight: 200 900;
+	font-stretch: 100%;
+	src: local("Source Sans 3 Italic"), local("SourceSans3-Italic"), url(source-sans-3-extralight-italic.woff2) format("woff2");
+}
+/* source-sans-3-extralight */
+@font-face {
+	font-family: "Source Sans 3";
+	font-style: normal;
+	font-weight: 200 900;
+	font-stretch: 100%;
+	src: local("Source Sans 3"), local("SourceSans3-Roman"), url(source-sans-3-extralight.woff2) format("woff2");
+}
+

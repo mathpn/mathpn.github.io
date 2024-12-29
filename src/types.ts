@@ -3,7 +3,7 @@ import type { CollectionEntry } from "astro:content";
 
 export type PostCollectionEntry =
   | CollectionEntry<"posts">
-  | CollectionEntry<"til">;
+  | CollectionEntry<"notes">;
 
 export type Site = {
   website: string;
@@ -15,7 +15,7 @@ export type Site = {
   lightAndDarkMode: boolean;
   postPerIndex: number;
   postPerPage: number;
-  tilPerPage: number;
+  notesPerPage: number;
   scheduledPostMargin: number;
   showArchives?: boolean;
   editPost?: {

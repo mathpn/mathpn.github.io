@@ -21,7 +21,7 @@
     "astro": "^5.0.9",
     "fuse.js": "^7.0.0",
     "hyphenopoly": "^6.0.0",
-    "katex": "^0.16.11",
+    "katex": "^0.16.19",
     "lodash.kebabcase": "^4.1.1",
     "rehype-katex": "^7.0.1",
     "remark-collapse": "^0.1.2",

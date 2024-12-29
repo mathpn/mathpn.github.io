@@ -9,7 +9,7 @@ export async function GET() {
   return rss({
     stylesheet: "/rss/styles.xsl",
     title: SITE.title,
-    description: SITE.desc,
+    description: "Feed of long-form posts of MPN.\n\n" + SITE.desc,
     site: SITE.website,
     items: sortedPosts.map(({ collection, id, data }) => ({
       link: `${collection}/${id}/`,
