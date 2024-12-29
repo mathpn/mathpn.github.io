@@ -4,12 +4,12 @@ import getSortedPosts from "@utils/getSortedPosts";
 import { SITE } from "@config";
 
 export async function GET() {
-  const posts = await getCollection("til");
+  const posts = await getCollection("notes");
   const sortedPosts = getSortedPosts(posts);
   return rss({
     stylesheet: "/rss/styles.xsl",
-    title: SITE.title + " - TIL",
-    description: "Today I learned (TIL) section feed.",
+    title: SITE.title + " - Notes",
+    description: "Feed of short-form notes of MPN.\n\n" + SITE.desc,
     site: SITE.website,
     items: sortedPosts.map(({ collection, data, id }) => ({
       link: `${collection}/${id}/`,

@@ -1,6 +1,6 @@
 ---
 import { SITE } from "@config";
-import Til from "@layouts/Til.astro";
+import Notes from "@layouts/Notes.astro";
 import type { GetStaticPaths } from "astro";
 import { getCollection } from "astro:content";
 import getSortedPosts from "@utils/getSortedPosts";
@@ -8,15 +8,15 @@ import type { Page } from "astro";
 import type { CollectionEntry } from "astro:content";
 
 export const getStaticPaths = (async ({ paginate }) => {
-  const posts = await getCollection("til", ({ data }) => !data.draft);
-  return paginate(getSortedPosts(posts), { pageSize: SITE.tilPerPage });
+  const posts = await getCollection("notes", ({ data }) => !data.draft);
+  return paginate(getSortedPosts(posts), { pageSize: SITE.notesPerPage });
 }) satisfies GetStaticPaths;
 
 interface Props {
-  page: Page<CollectionEntry<"til">>;
+  page: Page<CollectionEntry<"notes">>;
 }
 
 const { page } = Astro.props;
 ---
 
-<Til {page} />
+<Notes {page} />

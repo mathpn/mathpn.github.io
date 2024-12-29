@@ -9,7 +9,7 @@ export const SITE: Site = {
   lightAndDarkMode: true,
   postPerIndex: 4,
   postPerPage: 10,
-  tilPerPage: 5,
+  notesPerPage: 5,
   scheduledPostMargin: 15 * 60 * 1000, // 15 minutes
   showArchives: true,
 };

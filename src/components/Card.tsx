@@ -5,22 +5,17 @@ import type { PostCollectionEntry } from "types";
 export interface Props {
   href?: string;
   frontmatter: PostCollectionEntry["data"];
-  collection: string,
+  collection: string;
   secHeading?: boolean;
 }
 
-export default function Card({ href, frontmatter, collection, secHeading = true }: Props) {
+export default function Card({ href, frontmatter, secHeading = true }: Props) {
   const { title, pubDatetime, modDatetime, description } = frontmatter;
-
-  const latestDatetime = modDatetime || pubDatetime;
-  let formattedTitle = title;
-  if (collection == "til") {
-    formattedTitle = `TIL ${latestDatetime.toISOString().split("T")[0]}: ${title}`
-  }
 
   const headerProps = {
     style: { viewTransitionName: slugifyStr(title) },
-    className: "text-xl sm:text-2xl font-medium decoration-dashed hover:underline",
+    className:
+      "text-xl sm:text-2xl font-medium decoration-dashed hover:underline",
   };
 
   return (
@@ -30,9 +25,9 @@ export default function Card({ href, frontmatter, collection, secHeading = true 
         className="inline-block text-lg font-medium text-skin-accent decoration-dashed underline-offset-4 focus-visible:no-underline focus-visible:underline-offset-0"
       >
         {secHeading ? (
-          <h2 {...headerProps}>{formattedTitle}</h2>
+          <h2 {...headerProps}>{title}</h2>
         ) : (
-          <h3 {...headerProps}>{formattedTitle}</h3>
+          <h3 {...headerProps}>{title}</h3>
         )}
       </a>
       <Datetime pubDatetime={pubDatetime} modDatetime={modDatetime} />

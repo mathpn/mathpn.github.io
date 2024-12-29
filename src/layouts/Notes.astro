@@ -4,23 +4,23 @@ import Main from "@layouts/Main.astro";
 import Header from "@components/Header.astro";
 import Footer from "@components/Footer.astro";
 import Pagination from "@components/Pagination.astro";
-import TilPost from "@components/TilPost.astro";
+import Post from "@components/Post.astro";
 import { SITE } from "@config";
 import type { Page } from "astro";
 import type { CollectionEntry } from "astro:content";
 
 export interface Props {
-  page: Page<CollectionEntry<"til">>;
+  page: Page<CollectionEntry<"notes">>;
 }
 
 const { page } = Astro.props;
 ---
 
-<Layout title={`TIL | ${SITE.title}`}>
-  <Header activeNav="til" />
-  <Main pageTitle="TIL" pageDesc="Today I learned (TIL) entries.">
+<Layout title={`Notes | ${SITE.title}`}>
+  <Header activeNav="notes" />
+  <Main pageTitle="Notes" pageDesc="All the short-form notes I've posted.">
     <ul>
-      {page.data.map((post) => <TilPost post={post} href={post.id} />)}
+      {page.data.map((post) => <Post post={post} href={post.id} />)}
     </ul>
   </Main>
 
