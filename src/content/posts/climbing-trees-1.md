@@ -20,7 +20,8 @@ Let's simulate this weather example:
 ![Scatter plot of humidity and cloud coverage showing that it's more likely to rain when its cloudy and humid](../../assets/images/climbing-trees-1/weather_conditions.png)
 
 A decision tree can be thought of as making consecutive decisions by asking a series of questions about our data.
-Each internal tree node uses a certain feature (in our example, cloud cover or humidity) to divide its region into two using a split value. Each new region can be further divided into two. Each node that divides its region into two is called an _internal node_.
+Each internal tree node uses a certain feature (in our example, cloud cover or humidity) to divide its region into two using a split value.
+Each new region can be further divided into two. Each node that divides its region into two is called an _internal node_.
 
 _Leaf (or terminal) nodes_ don't ask any more questions, but rather provide a prediction for its region. In our example, it might say _"Rain"_ or _"No rain"_. More precisely, it assigns a probability for each outcome.
 
@@ -30,8 +31,8 @@ Let's take a look at a decision tree fitted to our weather example:
 
 This decision tree was kept intentionally small.
 From top to bottom, this graph represents all decision boundaries of our simple tree.
-For instance, we predict that it'll rain if humidity is above 59% and cloud cover is above 45%.
-This region is defined by following the rightmost path in the graph.
+It recursively partitions the feature space such that the samples with the same labels or similar target values are grouped together.
+For instance, we predict that it'll rain if humidity is above 59% and cloud cover is above 45% (rightmost path in the graph) because most points (_instances_) in this region are of the "Rain" class.
 
 The class shown is only relevant for leaf nodes, that is, those at the bottom row.
 The `value` property shows how many samples there are for each class in each region.
@@ -43,7 +44,7 @@ We can also visualize the decision boundaries of the tree by overlaying them ont
 
 ![Scatter plot of humidity and cloud coverage showing prediction regions from a decision tree](../../assets/images/climbing-trees-1/weather_conditions_with_tree.png)
 
-We can see the straight boundaries between regions. More formally, a decision tree is a hierarchical structure that recursively divide our features into _cuboid regions_. Since we have 2 features (2 dimensions), the cuboid regions are squares.
+We can see the straight boundaries between regions. More formally, a decision tree is a hierarchical structure that recursively divide our features into _cuboid regions_. Since we have 2 features (2 dimensions) in our example, the cuboid regions are squares.
 
 ## Mathematical definition
 
@@ -53,7 +54,8 @@ $$
 f(x) = \sum_{m=1}^{M} w_m \mathbf{I}(x \in R_m)
 $$
 
-Where $x$ are the input features, $R_m$ is the $m$'th region and $w_m$ is the model applied to this region. $\mathbf{I}(x \in R_m)$ is 1 if $x$ is contained in the $m$'th region, 0 otherwise. Each model $w$ provides a prediction for a region, and their combination defines the decision tree. Typically, this model is simply a constant (regression) or a vector of probabilities (classification). We'll dive deeper into this definition later.
+Where $x$ are the input features, $R_m$ is the $m$'th region and $w_m$ is the model applied to this region. $\mathbf{I}(x \in R_m)$ is 1 if $x$ is contained in the $m$'th region, 0 otherwise. Each model $w$ provides a prediction for a region, and their combination defines the decision tree.
+This model, which will be explored later, is typically a constant (regression) or a vector of probabilities (classification).
 
 The regions cannot assume arbitrary boundaries, though. They are always _parallel_ to some axis and can only divide a previous region into two.
 This can be a limitation, but it greatly reduces the computational complexity of constructing a decision tree. In our weather example, it's trivial to find the following decision boundary using other methods (I have used logistic regression):
@@ -63,10 +65,11 @@ This can be a limitation, but it greatly reduces the computational complexity of
 However, axis-parallel splits (single feature) are much easier to compute than oblique splits (multiple features). Finding the best split of a single feature involves sorting the data and evaluating splits.
 Since the latter is negligible compared to sorting, this operation has a time complexity of $O(n \log n)$, where $n$ is the number of data points.
 To find the best oblique split combining two features, however, we must first consider all possible $O(n^2)$ lines formed by pairs of points.
-For each line, you need to evaluate which side each point falls on: $O(n)$. This amounts to a total time complexity of $O(n^3)$, which can become much worse if we consider oblique splits with more than two features.
+For each line, you need to evaluate which side each point falls on: $O(n)$. This amounts to a total time complexity of $O(n^3)$.
+More generally, an oblique split has a time complexity of $O(n^{d+1})$, in which $d$ is the number of features.
 Therefore, we compromise on using only axis-parallel splits, which define cuboid regions.
 
-Each region $R_m$ is defined by a path from the root to the $m$'th leaf of the tree. For instance, consider the path that defines the region $\{ Humidity > 59; Cloud > 45 \}$:
+Each region $R_m$ is defined by a path from the root to the $m$'th leaf of the tree. For instance, consider the path that defines the region $R = \{(Humidity,\ Cloud)\ |\ Humidity > 59\ \text{and}\ Cloud > 45\}$.
 
 ![Path between the root node and a leaf node](../../assets/images/climbing-trees-1/weather_tree_path.svg)
 
