@@ -31,7 +31,7 @@ const {
 
 const socialImageURL = new URL(
   ogImage ?? SITE.ogImage ?? "og.png",
-  Astro.url.origin,
+  Astro.url.origin
 ).href;
 
 const structuredData = {
@@ -84,7 +84,8 @@ const structuredData = {
 
     <!-- Analytics -->
     <script
-      defer is:inline
+      defer
+      is:inline
       src="https://cloud.umami.is/script.js"
       data-website-id="51230717-6a20-4dd8-ad65-5eff6c1a7b52"
       data-domains="mathpn.com"></script>
@@ -121,13 +122,9 @@ const structuredData = {
       set:html={JSON.stringify(structuredData)}
     />
 
-    <!-- Google Font -->
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link
-      href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@300..700&family=Source+Sans+3:ital,wght@0,200..900;1,200..900&family=Source+Serif+4:ital,opsz,wght@0,8..60,200..900;1,8..60,200..900&display=swap"
-      rel="stylesheet"
-    />
+    <link href="/fonts/fira-code/fira-code.css" rel="stylesheet" />
+    <link href="/fonts/source-sans-3/source-sans-3.css" rel="stylesheet" />
+    <link href="/fonts/source-serif-4/source-serif-4.css" rel="stylesheet" />
 
     <meta name="theme-color" content="" />
 
