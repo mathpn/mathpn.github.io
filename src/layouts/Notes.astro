@@ -18,7 +18,7 @@ const { page } = Astro.props;
 
 <Layout title={`Notes | ${SITE.title}`}>
   <Header activeNav="notes" />
-  <Main pageTitle="Notes" pageDesc="Notes entries.">
+  <Main pageTitle="Notes" pageDesc="All the short-form notes I've posted.">
     <ul>
       {page.data.map((post) => <Post post={post} href={post.id} />)}
     </ul>
