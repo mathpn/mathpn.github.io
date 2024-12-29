@@ -1,36 +1,45 @@
 ---
 import Tag from "@components/Tag.astro";
 import { slugifyStr } from "@utils/slugify";
-import type { CollectionEntry } from "astro:content";
 import { render } from "astro:content";
+import Datetime from "components/Datetime";
+import type { PostCollectionEntry } from "types";
 
 export interface Props {
-  post: CollectionEntry<"til">;
+  post: PostCollectionEntry;
   href?: string;
 }
 
 const { post, href } = Astro.props;
 
-const { title, pubDatetime, modDatetime, tags } = post.data;
+const { title, editPost, pubDatetime, modDatetime, tags } = post.data;
 
 const { Content } = await render(post);
-
-const latestDatetime = modDatetime || pubDatetime;
 ---
 
 {
   href ? (
     <a href={href}>
       <h1 transition:name={slugifyStr(title)} class="post-title">
-        {latestDatetime.toISOString().split("T")[0]}: {title}
+        {title}
       </h1>
     </a>
   ) : (
     <h1 transition:name={slugifyStr(title)} class="post-title">
-      {latestDatetime.toISOString().split("T")[0]}: {title}
+      {title}
     </h1>
   )
 }
+
+<Datetime
+  pubDatetime={pubDatetime}
+  modDatetime={modDatetime}
+  size="lg"
+  className="my-2"
+  editPost={editPost}
+  postId={post.id}
+/>
+
 <article
   id="article"
   class="prose md:prose-lg lg:prose-xl mx-auto mt-8 max-w-3xl lg:max-w-4xl"
