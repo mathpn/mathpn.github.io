@@ -3,6 +3,7 @@ title: "Deterministic simulation testing"
 tags:
   - Distributed systems
   - Bookmarks
+  - TIL
 pubDatetime: 2024-12-11
 lang: "en-us"
 ---
