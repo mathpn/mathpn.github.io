@@ -11,7 +11,13 @@ lang: "en-us"
 
 This is the first in a series of posts about decision trees in the context of machine learning. The goal here is to provide a foundational understanding of decision trees and implement them.
 
-## What is a decision tree
+Decision trees are not amazing algorithms by themselves. They have limitations that can result in suboptimal and even weird predictions.
+And yet, they have become extremely popular. Some would even say they are the _de facto_ go-to algorithm for many machine learning domains.
+This is due to _bagging_ and _boosting_, techniques that turned subpar decision trees into state-of-the-art algorithms. We'll explore them in the future.
+
+First, we'll build an intuition for what are decision trees and define them mathematically. Then, we'll explore how decision trees are built. This will allow us to grasp their main characteristics, advantages and disadvantages.
+
+## What is a decision tree?
 
 Imagine you're trying to decide whether to take an umbrella when leaving home. You might ask questions like: _"Are there clouds?"_. If yes, you might then ask _"What's the humidity level?"_. Each question helps you narrow down the decision. This is how a decision tree works.
 
@@ -20,8 +26,8 @@ Let's simulate this weather example:
 ![Scatter plot of humidity and cloud coverage showing that it's more likely to rain when its cloudy and humid](../../assets/images/climbing-trees-1/weather_conditions.png)
 
 A decision tree can be thought of as making consecutive decisions by asking a series of questions about our data.
-Each internal tree node uses a certain feature (in our example, cloud cover or humidity) to divide its region into two using a split value.
-Each new region can be further divided into two. Each node that divides its region into two is called an _internal node_.
+Each internal tree _node_ uses a certain feature (in our example, cloud cover or humidity) to divide its region into two using a split value.
+Each new region can be further divided into two. A node that divides its region into two is called an _internal node_.
 
 _Leaf (or terminal) nodes_ don't ask any more questions, but rather provide a prediction for its region. In our example, it might say _"Rain"_ or _"No rain"_. More precisely, it assigns a probability for each outcome.
 
@@ -31,12 +37,15 @@ Let's take a look at a decision tree fitted to our weather example:
 
 This decision tree was kept intentionally small.
 From top to bottom, this graph represents all decision boundaries of our simple tree.
-It recursively partitions the feature space such that the samples with the same labels or similar target values are grouped together.
+Each internal node produces two _branches_, that is, two paths that can be followed. These branches recursively partitions the feature space such that the samples with the same labels or similar target values are grouped together.
 For instance, we predict that it'll rain if humidity is above 59% and cloud cover is above 45% (rightmost path in the graph) because most points (_instances_) in this region are of the "Rain" class.
 
 The class shown is only relevant for leaf nodes, that is, those at the bottom row.
 The `value` property shows how many samples there are for each class in each region.
 A _pure node_ has only instances of one class in its region. Since all nodes contain at least one instance of both classes (that is, "Rain" and "No Rain"), all nodes are _impure_.
+The objective during training is to _reduce impurity_ as much as possible. If all nodes are pure, then the tree has _zero error_ on the training data set. This is how decision trees learn.
+
+Unlike linear models, they do not model the entire data distribution. Rather, each region has independent predicted values.
 
 This visualization of the tree is very easy to interpret. We can follow each path and clearly see why a prediction was made, that is, the model is easily _explainable_ (the opposite of a _black-box_ model). This is one of the reasons why decision trees are popular. Simple decision trees can even be applied in some practical settings (e.g. medicine) without machine assistance.
 
