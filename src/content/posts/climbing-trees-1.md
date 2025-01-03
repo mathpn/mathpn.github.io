@@ -45,15 +45,29 @@ The `value` property shows how many samples there are for each class in each reg
 A _pure node_ has only instances of one class in its region. Since all nodes contain at least one instance of both classes (that is, "Rain" and "No Rain"), all nodes are _impure_.
 The objective during training is to _reduce impurity_ as much as possible. If all nodes are pure, then the tree has _zero error_ on the training data set. This is how decision trees learn.
 
-Unlike linear models, they do not model the entire data distribution. Rather, each region has independent predicted values.
-
 This visualization of the tree is very easy to interpret. We can follow each path and clearly see why a prediction was made, that is, the model is easily _explainable_ (the opposite of a _black-box_ model). This is one of the reasons why decision trees are popular. Simple decision trees can even be applied in some practical settings (e.g. medicine) without machine assistance.
 
 We can also visualize the decision boundaries of the tree by overlaying them onto the scatter plot of our data:
 
-![Scatter plot of humidity and cloud coverage showing prediction regions from a decision tree](../../assets/images/climbing-trees-1/weather_conditions_with_tree.png)
+![Scatter plot of humidity and cloud coverage showing prediction regions from a decision tree](../../assets/images/climbing-trees-1/weather_conditions_with_shallow_tree.png)
 
 We can see the straight boundaries between regions. More formally, a decision tree is a hierarchical structure that recursively divide our features into _cuboid regions_. Since we have 2 features (2 dimensions) in our example, the cuboid regions are squares.
+
+## Types of trees
+
+Broadly, there are two types of decision trees: _classification_ and _regression_ trees. While they share the same fundamental structure and splitting methodology, they differ in their output and how they make predictions.
+
+Classification trees are designed to predict categorical outcomes -- they assign input data to predefined classes or categories.
+At each leaf node, the tree predicts the most common class among the training samples that reached that node.
+Our weather example involves a classification tree and the leaves predict whether it will rain or not.
+The prediction is made by counting the proportion of training samples of each class at the leaf node and selecting the majority class.
+Think of it as the tree asking a series of yes/no questions about the input features until it can make an educated guess about which category the input belongs to.
+
+Regression trees, on the other hand, predict continuous numerical values rather than categories.
+Instead of predicting a class at each leaf node, regression trees typically output the average value of all training samples that reached that node.
+For instance, a regression tree might predict a house's price based on features like square footage, number of bedrooms, and location.
+Each split in the tree tries to group together similar numerical values.
+When a new example comes in, the tree can guide it to a leaf node containing training examples with similar target values and use their average as the prediction.
 
 ## Mathematical definition
 
@@ -72,7 +86,7 @@ This can be a limitation, but it greatly reduces the computational complexity of
 ![Weather scatter plot with diagonal decision boundary](../../assets/images/climbing-trees-1/weather_conditions_boundary.png)
 
 However, axis-parallel splits (single feature) are much easier to compute than oblique splits (multiple features). Finding the best split of a single feature involves sorting the data and evaluating splits.
-Since the latter is negligible compared to sorting, this operation has a time complexity of $O(n \log n)$, where $n$ is the number of data points.
+Since the latter is negligible compared to sorting, this operation has a [time complexity](https://en.wikipedia.org/wiki/Time_complexity) of $O(n \log n)$, where $n$ is the number of data points.
 To find the best oblique split combining two features, however, we must first consider all possible $O(n^2)$ lines formed by pairs of points.
 For each line, you need to evaluate which side each point falls on: $O(n)$. This amounts to a total time complexity of $O(n^3)$.
 More generally, an oblique split has a time complexity of $O(n^{d+1})$, in which $d$ is the number of features.
@@ -82,7 +96,38 @@ Each region $R_m$ is defined by a path from the root to the $m$'th leaf of the t
 
 ![Path between the root node and a leaf node](../../assets/images/climbing-trees-1/weather_tree_path.svg)
 
+This region can be visualized on the scatter plot:
+
 ![Defined region in scatter plot](../../assets/images/climbing-trees-1/weather_conditions_region.png)
+
+Unlike linear models, decision trees do not model the entire data distribution. Rather, each region has independent predicted values.
+More formally, adding all independent regions defines a [piecewise function](https://en.wikipedia.org/wiki/Piecewise_function) that can approximate any pattern in the data, but it may struggle to represent smooth or continuous functions properly.
+
+## Bias-variance tradeoff
+
+As all other machine learning algorithms, trees are also haunted by the bias-variance tradeoff.
+If this concept is new to you, I highly recommend reading about it first, but come back later.
+In summary, _bias_ refers to the error that a model makes due to oversimplification of relationships between features (_underfitting_).
+_Variance_ measures how sensitive model predictions are to small fluctuations in the training set. High variance means that the model is capturing _noise_ rather than true relationships (_overfitting_).
+Reducing bias tends to increase variance and vice-versa.
+Finding an optimal bias-variance balance is crucial to achieve good prediction accuracy.
+
+Bigger and therefore deeper trees present more variance. If you fully grow a tree, it will partition the feature space until the error is zero[^almost_zero_error].
+The model will have effectively memorized the training set -- including noise -- which results in _overfitting_.
+Therefore, fully-grown trees have high variance.
+
+[^almost_zero_error]: The error may not reach zero if and only if there are two or more points with _exactly_ the same feature values but different target values.
+
+If we rebuild our example tree until the error is 0 we get the following regions:
+
+![Scatter plot of humidity and cloud coverage showing prediction regions from a deep decision tree](../../assets/images/climbing-trees-1/weather_conditions_with_deep_tree.png)
+
+It has perfect accuracy, but it has very unusual boundaries due to noise (high variance). This model doesn't generalize well, that is, it would score poorly with new data. There are different ways to limit tree variance, namely:
+
+- Limiting depth
+- Requiring a minimum number of points per node
+- Requiring a minimum decrease in loss to split the node
+## Splitting criteria
 
 For each split, we test many split points for all features and use the one that improves our metric the most. We'll discuss this metric later.
 Without the constraint that boundaries must be parallel to one axis, the line defining the region would depend on two or more features, thus increasing by a lot the number of regions we'd have to test to find the best one.
