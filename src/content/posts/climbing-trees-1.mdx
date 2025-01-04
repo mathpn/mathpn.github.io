@@ -74,7 +74,7 @@ When a new example comes in, the tree can guide it to a leaf node containing tra
 Mathematically, a decision tree can be described as:
 
 $$
-f(x) = \sum_{m=1}^{M} w_m \mathbf{I}(x \in R_m)
+f(x) = \sum_{m=1}^{M} w_m \mathbb{I}(x \in R_m)
 $$
 
 Where $x$ are the input features, $R_m$ is the $m$'th region and $w_m$ is the value of this region. $\mathbf{I}(x \in R_m)$ is 1 if $x$ is contained in the $m$'th region, 0 otherwise. The values $w$ are typically a constant (regression) or a vector of probabilities (classification). The combination of regions and values defines the decision tree.
@@ -178,10 +178,55 @@ Additive structure, XOR and parity involve global dependencies that require mult
 Decision trees split data based on one feature at a time, therefore are inefficient at capturing these relationships.
 Multiplexer problems require conditional rules which are not hierarchical, making the tree very large to account for all combinations of selector-input pairs.
 
-In more complex real-world datasets, it's quite likely that multiple non-hierarchical concepts are present, leading to large bias. If they have subpar variance _and_ bias, decision trees may look like a poor choice of algorithm. Indeed, they rarely shine on their own, but rather as _ensembles_ (with bagging or boosting), which we'll cover in the future.
+In more complex real-world datasets, it's quite likely that multiple non-hierarchical concepts are present, leading to large biases. If they have subpar variance _and_ bias, decision trees may look like a poor choice of algorithm. Indeed, they rarely shine on their own, but rather as _ensembles_ (with bagging or boosting), which we'll cover in the future.
 
 [^sampling]: Each class was sampled from a Bivariate (2D) Gaussian distribution with SD=1. One class is shifted by 1.5 units both up and to the right.
 
+<details>
+  <summary>The staircase effect</summary>
+  TODO ...
+</details>
+
 ## Objective functions
 
-...
+We need to define objective functions to optimize during training. Classification trees optimize either Gini impurity or entropy.
+Regression trees usually use mean squared error.
+
+### Misclassification rate
+
+$$
+\text{Misclassification Rate} = \frac{\sum_{i=1}^N \mathbb{I}(\hat{y}_i \neq y_i)}{N}
+$$
+
+This is a very intuitive objective for classification. It measures the proportion of misclassified examples. The prediction $\hat{y}$ is the majority vote of the node. Our goal is to decrease leaf node impurity, which is aligned with the misclassification rate function. However, this is not a good objective and is not used during training because it is not sensitive enough.
+
+### Gini impurity
+
+The Gini impurity[^gini_confusion] over a set of class probabilities $p$ with $c$ classes is defined as:
+
+[^gini_confusion]: Not to be confused with the [Gini coefficient](https://en.wikipedia.org/wiki/Gini_coefficient)
+
+$$
+I_{G}(p) = \sum_{k=1}^{c} p_{k}(1 - p_{k}) = 1 - \sum_{k=1}^c p_{k}^2
+$$
+
+It measures how often a randomly chosen element of a set would be incorrectly labeled if it were labeled randomly and independently according to the distribution of labels in the set.
+When the node is pure, one class has a probability of 1 and the rest 0, so the Gini impurity is also 0.
+The worst Gini impurity arises when the probabilities are uniform among classes, that is, a node with maximum impurity is no better than a coin toss at classifying examples.
+It can be shown that the upper bound of Gini impurity is 1 as the number of classes grow.
+
+### Entropy
+
+$$
+H(p) = - \sum_{k=1}^{c} p_{k}\ log_{2} p_{k}
+$$
+
+### Comparing classification objectives
+
+### Mean squared error
+
+$$
+MSE = \frac{1}{N} \sum_{i=1}^N (\hat{y}_{i} - y_{i})^2
+$$
+
+## Constructing a decision tree
