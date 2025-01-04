@@ -5,7 +5,7 @@ tags:
   - Decision trees
 description: "This is the first in a series of posts about decision trees in the context of machine learning. The goal here is to provide a foundational understanding of decision trees and implement them."
 pubDatetime: 1900-01-01
-draft: true
+draft: false
 lang: "en-us"
 ---
 
@@ -77,8 +77,7 @@ $$
 f(x) = \sum_{m=1}^{M} w_m \mathbf{I}(x \in R_m)
 $$
 
-Where $x$ are the input features, $R_m$ is the $m$'th region and $w_m$ is the model applied to this region. $\mathbf{I}(x \in R_m)$ is 1 if $x$ is contained in the $m$'th region, 0 otherwise. Each model $w$ provides a prediction for a region, and their combination defines the decision tree.
-This model, which will be explored later, is typically a constant (regression) or a vector of probabilities (classification).
+Where $x$ are the input features, $R_m$ is the $m$'th region and $w_m$ is the value of this region. $\mathbf{I}(x \in R_m)$ is 1 if $x$ is contained in the $m$'th region, 0 otherwise. The values $w$ are typically a constant (regression) or a vector of probabilities (classification). The combination of regions and values defines the decision tree.
 
 The regions cannot assume arbitrary boundaries, though. They are always _parallel_ to some axis and can only divide a previous region into two.
 This can be a limitation, but it greatly reduces the computational complexity of constructing a decision tree. In our weather example, it's trivial to find the following decision boundary using other methods (I have used logistic regression):
@@ -105,16 +104,30 @@ More formally, adding all independent regions defines a [piecewise function](htt
 
 ## Bias-variance tradeoff
 
+TODO add sources
+
 As all other machine learning algorithms, trees are also haunted by the bias-variance tradeoff.
 If this concept is new to you, I highly recommend reading about it first, but come back later.
-In summary, _bias_ refers to the error that a model makes due to oversimplification of relationships between features (_underfitting_).
-_Variance_ measures how sensitive model predictions are to small fluctuations in the training set. High variance means that the model is capturing _noise_ rather than true relationships (_overfitting_).
-Reducing bias tends to increase variance and vice-versa.
-Finding an optimal bias-variance balance is crucial to achieve good prediction accuracy.
 
-Bigger and therefore deeper trees present more variance. If you fully grow a tree, it will partition the feature space until the error is zero[^almost_zero_error].
-The model will have effectively memorized the training set -- including noise -- which results in _overfitting_.
-Therefore, fully-grown trees have high variance.
+<details>
+  <summary>Bias-variance tradeoff refresher</summary>
+  In summary, _bias_ refers to the error that a model makes due to
+  oversimplification of relationships between features (_underfitting_).
+  _Variance_ measures how sensitive model predictions are to small fluctuations
+  in the training set. High variance means that the model is capturing _noise_
+  rather than true relationships (_overfitting_). Reducing bias tends to
+  increase variance and vice-versa. Finding an optimal bias-variance balance is
+  crucial to achieve good prediction accuracy.
+</details>
+
+### Decision tree variance
+
+TODO explain variance due to greedy
+
+Due to the non-linear and non-smooth nature of trees, they easily capture noise.
+Thus, deeper trees present more variance.
+If you fully grow a tree, it will partition the feature space until the error is zero[^almost_zero_error].
+The model will have effectively _memorized_ the training set -- including noise -- which results in _overfitting_.
 
 [^almost_zero_error]: The error may not reach zero if and only if there are two or more points with _exactly_ the same feature values but different target values.
 
@@ -127,9 +140,48 @@ It has perfect accuracy, but it has very unusual boundaries due to noise (high v
 - Limiting depth
 - Requiring a minimum number of points per node
 - Requiring a minimum decrease in loss to split the node
-## Splitting criteria
 
-For each split, we test many split points for all features and use the one that improves our metric the most. We'll discuss this metric later.
-Without the constraint that boundaries must be parallel to one axis, the line defining the region would depend on two or more features, thus increasing by a lot the number of regions we'd have to test to find the best one.
+TODO: The last one is usually not a good idea for a reason we'll see later.
 
-This constraint may impair the model's ability to learn relationships that depend on two variables. However, given enough splits (larger tree size), it's easy to see that _any_ relationship can be approximated.
+Another possibility is to fully grow the tree and later _prune it_ to balance complexity and accuracy.
+
+Let's build decision trees with increasing depths on a toy dataset:
+
+import TreeDepthSlider from "@assets/js/climbing-trees/frame-slider.tsx";
+
+<TreeDepthSlider client:load />
+
+On the left we can see the training set[^sampling] with two features and two classes. We're building _classification_ trees, whose boundaries are overlaid onto the left plot.
+The plot on the right shows training and test error, as well as the error of a logistic regression model as a baseline.
+The test set was sampled from the same distribution, but is different from the training set.
+Use the slider to compare depths. We can see that the best test error happens with a depth of 3.
+Increasing the depth further results in overfitting.
+
+### Decision tree bias
+
+Even with a depth of three in the example above the error is larger than the logistic regression baseline. This is an example where linear models outperform decision trees due to the _additive structure_ of the data. The [logistic regression](https://en.wikipedia.org/wiki/Logistic_regression) equation in this case is:
+
+$$
+logit(p) = \beta_{0} + \beta_{1} x_{1} + \beta_{2} x_{2} + \varepsilon
+$$
+
+Where $p$ is the probability of the outcome being of class 1. Ignoring constants and the noise ($\varepsilon$), the probability is determined by a linear combination of both features. The relationship between features is not _hierarchical_, therefore decision trees require multiple, sometimes redundant, splits to approximate this concept, leading to deep or overly complex trees.
+
+There are other concepts that fall under the same category, such as:
+
+- XOR (Exclusive OR): the output is of one class if _exactly one_ (but not both) of two inputs is true.
+- Parity problem: the output is different if the number of true values in a set of inputs is even or odd.
+- Multiplexer problem: a multiplexer selects one of several input values based on a separate "selector" input.
+
+These may seem overly specific, but they're used as benchmarks to test the capabilities machine learning algorithms.
+Additive structure, XOR and parity involve global dependencies that require multiple inputs to be considered together.
+Decision trees split data based on one feature at a time, therefore are inefficient at capturing these relationships.
+Multiplexer problems require conditional rules which are not hierarchical, making the tree very large to account for all combinations of selector-input pairs.
+
+In more complex real-world datasets, it's quite likely that multiple non-hierarchical concepts are present, leading to large bias. If they have subpar variance _and_ bias, decision trees may look like a poor choice of algorithm. Indeed, they rarely shine on their own, but rather as _ensembles_ (with bagging or boosting), which we'll cover in the future.
+
+[^sampling]: Each class was sampled from a Bivariate (2D) Gaussian distribution with SD=1. One class is shifted by 1.5 units both up and to the right.
+
+## Objective functions
+
+...
