@@ -192,28 +192,39 @@ In more complex real-world datasets, it's quite likely that multiple non-hierarc
 We need to define objective functions to optimize during training. Classification trees optimize either Gini impurity or entropy.
 Regression trees usually use mean squared error.
 
+In all examples, consider the data $S = \{(x_1, y_1), ..., (x_n, y_n)\}, y_i \in \{1, ..., c\}$ where $c$ is the number of classes.
+
 ### Misclassification rate
 
 $$
-\text{Misclassification Rate} = \frac{\sum_{i=1}^N \mathbb{I}(\hat{y}_i \neq y_i)}{N}
+MR = \frac{\sum_{i=1}^n \mathbb{I}(\hat{y}_i \neq y_i)}{n}
 $$
 
-This is a very intuitive objective for classification. It measures the proportion of misclassified examples. The prediction $\hat{y}$ is the majority vote of the node. Our goal is to decrease leaf node impurity, which is aligned with the misclassification rate function. However, this is not a good objective and is not used during training because it is not sensitive enough.
+This is a very intuitive objective for classification. It measures the proportion of misclassified examples.
+The prediction $\hat{y}$ is the majority vote of the node. Our goal is to decrease leaf node impurity, which is aligned with the misclassification rate function.
 
 ### Gini impurity
 
-The Gini impurity[^gini_confusion] over a set of class probabilities $p$ with $c$ classes is defined as:
+The Gini impurity[^gini_confusion] over a set of class probabilities $p$ is defined as:
 
 [^gini_confusion]: Not to be confused with the [Gini coefficient](https://en.wikipedia.org/wiki/Gini_coefficient)
 
 $$
-I_{G}(p) = \sum_{k=1}^{c} p_{k}(1 - p_{k}) = 1 - \sum_{k=1}^c p_{k}^2
+G(S) = \sum_{k=1}^{c} p_{k}(1 - p_{k}) = 1 - \sum_{k=1}^c p_{k}^2
 $$
 
 It measures how often a randomly chosen element of a set would be incorrectly labeled if it were labeled randomly and independently according to the distribution of labels in the set.
 When the node is pure, one class has a probability of 1 and the rest 0, so the Gini impurity is also 0.
-The worst Gini impurity arises when the probabilities are uniform among classes, that is, a node with maximum impurity is no better than a coin toss at classifying examples.
+The worst Gini impurity arises when the probabilities are uniform among classes, that is, a node with maximum Gini impurity is no better than a coin toss at classifying examples.
 It can be shown that the upper bound of Gini impurity is 1 as the number of classes grow.
+
+To evaluate the quality of a split, we calculate the Gini impurity of each child node and take the weighted average.
+
+$$
+G(S) = \frac{|S_L|}{|S|} G(S_L) + \frac{|S_R|}{|S|} G(S_R)
+$$
+
+Where $\frac{|S_L|}{|S|}$ is the fraction of inputs in the left child node and $\frac{|S_R|}{|S|}$, in the right.
 
 ### Entropy
 
@@ -221,7 +232,64 @@ $$
 H(p) = - \sum_{k=1}^{c} p_{k}\ log_{2} p_{k}
 $$
 
+Upper bound is $log_{2}(c)$
+
 ### Comparing classification objectives
+
+Although misclassification rate is intuitive and commonly used as a model metric, it's not used as an optimization objective.
+We can come up with splits that have the same misclassification rate, but one has a pure node while the other doesn't. For instance:
+
+$$
+\{A: 10, B: 0\},\ \{A: 10, B: 5\}
+$$
+
+$$
+\{A: 10, B: 2\},\ \{A: 10, B: 3\}
+$$
+
+Both splits misclassify 5 samples of class B (same misclassification rate), however the first has a pure node.
+From an optimization perspective, we should favor pure nodes since they reduce the number of subsequent splits.
+You can check that indeed both the entropy and the Gini impurity of the second split are higher.
+
+<details>
+  <summary>Checking that the affirmation holds</summary>
+
+Misclassification rate:
+
+$$
+MR(S) = \frac{10}{25} 0 + \frac{15}{25} \frac{5}{15} = 0.2
+$$
+
+$$
+MR(S') = \frac{12}{25} \frac{2}{12} + \frac{13}{25} \frac{3}{13} = 0.2
+$$
+
+$$
+MR(S) = MR(S')
+$$
+
+Gini impurity:
+
+$$
+G(S) = \frac{10}{25} 0 + \frac{15}{25} 0.444 = 0.266
+$$
+
+$$
+G(S') = \frac{12}{25} 0.277 + \frac{13}{25} 0.355 = 0.318
+$$
+
+$$
+G(S') > G(S)
+$$
+
+</details>
+
+For the same reason, a tree may get "stuck" when there is no split that minimizes the misclassification rate. Gini impurity and entropy consider probabilities, while misclassification rate considers only the majority vote and therefore is not sensitive enough.
+
+More formally, both Gini impurity and entropy are strictly concave, while misclassification rate is not.
+In a strictly concave function there is (almost)[^almost_always] _always_ a split which results in a lower child node average.
+
+[^almost_always]: Here, again, this split doesn't exist only if all points have the exact same feature values.
 
 ### Mean squared error
 
