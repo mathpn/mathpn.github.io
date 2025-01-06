@@ -16,6 +16,11 @@ And yet, they have become extremely popular. Some would even say they are the _d
 This is due to _bagging_ and _boosting_, techniques that turned subpar decision trees into state-of-the-art algorithms. We'll explore them in the future.
 
 First, we'll build an intuition for what are decision trees and define them mathematically. Then, we'll explore how decision trees are built. This will allow us to grasp their main characteristics, advantages and disadvantages.
+I will try to introduce complexity gradually, but I will assume you have some knowledge on mathematical notation, statistics and basic machine learning concepts.
+
+If things become too complicated, try to read the provided references.
+I've drawn upon various sources instrumental to my understanding of decision trees, including books, documentation, articles, blog posts and lectures.
+Even if you understand everything, check the references: there is great content there.
 
 ## What is a decision tree?
 
@@ -192,12 +197,12 @@ In more complex real-world datasets, it's quite likely that multiple non-hierarc
 We need to define objective functions to optimize during training. Classification trees optimize either Gini impurity or entropy.
 Regression trees usually use mean squared error.
 
-In all examples, consider the data $S = \{(x_1, y_1), ..., (x_n, y_n)\}, y_i \in \{1, ..., c\}$ where $c$ is the number of classes.
+In all examples, consider the data $\mathcal{D} = \{(x_1, y_1), ..., (x_n, y_n)\}, y_i \in \{1, ..., c\}$ where $c$ is the number of classes.
 
 ### Misclassification rate
 
 $$
-MR = \frac{\sum_{i=1}^n \mathbb{I}(\hat{y}_i \neq y_i)}{n}
+MR(\mathcal{D}) = \frac{\sum_{i=1}^n \mathbb{I}(\hat{y}_i \neq y_i)}{n}
 $$
 
 This is a very intuitive objective for classification. It measures the proportion of misclassified examples.
@@ -210,7 +215,7 @@ The Gini impurity[^gini_confusion] over a set of class probabilities $p$ is defi
 [^gini_confusion]: Not to be confused with the [Gini coefficient](https://en.wikipedia.org/wiki/Gini_coefficient)
 
 $$
-G(S) = \sum_{k=1}^{c} p_{k}(1 - p_{k}) = 1 - \sum_{k=1}^c p_{k}^2
+G(\mathcal{D}) = \sum_{k=1}^{c} p_{k}(1 - p_{k}) = 1 - \sum_{k=1}^c p_{k}^2
 $$
 
 It measures how often a randomly chosen element of a set would be incorrectly labeled if it were labeled randomly and independently according to the distribution of labels in the set.
@@ -218,33 +223,54 @@ When the node is pure, one class has a probability of 1 and the rest 0, so the G
 The worst Gini impurity arises when the probabilities are uniform among classes, that is, a node with maximum Gini impurity is no better than a coin toss at classifying examples.
 It can be shown that the upper bound of Gini impurity is 1 as the number of classes grow.
 
-To evaluate the quality of a split, we calculate the Gini impurity of each child node and take the weighted average.
+To evaluate the quality of a split ($\mathcal{S}$), we calculate the Gini impurity of each child node and take the weighted average.
 
 $$
-G(S) = \frac{|S_L|}{|S|} G(S_L) + \frac{|S_R|}{|S|} G(S_R)
+G(\mathcal{D}|\mathcal{S}) = \frac{|\mathcal{D}_L|}{|\mathcal{D}|} G(\mathcal{D}_L) + \frac{|\mathcal{D}_R|}{|\mathcal{D}|} G(\mathcal{D}_R)
 $$
 
-Where $\frac{|S_L|}{|S|}$ is the fraction of inputs in the left child node and $\frac{|S_R|}{|S|}$, in the right.
+Where $\frac{|\mathcal{D}_L|}{|\mathcal{D}|}$ is the fraction of inputs in the left child node and $\frac{|\mathcal{D}_R|}{|\mathcal{D}|}$, in the right.
 
 ### Entropy
 
 $$
-H(p) = - \sum_{k=1}^{c} p_{k}\ log_{2} p_{k}
+H(\mathcal{D}) = - \sum_{k=1}^{c} p_{k}\ log_{2} p_{k}
 $$
 
-Upper bound is $log_{2}(c)$
+The entropy criterion is a concept from information theory (Shannon entropy).
+It measures the average level of uncertainty of a set of probabilities.
+In other words, it's the expected amount of information required to describe the potential outcomes.
+When probabilities are uniformly distributed entropy is maximum, just like Gini impurity.
+To understand the connection between information and probabilities, consider you have a set with two classes that are equally likely (let's say red and blue).
+If you draw a sample, you have the least possible amount of certainty about which color you've drawn.
+On the other hand, if red has a 95% probability, you can be pretty confident about which color you'll draw -- this has much lower uncertainty.
+When probabilities are uniform you need extra information to accurately convey the result of a series of draws.
+
+The range of the entropy criterion is from 0 to $log_{2}(c)$. We also take the weighted average of child nodes to evaluate the quality of a split:
+
+$$
+H(\mathcal{D}|\mathcal{S}) = \frac{|\mathcal{D}_L|}{|\mathcal{D}|} H(\mathcal{D}_L) + \frac{|\mathcal{D}_R|}{|\mathcal{D}|} H(\mathcal{D}_R)
+$$
+
+It's also common to see the objective function expressed in terms of _information gain_, which is the decrease in entropy yielded by a node split.
+
+$$
+IG(\mathcal{D}) = H(\mathcal{D}) - H(\mathcal{D}|\mathcal{S})
+$$
+
+It represents the amount of information gained about our target variable given our split. In these terms, the objective is to maximize information gain.
 
 ### Comparing classification objectives
 
 Although misclassification rate is intuitive and commonly used as a model metric, it's not used as an optimization objective.
-We can come up with splits that have the same misclassification rate, but one has a pure node while the other doesn't. For instance:
+We can come up with splits ($\mathcal{S}$) that have the same misclassification rate, but one has a pure node while the other doesn't. For instance:
 
 $$
-\{A: 10, B: 0\},\ \{A: 10, B: 5\}
+\mathcal{S} = \{A: 10, B: 0\},\ \{A: 10, B: 5\}
 $$
 
 $$
-\{A: 10, B: 2\},\ \{A: 10, B: 3\}
+\mathcal{S}' = \{A: 10, B: 2\},\ \{A: 10, B: 3\}
 $$
 
 Both splits misclassify 5 samples of class B (same misclassification rate), however the first has a pure node.
@@ -257,29 +283,29 @@ You can check that indeed both the entropy and the Gini impurity of the second s
 Misclassification rate:
 
 $$
-MR(S) = \frac{10}{25} 0 + \frac{15}{25} \frac{5}{15} = 0.2
+MR(\mathcal{S}) = \frac{10}{25} 0 + \frac{15}{25} \frac{5}{15} = 0.2
 $$
 
 $$
-MR(S') = \frac{12}{25} \frac{2}{12} + \frac{13}{25} \frac{3}{13} = 0.2
+MR(\mathcal{S}') = \frac{12}{25} \frac{2}{12} + \frac{13}{25} \frac{3}{13} = 0.2
 $$
 
 $$
-MR(S) = MR(S')
+MR(\mathcal{S}) = MR(\mathcal{S}')
 $$
 
 Gini impurity:
 
 $$
-G(S) = \frac{10}{25} 0 + \frac{15}{25} 0.444 = 0.266
+G(\mathcal{S}) = \frac{10}{25} 0 + \frac{15}{25} 0.444 = 0.266
 $$
 
 $$
-G(S') = \frac{12}{25} 0.277 + \frac{13}{25} 0.355 = 0.318
+G(\mathcal{S}') = \frac{12}{25} 0.277 + \frac{13}{25} 0.355 = 0.318
 $$
 
 $$
-G(S') > G(S)
+G(\mathcal{S}) < G(\mathcal{S}')
 $$
 
 </details>
@@ -298,3 +324,16 @@ MSE = \frac{1}{N} \sum_{i=1}^N (\hat{y}_{i} - y_{i})^2
 $$
 
 ## Constructing a decision tree
+
+## References
+
+- Cornell CS4780 SP17 By Kilian Weinberger
+- [Scikit-learn documentation on trees](https://scikit-learn.org/stable/modules/tree.html)
+- [Wikipedia on decision tree learning](https://en.wikipedia.org/wiki/Decision_tree_learning#Gini_impurity)
+- Machine Learning STAT 479 (Fall 2018) by Sebastian Raschka
+  - [Overview](https://pages.stat.wisc.edu/~sraschka/teaching/stat479-fs2018/)
+  - [Decision trees notes](https://sebastianraschka.com/pdf/lecture-notes/stat479fs18/06_trees_notes.pdf)
+- C. Bishop, Pattern Recognition and Machine Learning. Springer New York, 2016.
+- K. Murphy, Machine Learning: A Probabilistic Perspective. MIT Press, 2012.
+- Hastie, T., Tibshirani, R., & Friedman, J. (2009). The Elements of Statistical Learning: Data Mining, Inference, and Prediction, Second Edition. Springer New York.
+- Breiman, L., Friedman, J., Stone, C., & Olshen, R. (1984). Classification and Regression Trees. Taylor & Francis.
