@@ -20,7 +20,7 @@ I will try to introduce complexity gradually, but I will assume you have some kn
 
 If things become too complicated, try to read the provided references.
 I've drawn upon various sources instrumental to my understanding of decision trees, including books, documentation, articles, blog posts and lectures.
-Even if you understand everything, check the references: there is great content there.
+Even if you understand everything, check the [references](#references): there is great content there.
 
 ## What is a decision tree?
 
@@ -74,6 +74,16 @@ For instance, a regression tree might predict a house's price based on features 
 Each split in the tree tries to group together similar numerical values.
 When a new example comes in, the tree can guide it to a leaf node containing training examples with similar target values and use their average as the prediction.
 
+### Decision tree algorithms
+
+Decision trees have been widely explored and there is a wide range of different decision tree algorithms. The most influential ones are ID3 (Iterative Dichotomiser 3), C4.5 and CART (Classification and Regression Trees).
+
+ID3 is one of the earliest decision tree algorithms and support only classification with categorical features. Nodes can be split into more than two depending on the number of categorical levels of each feature.
+
+C4.5 extends the ID3 algorithm to support numerical features and missing values. CART is similar to C4.5 but also adds support for regression.
+
+The CART approach only performs binary splits, resulting in taller trees when compared to ID3 and C4.5. Although the principles discussed here apply to most decision tree algorithms, I am focused on CART -- which is also the algorithm we'll implement.
+
 ## Mathematical definition
 
 Mathematically, a decision tree can be described as:
@@ -82,21 +92,29 @@ $$
 f(x) = \sum_{m=1}^{M} c_m \mathbb{I}(x \in R_m)
 $$
 
-Where $x$ are the input features, $R_m$ is the $m$'th region and $c_m$ is the value of this region. $\mathbb{I}(x \in R_m)$ is 1 if $x$ is contained in the $m$'th region, 0 otherwise. The values ($c$) are typically a constant (regression) or a vector of probabilities (classification). The combination of regions and values defines the decision tree.
+Where $x$ are the input features, $R_m$ is the $m$'th region and $c_m$ is the value of this region.
+$\mathbb{I}(x \in R_m)$ is 1 if $x$ is contained in the $m$'th region, 0 otherwise.
+The values ($c$) are typically a constant (regression) or a vector of probabilities (classification).
+The combination of regions and values defines the decision tree.
 
-The regions cannot assume arbitrary boundaries, though. They are always _parallel_ to some axis and can only divide a previous region into two.
-This can be a limitation, but it greatly reduces the computational complexity of constructing a decision tree. In our weather example, it's trivial to find the following decision boundary using other methods (I have used logistic regression):
+The regions cannot assume arbitrary boundaries, though.
+They are always _parallel_ to some axis and can only divide a previous region.
+This can be a limitation, but it greatly reduces the computational complexity of constructing a decision tree.
+In our weather example, it's trivial to find the following decision boundary using other methods (I have used logistic regression):
 
 ![Weather scatter plot with diagonal decision boundary](../../assets/images/climbing-trees-1/weather_conditions_boundary.png)
 
-However, axis-parallel splits (single feature) are much easier to compute than oblique splits (multiple features). Finding the best split of a single feature involves sorting the data and evaluating splits.
+However, axis-parallel splits (single feature) are much easier to compute than oblique splits (multiple features).
+Finding the best split of a single feature involves sorting the data and evaluating splits.
 Since the latter is negligible compared to sorting, this operation has a [time complexity](https://en.wikipedia.org/wiki/Time_complexity) of $O(n \log n)$, where $n$ is the number of data points.
 To find the best oblique split combining two features, however, we must first consider all possible $O(n^2)$ lines formed by pairs of points.
-For each line, you need to evaluate which side each point falls on: $O(n)$. This amounts to a total time complexity of $O(n^3)$.
+For each line, you need to evaluate which side each point falls on: $O(n)$.
+This amounts to a total time complexity of $O(n^3)$.
 More generally, an oblique split has a time complexity of $O(n^{d+1})$, in which $d$ is the number of features.
 Therefore, we compromise on using only axis-parallel splits, which define cuboid regions.
 
-Each region $R_m$ is defined by a path from the root to the $m$'th leaf of the tree. For instance, consider the path that defines the region $R = \{(Humidity,\ Cloud)\ |\ Humidity > 59\ \text{and}\ Cloud > 45\}$.
+Each region $R_m$ is defined by a path from the root to the $m$'th leaf of the tree.
+For instance, consider the path that defines the region $R = \{(Humidity,\ Cloud)\ |\ Humidity > 59\ \text{and}\ Cloud > 45\}$.
 
 ![Path between the root node and a leaf node](../../assets/images/climbing-trees-1/weather_tree_path.svg)
 
@@ -104,13 +122,14 @@ This region can be visualized on the scatter plot:
 
 ![Defined region in scatter plot](../../assets/images/climbing-trees-1/weather_conditions_region.png)
 
-Unlike linear models, decision trees do not model the entire data distribution. Rather, each region has independent predicted values.
+Unlike linear models, decision trees do not model the entire data distribution.
+Rather, each region has independent predicted values.
 More formally, adding all independent regions defines a [piecewise function](https://en.wikipedia.org/wiki/Piecewise_function) that can approximate any pattern in the data, but it may struggle to represent smooth or continuous functions properly.
 
 ## Bias-variance tradeoff
 
-As all other machine learning algorithms, trees are also haunted by the bias-variance tradeoff.
-If this concept is new to you, I highly recommend reading about it first, but come back later.
+As all other machine learning algorithms, trees are also haunted by the [bias-variance tradeoff](https://en.wikipedia.org/wiki/Bias%E2%80%93variance_tradeoff).
+If this concept is new to you, I highly recommend reading about it first (check the [references](#references)), but come back later.
 
 <details>
   <summary>Bias-variance tradeoff refresher</summary>
@@ -142,6 +161,8 @@ It has perfect accuracy, but it has very unusual boundaries due to noise (high v
 - Requiring a minimum number of points per node
 - Requiring a minimum decrease in loss to split the node (usually not a good idea)
 
+The number of samples required to fill a tree doubles for each additional level (depth) of the tree.
+These limits ensure leaf nodes are not overly sparse.
 Another possibility is to fully grow the tree and later _prune it_ to balance complexity and accuracy.
 
 Let's build decision trees with increasing depths on a toy dataset:
@@ -158,13 +179,17 @@ Increasing the depth further results in overfitting.
 
 ### Decision tree bias
 
-Even with a depth of three in the example above the error is larger than the logistic regression baseline. This is an example where linear models outperform decision trees due to the _additive structure_ of the data. The [logistic regression](https://en.wikipedia.org/wiki/Logistic_regression) equation in this case is:
+Even with a depth of three in the example above the error is larger than the logistic regression baseline.
+This is an example where linear models outperform decision trees due to the _additive structure_ of the data.
+The [logistic regression](https://en.wikipedia.org/wiki/Logistic_regression) equation in this case is:
 
 $$
 logit(p) = \beta_{0} + \beta_{1} x_{1} + \beta_{2} x_{2} + \varepsilon
 $$
 
-Where $p$ is the probability of the outcome being of class 1. Ignoring constants and the noise ($\varepsilon$), the probability is determined by a linear combination of both features. The relationship between features is not _hierarchical_, therefore decision trees require multiple, sometimes redundant, splits to approximate this concept, leading to deep or overly complex trees.
+Where $p$ is the probability of the outcome being of class 1.
+Ignoring constants and the noise ($\varepsilon$), the probability is determined by a linear combination of both features.
+The relationship between features is not _hierarchical_, therefore decision trees require multiple, sometimes redundant, splits to approximate this concept, leading to deep or overly complex trees.
 
 There are other concepts that fall under the same category, such as:
 
@@ -177,14 +202,15 @@ Additive structure, XOR and parity involve global dependencies that require mult
 Decision trees split data based on one feature at a time, therefore are inefficient at capturing these relationships.
 Multiplexer problems require conditional rules which are not hierarchical, making the tree very large to account for all combinations of selector-input pairs.
 
-In more complex real-world datasets, it's quite likely that multiple non-hierarchical concepts are present, leading to large biases. If they have subpar variance _and_ bias, decision trees may look like a poor choice of algorithm. Indeed, they rarely shine on their own, but rather as _ensembles_ (with bagging or boosting), which we'll cover in the future.
+In more complex real-world datasets, it's quite likely that multiple non-hierarchical concepts are present, leading to suboptimal bias.
+If they have subpar variance _and_ bias, decision trees may look like a poor choice of algorithm.
+Indeed, they rarely shine on their own, but rather as _ensembles_ (with bagging or boosting), which we'll cover in the future.
 
 [^sampling]: Each class was sampled from a Bivariate (2D) Gaussian distribution with SD=1. One class is shifted by 1.5 units both up and to the right.
 
-<details>
-  <summary>The staircase effect</summary>
-  TODO ...
-</details>
+### The staircase effect
+
+TODO ...
 
 ## Objective functions
 
@@ -269,7 +295,7 @@ $$
 $$
 
 Both splits misclassify 5 samples of class B (same misclassification rate), however the first has a pure node.
-From an optimization perspective, we should favor pure nodes since they reduce the number of subsequent splits.
+From an optimization perspective, we should favor pure nodes as they reduce the number of subsequent splits.
 You can check that indeed both the entropy and the Gini impurity of the second split are higher.
 
 <details>
@@ -305,7 +331,8 @@ $$
 
 </details>
 
-For the same reason, a tree may get "stuck" when there is no split that minimizes the misclassification rate. Gini impurity and entropy consider probabilities, while misclassification rate considers only the majority vote and therefore is not sensitive enough.
+For the same reason, a tree may get "stuck" when there is no split that minimizes the misclassification rate.
+Gini impurity and entropy consider probabilities, while misclassification rate considers only the majority vote and therefore is not sensitive enough.
 
 More formally, both Gini impurity and entropy are strictly [concave fuctions](https://en.wikipedia.org/wiki/Concave_function).
 If you take two points on the curve of a strictly concave function and draw a line between them, the line will be _always below_ the curve.
@@ -324,11 +351,11 @@ The strict concavity of the entropy function is enough to ensure this.
 ![Plot of entropy over probabilities showing labeled node points](../../assets/images/climbing-trees-1/entropy_split.png)
 
 The average child node entropy lies somewhere along the line between the points of both child nodes in the curve.
-The average probability must be the same of the parent node, so the average child node entropy always lies below the parent node entropy.
-Hence, there is (almost)[^almost_always] _always_ a split which results in a lower child node average entropy.
+The average probability must be the same of the parent node, so the average child node entropy always lies directly below the parent node entropy.
+Hence, there is ~almost~[^almost_always] _always_ a split which results in a lower child node average entropy.
 
 Misclassification rate is not strictly concave.
-The average misclassification rate of child nodes is equal to that of the parent node when both child nodes lie on the same side of the function halting the optimization process.
+The average misclassification rate of child nodes is equal to that of the parent node when both child nodes lie on the same side of the function, halting the optimization process.
 
 ![Plot showing line segment over misclassification rate function](../../assets/images/climbing-trees-1/misclassification_concave.png)
 
@@ -352,8 +379,8 @@ The optimal split is one that creates child nodes with minimal average variance,
 
 ## Building a decision tree
 
-A sufficiently large tree will have one training sample per node, effectively memorizing the training set. This achieves 0 training error but is a pathological case. Our optimization goal is to build the _smallest possible_ tree that achieves 0 training error.
-If limits such as maximum depth are enforced, we should find the tree that minimizes the objective while respecting such limits.
+A sufficiently large tree will have one training sample per node, effectively memorizing the training set. Such tree achieves 0 training error, but it is a pathological optimization case. Our goal is to build the _smallest possible_ tree that achieves 0 training error.
+If limits such as maximum depth are enforced, we should find the tree that _minimizes_ the objective while respecting such limits.
 
 Unfortunately, the computational complexity grows combinatorially and finding the optimal tree is [NP-complete](https://en.wikipedia.org/wiki/NP-completeness).
 It would be nice to build trees before the heat death of the universe, so we proceed with a _greedy algorithm_.
@@ -377,24 +404,75 @@ This myopic optimization strategy introduces substantial model instability. The 
 Moreover, this is the main reason why requiring a minimum decrease in loss to split the node is not a good idea.
 Splits that appear marginally beneficial in isolation may be essential for accessing valuable partition patterns deeper in the tree structure. Therefore, the immediate magnitude of improvement from a split may not reliably indicate its ultimate contribution to model performance.
 
+## Characteristics of decision trees
+
+### Assumptions
+
+Every machine learning algorithm makes assumptions about the structure of the data.
+Exploring the entire space of possible relationships between features and the outcome is not feasible, therefore each algorithm cuts corners in its way.
+
+Decision trees assume that we can separate the data into meaningful regions by repeatedly splitting on individual features.
+In other words, they assume that the optimal decision boundary in the feature space is axis-aligned, hence feature interactions can only be captured through hierarchical structure.
+As with most machine learning algorithms, these assumptions are seldom strictly true.
+Nonetheless, they may be close enough to reality to produce good results.
+
+Decision trees, on the other hand, don't make other restrictive assumptions common to many machine learning algorithms: they do not assume any probability distribution nor any linear structure.
+They also do not rely on any distance metric, partially evading the [curse of dimensionality](https://en.wikipedia.org/wiki/Curse_of_dimensionality)[^curse_of_dimensionality].
+Feature selection is baked into the decision tree algorithm, so they can ignore irrelevant dimensions.
+Still, as dimensionality grows and the data becomes sparse, it becomes harder to find meaningful splits without capturing noise.
+
+[^curse_of_dimensionality]: As the number of dimensions increase, the data quickly becomes sparse. Standard distance metrics (e.g. Euclidean distance) become less meaningful and loose predictive power.
+
+### Pros and cons
+
+We can summarize the main advantages of decision trees as:
+
+- Simple to understand and to interpret
+- Scales reasonably well with large datasets
+- Requires little data preparation[^scaling]
+- Able to handle both numerical and categorical data directly
+- Able to approximate non-linear relationships
+- Do not assume any specific distribution for the data
+
+[^scaling]: Decision trees are not influenced by the relative scale of features.
+
+They also same major drawbacks, namely:
+
+- Easily capture noise and overfit
+- Instability: highly sensitive to small changes in the training set
+- Lack of smooth decision boundary
+- Lack of smooth and continuous predictions in regression
+- Struggle to capture non-hierarchical concepts
+
+TODO extrapolation
+
+---
+
+We've defined decision trees, their objective functions and a general algorithm.
+In the followup of this series we'll implement classification and regression trees (CART) in Python.
+
 ## References
 
 - [Bias variance tradeoff - Wikipedia](https://en.wikipedia.org/wiki/Bias%E2%80%93variance_tradeoff)
-- [Bias-Variance Analysis: Theory and Practive](https://cs229.stanford.edu/summer2019/BiasVarianceAnalysis.pdf) - Stanford CS229 (Summer 2019) lecture notes
-- Cornell CS4780 (Fall 2018) By Kilian Weinberger
+- [Bias-Variance Analysis: Theory and Practice](https://cs229.stanford.edu/summer2019/BiasVarianceAnalysis.pdf) - Stanford CS229 (Summer 2019) lecture notes
+- Machine Learning for Intelligent Systems - Cornell CS4780 (Fall 2018) by Kilian Weinberger
   - [Overview](https://www.cs.cornell.edu/courses/cs4780/2018fa/)
-  - [Decision tree lecture](https://www.youtube.com/watch?v=a3ioGSwfVpE)
-  - [Decision tree lecture notes](https://www.cs.cornell.edu/courses/cs4780/2018fa/lectures/lecturenote17.html)
+  - [Bias-variance tradeoff lecture](https://www.youtube.com/watch?v=zUJbRO0Wavo)
+  - [Bias-variance tradeoff lecture notes](https://www.cs.cornell.edu/courses/cs4780/2018fa/lectures/lecturenote12.html)
+  - [Decision trees lecture](https://www.youtube.com/watch?v=a3ioGSwfVpE)
+  - [Decision trees lecture notes](https://www.cs.cornell.edu/courses/cs4780/2018fa/lectures/lecturenote17.html)
 - [Scikit-learn documentation on trees](https://scikit-learn.org/stable/modules/tree.html)
 - [Decision tree learning - Wikipedia](https://en.wikipedia.org/wiki/Decision_tree_learning#Gini_impurity)
-- Machine Learning STAT 479 (Fall 2018) by Sebastian Raschka
+- Machine Learning - UW-Madison STAT 479 (Fall 2018) by Sebastian Raschka
   - [Overview](https://pages.stat.wisc.edu/~sraschka/teaching/stat479-fs2018/)
-  - [Decision trees notes](https://sebastianraschka.com/pdf/lecture-notes/stat479fs18/06_trees_notes.pdf)
+  - [Decision trees lecture notes](https://sebastianraschka.com/pdf/lecture-notes/stat479fs18/06_trees_notes.pdf)
 - C. Bishop, Pattern Recognition and Machine Learning. Springer New York, 2016.
 - K. Murphy, Machine Learning: A Probabilistic Perspective. MIT Press, 2012.
 - Hastie, T., Tibshirani, R., & Friedman, J. (2009). The Elements of Statistical Learning: Data Mining, Inference, and Prediction, Second Edition. Springer New York.
 - Breiman, L., Friedman, J., Stone, C., & Olshen, R. (1984). Classification and Regression Trees. Taylor & Francis.
 - [Concave function - Wikipedia](https://en.wikipedia.org/wiki/Concave_function)
 - [Data processing inequality - Wikipedia](https://en.wikipedia.org/wiki/Data_processing_inequality)
+- [Logistic regression - Wikipedia](https://en.wikipedia.org/wiki/Logistic_regression)
 - [NP-completeness](https://en.wikipedia.org/wiki/NP-completeness)
+- [Piecewise function - Wikipedia](https://en.wikipedia.org/wiki/Piecewise_function)
 - [Time complexity - Wikipedia](https://en.wikipedia.org/wiki/Time_complexity)
