@@ -9,7 +9,7 @@ draft: false
 lang: "en-us"
 ---
 
-This is the first in a series of posts about decision trees in the context of machine learning. The goal here is to provide a foundational understanding of decision trees and implement them.
+This is the first in a series of posts about decision trees in the context of machine learning. The goal here is to provide a foundational understanding of decision trees and to implement them.
 
 Decision trees are not amazing algorithms by themselves. They have limitations that can result in suboptimal and even weird predictions.
 And yet, they have become extremely popular. Some would even say they are the _de facto_ go-to algorithm for many machine learning domains.
@@ -82,7 +82,7 @@ $$
 f(x) = \sum_{m=1}^{M} c_m \mathbb{I}(x \in R_m)
 $$
 
-Where $x$ are the input features, $R_m$ is the $m$'th region and $c_m$ is the value of this region. $\mathbf{I}(x \in R_m)$ is 1 if $x$ is contained in the $m$'th region, 0 otherwise. The values $c$ are typically a constant (regression) or a vector of probabilities (classification). The combination of regions and values defines the decision tree.
+Where $x$ are the input features, $R_m$ is the $m$'th region and $c_m$ is the value of this region. $\mathbb{I}(x \in R_m)$ is 1 if $x$ is contained in the $m$'th region, 0 otherwise. The values ($c$) are typically a constant (regression) or a vector of probabilities (classification). The combination of regions and values defines the decision tree.
 
 The regions cannot assume arbitrary boundaries, though. They are always _parallel_ to some axis and can only divide a previous region into two.
 This can be a limitation, but it greatly reduces the computational complexity of constructing a decision tree. In our weather example, it's trivial to find the following decision boundary using other methods (I have used logistic regression):
@@ -108,8 +108,6 @@ Unlike linear models, decision trees do not model the entire data distribution. 
 More formally, adding all independent regions defines a [piecewise function](https://en.wikipedia.org/wiki/Piecewise_function) that can approximate any pattern in the data, but it may struggle to represent smooth or continuous functions properly.
 
 ## Bias-variance tradeoff
-
-TODO add sources
 
 As all other machine learning algorithms, trees are also haunted by the bias-variance tradeoff.
 If this concept is new to you, I highly recommend reading about it first, but come back later.
@@ -144,8 +142,6 @@ It has perfect accuracy, but it has very unusual boundaries due to noise (high v
 - Requiring a minimum number of points per node
 - Requiring a minimum decrease in loss to split the node (usually not a good idea)
 
-TODO: The last one is usually not a good idea for a reason we'll see later.
-
 Another possibility is to fully grow the tree and later _prune it_ to balance complexity and accuracy.
 
 Let's build decision trees with increasing depths on a toy dataset:
@@ -154,8 +150,8 @@ import TreeDepthSlider from "@assets/js/climbing-trees/frame-slider.tsx";
 
 <TreeDepthSlider client:load />
 
-On the left we can see the training set[^sampling] with two features and two classes. We're building _classification_ trees, whose boundaries are overlaid onto the left plot.
-The plot on the right shows training and test error, as well as the error of a logistic regression model as a baseline.
+On the left we can see the training set[^sampling] with two features and two classes. We're building _classification_ trees, whose decision boundary is overlaid onto the left plot.
+The plot on the right shows training and test error, as well as the test error of a logistic regression model as a baseline.
 The test set was sampled from the same distribution, but is different from the training set.
 Use the slider to compare depths. We can see that the best test error happens with a depth of 3.
 Increasing the depth further results in overfitting.
@@ -192,8 +188,9 @@ In more complex real-world datasets, it's quite likely that multiple non-hierarc
 
 ## Objective functions
 
-We need to define objective functions to optimize during training. Classification trees optimize either Gini impurity or entropy.
-Regression trees usually use mean squared error.
+We need to define objective functions to optimize for during training.
+Classification trees use either Gini impurity or entropy as objective functions.
+Regression trees usually use the squared loss.
 
 In all examples, consider the data $\mathcal{D} = \{(x_1, y_1), ..., (x_n, y_n)\}, y_i \in \{1, ..., c\}$ where $c$ is the number of classes.
 
@@ -281,38 +278,37 @@ You can check that indeed both the entropy and the Gini impurity of the second s
 Misclassification rate:
 
 $$
-MR(\mathcal{S}) = \frac{10}{25} 0 + \frac{15}{25} \frac{5}{15} = 0.2
+MR(\mathcal{D}|\mathcal{S}) = \frac{10}{25} 0 + \frac{15}{25} \frac{5}{15} = 0.2
 $$
 
 $$
-MR(\mathcal{S}') = \frac{12}{25} \frac{2}{12} + \frac{13}{25} \frac{3}{13} = 0.2
+MR(\mathcal{D}|\mathcal{S}') = \frac{12}{25} \frac{2}{12} + \frac{13}{25} \frac{3}{13} = 0.2
 $$
 
 $$
-MR(\mathcal{S}) = MR(\mathcal{S}')
+MR(\mathcal{D}|\mathcal{S}) = MR(\mathcal{D}|\mathcal{S}')
 $$
 
 Gini impurity:
 
 $$
-G(\mathcal{S}) = \frac{10}{25} 0 + \frac{15}{25} 0.444 = 0.266
+G(\mathcal{D}|\mathcal{S}) = \frac{10}{25} 0 + \frac{15}{25} 0.444 = 0.266
 $$
 
 $$
-G(\mathcal{S}') = \frac{12}{25} 0.277 + \frac{13}{25} 0.355 = 0.318
+G(\mathcal{D}|\mathcal{S}') = \frac{12}{25} 0.277 + \frac{13}{25} 0.355 = 0.318
 $$
 
 $$
-G(\mathcal{S}) < G(\mathcal{S}')
+G(\mathcal{D}|\mathcal{S}) < G(\mathcal{D}|\mathcal{S}')
 $$
 
 </details>
 
 For the same reason, a tree may get "stuck" when there is no split that minimizes the misclassification rate. Gini impurity and entropy consider probabilities, while misclassification rate considers only the majority vote and therefore is not sensitive enough.
 
-More formally, both Gini impurity and entropy are strictly concave.
-In a strictly concave function there is (almost)[^almost_always] _always_ a split which results in a lower child node average.
-If you take two points on the curve of a strictly convex function and draw a line between them, the line will be _always below_ the curve.
+More formally, both Gini impurity and entropy are strictly [concave fuctions](https://en.wikipedia.org/wiki/Concave_function).
+If you take two points on the curve of a strictly concave function and draw a line between them, the line will be _always below_ the curve.
 
 [^almost_always]: Here, again, this split doesn't exist only if all points have the exact same feature values.
 
@@ -329,8 +325,9 @@ The strict concavity of the entropy function is enough to ensure this.
 
 The average child node entropy lies somewhere along the line between the points of both child nodes in the curve.
 The average probability must be the same of the parent node, so the average child node entropy always lies below the parent node entropy.
+Hence, there is (almost)[^almost_always] _always_ a split which results in a lower child node average entropy.
 
-misclassification rate is not strictly convex.
+Misclassification rate is not strictly concave.
 The average misclassification rate of child nodes is equal to that of the parent node when both child nodes lie on the same side of the function halting the optimization process.
 
 ![Plot showing line segment over misclassification rate function](../../assets/images/climbing-trees-1/misclassification_concave.png)
@@ -358,26 +355,38 @@ The optimal split is one that creates child nodes with minimal average variance,
 A sufficiently large tree will have one training sample per node, effectively memorizing the training set. This achieves 0 training error but is a pathological case. Our optimization goal is to build the _smallest possible_ tree that achieves 0 training error.
 If limits such as maximum depth are enforced, we should find the tree that minimizes the objective while respecting such limits.
 
-Unfortunately, the complexity grows combinatorially and finding the optimal tree is NP-complete.
+Unfortunately, the computational complexity grows combinatorially and finding the optimal tree is [NP-complete](https://en.wikipedia.org/wiki/NP-completeness).
 It would be nice to build trees before the heat death of the universe, so we proceed with a _greedy algorithm_.
 We make a series of locally optimal choices, hoping that it leads to a solution somewhat close to the global optimum.
 
-Let's build a classification tree using the Gini impurity criterion. Starting with all of the data and the first variable, we test _all possible_ split points ($N - 1$ splits) and choose the one with the lowest criterion. Then, we repeat this procedure with all other features. The split with the lowest criterion over all features is chosen. Finally, we repeat the procedure for the left and right child nodes recursively until the criterion is 0 in all nodes or until a tree size limit is reached.
+Let's build a classification tree using the Gini impurity criterion.
+Starting with all of the data and the first variable, we test _all possible_ split points ($N - 1$ splits) and choose the one with the lowest criterion.
+Then, we repeat this procedure with all other features. The split with the lowest criterion over all features is chosen.
+Finally, we repeat the procedure for the left and right child nodes recursively until the criterion is 0 in all nodes or until a tree size limit is reached.
 
-This process is short-sighted because splits do not consider the quality of downstream splits.
-A split may capture noise of a variable if it leads to the best criterion, even though a (locally) suboptimal split would lead to better subsequent splits.
-In the worst case, a single data point can completely change the final decision tree.
-Thus, the greedy approach is another source of _variance_.
-It's also the reason why requiring a minimum decrease in loss to split the node is not a good idea: a split may provide almost no immediate improvement but may be required to find good splits afterward.
+![Animation of single split choice](../../assets/images/climbing-trees-1/decision_tree_split.gif)
+
+> Representation of the optimization process considering a single feature. We evaluate all split points to find the one that minimizes the objective function. The same process must be done with the other features to choose the optimal split.
+
+This approach, while computationally efficient, has significant drawbacks.
+The primary limitation lies in the algorithm's inability to consider long-term consequences of split decisions.
+When evaluating potential splits, the algorithm optimizes only for immediate gain, potentially overlooking splits that might enable better downstream decisions.
+
+This myopic optimization strategy introduces substantial model instability. The cumulative effect of these locally optimal but globally suboptimal decisions makes the resulting tree structure highly sensitive to variations in the training data (i.e. it's another source of _variance_). In extreme cases, the addition or removal of a single training example can propagate through the tree structure, leading to dramatically different decision paths.
+
+Moreover, this is the main reason why requiring a minimum decrease in loss to split the node is not a good idea.
+Splits that appear marginally beneficial in isolation may be essential for accessing valuable partition patterns deeper in the tree structure. Therefore, the immediate magnitude of improvement from a split may not reliably indicate its ultimate contribution to model performance.
 
 ## References
 
+- [Bias variance tradeoff - Wikipedia](https://en.wikipedia.org/wiki/Bias%E2%80%93variance_tradeoff)
+- [Bias-Variance Analysis: Theory and Practive](https://cs229.stanford.edu/summer2019/BiasVarianceAnalysis.pdf) - Stanford CS229 (Summer 2019) lecture notes
 - Cornell CS4780 (Fall 2018) By Kilian Weinberger
   - [Overview](https://www.cs.cornell.edu/courses/cs4780/2018fa/)
   - [Decision tree lecture](https://www.youtube.com/watch?v=a3ioGSwfVpE)
   - [Decision tree lecture notes](https://www.cs.cornell.edu/courses/cs4780/2018fa/lectures/lecturenote17.html)
 - [Scikit-learn documentation on trees](https://scikit-learn.org/stable/modules/tree.html)
-- [Wikipedia on decision tree learning](https://en.wikipedia.org/wiki/Decision_tree_learning#Gini_impurity)
+- [Decision tree learning - Wikipedia](https://en.wikipedia.org/wiki/Decision_tree_learning#Gini_impurity)
 - Machine Learning STAT 479 (Fall 2018) by Sebastian Raschka
   - [Overview](https://pages.stat.wisc.edu/~sraschka/teaching/stat479-fs2018/)
   - [Decision trees notes](https://sebastianraschka.com/pdf/lecture-notes/stat479fs18/06_trees_notes.pdf)
@@ -385,4 +394,7 @@ It's also the reason why requiring a minimum decrease in loss to split the node 
 - K. Murphy, Machine Learning: A Probabilistic Perspective. MIT Press, 2012.
 - Hastie, T., Tibshirani, R., & Friedman, J. (2009). The Elements of Statistical Learning: Data Mining, Inference, and Prediction, Second Edition. Springer New York.
 - Breiman, L., Friedman, J., Stone, C., & Olshen, R. (1984). Classification and Regression Trees. Taylor & Francis.
+- [Concave function - Wikipedia](https://en.wikipedia.org/wiki/Concave_function)
 - [Data processing inequality - Wikipedia](https://en.wikipedia.org/wiki/Data_processing_inequality)
+- [NP-completeness](https://en.wikipedia.org/wiki/NP-completeness)
+- [Time complexity - Wikipedia](https://en.wikipedia.org/wiki/Time_complexity)
