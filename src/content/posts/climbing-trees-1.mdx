@@ -210,7 +210,22 @@ Indeed, they rarely shine on their own, but rather as _ensembles_ (with bagging 
 
 ### The staircase effect
 
-TODO ...
+When decision trees attempt to model additive structure, they face a structural constraint that is common enough for me to name it the _"staircase" effect_[^staircase]. This limitation manifests differently in classification and regression tasks, but stems from axis-aligned splits.
+
+In classification problems, the staircase effect becomes apparent when the optimal decision boundary between classes involves a linear combination of features (an oblique boundary).
+Consider a simple case where the optimal boundary is a diagonal line in a two-dimensional feature space.
+Because decision trees can only make splits parallel to the feature axes, they must approximate this diagonal boundary through a series of rectangular regions, creating a stair-like pattern.
+
+[^staircase]: I've seen the term "staircase" being used informally (e.g. [here](https://www.reddit.com/r/statistics/comments/c8sb0p/how_does_a_decision_tree_classify_two_linear/)) before.
+
+![Demonstration of the staircase effect in classification](../../assets/images/climbing-trees-1/staircase_clf.png)
+
+In regression settings, the staircase effect is even more prominent because regression trees must approximate continuous functions using discrete, constant-valued regions.
+When the underlying relationship is smooth -- whether linear, polynomial, or any other continuous function -- the tree's prediction surface has a stair-like structure with abrupt changes between adjacent regions. Increasing tree depth approximates the prediction surface to the training set, yet the surface does not necessarily become smooth as it captures feature noise.
+
+![Demonstration of the staircase effect in regression](../../assets/images/climbing-trees-1/staircase_reg.png)
+
+> Regression example with the staircase effect. There is only one feature ($x$) and the vertical axis is the outcome.
 
 ## Objective functions
 
@@ -334,7 +349,7 @@ $$
 For the same reason, a tree may get "stuck" when there is no split that minimizes the misclassification rate.
 Gini impurity and entropy consider probabilities, while misclassification rate considers only the majority vote and therefore is not sensitive enough.
 
-More formally, both Gini impurity and entropy are strictly [concave fuctions](https://en.wikipedia.org/wiki/Concave_function).
+More formally, both Gini impurity and entropy are strictly [concave functions](https://en.wikipedia.org/wiki/Concave_function).
 If you take two points on the curve of a strictly concave function and draw a line between them, the line will be _always below_ the curve.
 
 [^almost_always]: Here, again, this split doesn't exist only if all points have the exact same feature values.
@@ -391,7 +406,9 @@ Starting with all of the data and the first variable, we test _all possible_ spl
 Then, we repeat this procedure with all other features. The split with the lowest criterion over all features is chosen.
 Finally, we repeat the procedure for the left and right child nodes recursively until the criterion is 0 in all nodes or until a tree size limit is reached.
 
-![Animation of single split choice](../../assets/images/climbing-trees-1/decision_tree_split.gif)
+import SplitSlider from "@assets/js/climbing-trees/split-frame-slider.tsx";
+
+<SplitSlider client:load />
 
 > Representation of the optimization process considering a single feature. We evaluate all split points to find the one that minimizes the objective function. The same process must be done with the other features to choose the optimal split.
 
@@ -444,7 +461,19 @@ They also same major drawbacks, namely:
 - Lack of smooth and continuous predictions in regression
 - Struggle to capture non-hierarchical concepts
 
-TODO extrapolation
+#### Extrapolation
+
+Decision trees do not extrapolate. I didn't place this either as a _pro_ or a _con_ because it might be both.
+
+[![xkcd comic about extrapolation](https://imgs.xkcd.com/comics/extrapolating.png)](https://xkcd.com/605/)
+
+The decision tree training procedure partitions the feature space based on examples.
+When a decision tree encounters a data point where one or more feature fall outside the bounds of what it was trained on, it simply assigns the value of the nearest leaf node. Therefore, predictions remain constant beyond the boundaries of the training data.
+
+This behavior makes the model robust to extreme feature values, hence it might be desirable in some settings.
+However, it's also a major limitation in domains where we expect trends to extend beyond our observed data range.
+Consider the task of predicting house based on constructed area. If the training data only includes houses up to 250 square meters, that is the upper bound of our predictions, even though we would reasonably expect larger houses to be more expensive.
+This is an inherent [inductive bias](https://mindfulmodeler.substack.com/p/from-theory-to-practice-inductive) of decision trees.
 
 ---
 
@@ -466,11 +495,13 @@ In the followup of this series we'll implement classification and regression tre
 - Machine Learning - UW-Madison STAT 479 (Fall 2018) by Sebastian Raschka
   - [Overview](https://pages.stat.wisc.edu/~sraschka/teaching/stat479-fs2018/)
   - [Decision trees lecture notes](https://sebastianraschka.com/pdf/lecture-notes/stat479fs18/06_trees_notes.pdf)
+- [From Theory to Practice: Inductive Biases in Machine Learning - Mindful Modeler](https://mindfulmodeler.substack.com/p/from-theory-to-practice-inductive)
 - C. Bishop, Pattern Recognition and Machine Learning. Springer New York, 2016.
 - K. Murphy, Machine Learning: A Probabilistic Perspective. MIT Press, 2012.
 - Hastie, T., Tibshirani, R., & Friedman, J. (2009). The Elements of Statistical Learning: Data Mining, Inference, and Prediction, Second Edition. Springer New York.
 - Breiman, L., Friedman, J., Stone, C., & Olshen, R. (1984). Classification and Regression Trees. Taylor & Francis.
 - [Concave function - Wikipedia](https://en.wikipedia.org/wiki/Concave_function)
+- [Curse of dimensionality - Wikipedia](https://en.wikipedia.org/wiki/Curse_of_dimensionality)
 - [Data processing inequality - Wikipedia](https://en.wikipedia.org/wiki/Data_processing_inequality)
 - [Logistic regression - Wikipedia](https://en.wikipedia.org/wiki/Logistic_regression)
 - [NP-completeness](https://en.wikipedia.org/wiki/NP-completeness)
