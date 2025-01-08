@@ -62,6 +62,9 @@ module.exports = {
       typography: (theme) => ({
         DEFAULT: {
           css: {
+            ".footnotes": {
+              borderTop: "1px solid rgb(var(--color-border))",
+            },
             kbd: {
               "box-shadow": "0 0 0 1px rgba(var(--color-accent), 0.1)",
             },
