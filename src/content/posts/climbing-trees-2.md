@@ -392,6 +392,47 @@ def split_node(
     return node
 ```
 
+At this point we already have a functional decision tree constructor. Here is an example:
+
+```python
+from sklearn.datasets import load_wine
+
+
+def print_tree(node: Node | LeafNode, depth: int = 0):
+    indent = "  " * depth
+    if isinstance(node, LeafNode):
+        print(f"{indent}LeafNode(value={np.array_str(node.value, precision=2)})")
+    else:
+        print(
+            f"{indent}Node(feature_idx={node.feature_idx}, split_value={node.split_value:.2f})"
+        )
+        print(f"{indent}Left:")
+        print_tree(node.left, depth + 1)
+        print(f"{indent}Right:")
+        print_tree(node.right, depth + 1)
+
+
+X, y = load_wine(return_X_y=True)
+
+y_oh = _one_hot_encode(y)
+node = LeafNode(np.mean(y_oh, axis=0))
+trained_node = split_node(
+    node=node,
+    X=X,
+    y=y_oh,
+    value=np.mean(y, axis=0),
+    depth=0,
+    criterion_fn=gini_criterion,
+)
+node = trained_node if trained_node is not None else node
+print_tree(node)
+```
+
+> You may have noticed the `scikit-learn` dependency. Well, it's used only as a convenient way to load a toy dataset, so I think this is fair enough.
+
+However, there are still major improvements to be made to this code: it's not very optimized, it can only handle numerical features, and there's no prediction (inference) implementation.
+
+## Time complexity
 ## References
 
 - [One-hot - Wikipedia](https://en.wikipedia.org/wiki/One-hot)
