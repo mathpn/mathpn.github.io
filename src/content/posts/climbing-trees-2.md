@@ -366,7 +366,7 @@ def split_node(
         value=split.left_value,
         depth=depth + 1,
         criterion_fn=criterion_fn,
-        sample_weights=sample_weights,
+        sample_weights=sample_weights[split.left_index],
         max_depth=max_depth,
         min_samples_leaf=min_samples_leaf,
         min_criterion_reduction=min_criterion_reduction,
@@ -378,7 +378,7 @@ def split_node(
         value=split.right_value,
         depth=depth + 1,
         criterion_fn=criterion_fn,
-        sample_weights=sample_weights,
+        sample_weights=sample_weights[split.right_index],
         max_depth=max_depth,
         min_samples_leaf=min_samples_leaf,
         min_criterion_reduction=min_criterion_reduction,
@@ -433,6 +433,86 @@ print_tree(node)
 However, there are still major improvements to be made to this code: it's not very optimized, it can only handle numerical features, and there's no prediction (inference) implementation.
 
 ## Time complexity
+
+Implementations of decision trees vary quite a lot in their details and the optimizations they employ.
+Furthermore, the structure of the tree depends on the data.
+Thus, it's not straightforward to estimate the average [time complexity](https://en.wikipedia.org/wiki/Time_complexity) of decision trees, but it's usually approximated as $O(D\ N \log^2{N})$, where $D$ is the number of dimensions (features) and $N$ is the number of training samples.
+For each node, we have to try all possible splits, which involves sorting the training samples based on each feature in $O(N \log{N})$ time, then try $N - 1$ splits.
+We must compute the objective function for each split, which increases the time complexity of this step to $O(N^2)$. Since this is done for all dimensions, we have a time complexity of $O(D\ N^2 \log{N})$ for each node.
+This process is repeated for each new depth level added to the tree, whose maximum depth is _approximately_ $\log{N}$ (balanced trees), hence we have a time complexity of $O(D\ N^2 \log^2{N})$.
+The $D$ and $log^2 N$ terms are not bad, but the $N^2$ term makes training trees on large number of samples infeasible.
+
+Luckily, it's possible to compute the objective function in constant time, bringing us back to the usual $O(D\ N\ \log^2{N})$ time complexity.
+With clever caching strategies we can also reuse the sorted features, giving us an average time complexity of $O(D\ N \log{N})$.
+
+### Optimizing the objective function
+
+In our current implementation, the run time to compute the best split per feature is $O(N^2)$. For each split we have to go over all samples in each child node to compute the objective function -- this is, effectively, a nested loop.
+We sort the samples by feature value, which means that each new split in the loop moves exactly one sample from one child node to the other. It's for this reason that we don't have to go over all samples every time: the objective function can be recomputed in constant time by moving a single point for each iteration.
+
+First, let's consider only the classification case without sample weights.
+
+```python
+def _find_best_split_classification(X, y, criterion_fn) -> Split | None:
+    min_criterion = np.inf
+    split = None
+    previous_split_value = None
+    y = y.astype(np.float64)
+
+    for feat_idx in range(X.shape[1]):
+        feature = X[:, feat_idx]
+        sort_idx = np.argsort(feature)
+        feature_sort = feature[sort_idx]
+        y_sort = y[sort_idx]
+        left_class_count = np.zeros(y.shape[1], dtype=np.float64)
+        right_class_count = np.sum(y, axis=0)
+
+        for idx in range(len(sort_idx) - 1):
+            left_class_count += y_sort[idx]
+            right_class_count -= y_sort[idx]
+
+            split_value = feature_sort[idx]
+            if previous_split_value == split_value:
+                continue
+            previous_split_value = split_value
+
+            criterion_l = criterion_fn(left_class_count / (idx + 1))
+            criterion_r = criterion_fn(right_class_count / (len(sort_idx) - idx - 1))
+
+            p_l = (idx + 1) / len(sort_idx)
+            p_r = (len(sort_idx) - idx - 1) / len(sort_idx)
+            criterion = p_l * criterion_l + p_r * criterion_r
+            if criterion < min_criterion:
+                left = sort_idx[: idx + 1]
+                right = sort_idx[idx + 1 :]
+                min_criterion = criterion
+                split = Split(
+                    criterion=criterion,
+                    feature_idx=feat_idx,
+                    split_value=split_value,
+                    left_index=left,
+                    right_index=right,
+                    left_value=np.mean(y_sort[: idx + 1], axis=0),
+                    right_value=np.mean(y_sort[idx + 1 :], axis=0),
+                )
+
+    return split
+```
+
+There have been a number of changes in this function.
+For each feature, we initialize two arrays of shape $c$ where $c$ is the number of classes that store the number of samples per class in each node.
+For the left node we initialize the values as 0, whereas the right node starts with the counts of all samples (remember that the outcome is a one-hot encoded matrix).
+
+Then, for each split point we add the label to the left class count vector and subtract it from the right class count vector.
+To obtain class probabilities, we divide the class counts by the number of elements in each child node -- this number is trivially obtained using the `idx` loop variable.
+Notice that we need to use the original objective functions that take probabilities as inputs, not the convenience functions we've implemented that convert class counts to probabilities.
+
+There is an edge case when two consecutive samples have the exact same sample value.
+We're moving samples one by one, but when applying the decision rule all tied samples will belong to the same child node.
+To avoid this issue, we check whether the split value has changed from the previous iteration.
+If it has not changed, we skip the iteration -- it's not a valid split point.
+
 ## References
 
 - [One-hot - Wikipedia](https://en.wikipedia.org/wiki/One-hot)
+- [Time complexity - Wikipedia](https://en.wikipedia.org/wiki/Time_complexity)
