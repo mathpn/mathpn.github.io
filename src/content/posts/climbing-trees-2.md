@@ -339,7 +339,7 @@ def split_node(
         return None
 
     criterion_reduction = prior_criterion - split.criterion
-    if criterion_reduction < min_criterion_reduction:
+    if criterion_reduction and criterion_reduction < min_criterion_reduction:
         return None
 
     X_left = X[split.left_index, :]
@@ -348,7 +348,7 @@ def split_node(
     y_right = y[split.right_index]
 
     if min_samples_leaf and (
-        X_left.shape[0] <= min_samples_leaf or X_right.shape[0] <= min_samples_leaf
+        X_left.shape[0] < min_samples_leaf or X_right.shape[0] < min_samples_leaf
     ):
         return None
 
@@ -445,59 +445,140 @@ The $D$ and $log^2 N$ terms are not bad, but the $N^2$ term makes training trees
 Luckily, it's possible to compute the objective function in constant time, bringing us back to the usual $O(D\ N\ \log^2{N})$ time complexity.
 With clever caching strategies we can also reuse the sorted features, giving us an average time complexity of $O(D\ N \log{N})$.
 
-### Optimizing the objective function
+### Optimizing classification split search
 
 In our current implementation, the run time to compute the best split per feature is $O(N^2)$. For each split we have to go over all samples in each child node to compute the objective function -- this is, effectively, a nested loop.
 We sort the samples by feature value, which means that each new split in the loop moves exactly one sample from one child node to the other. It's for this reason that we don't have to go over all samples every time: the objective function can be recomputed in constant time by moving a single point for each iteration.
 
-First, let's consider only the classification case without sample weights.
+We'll abstract our criterion to accommodate different ways to compute it.
+When searching for the best split, we need to keep track of some values depending on the criterion.
 
 ```python
-def _find_best_split_classification(X, y, criterion_fn) -> Split | None:
-    min_criterion = np.inf
-    split = None
-    previous_split_value = None
-    y = y.astype(np.float64)
+@dataclass
+class BaseSplitStats:
+    left_weight: float
+    right_weight: float
+
+
+S = TypeVar("S", bound=BaseSplitStats)
+
+
+@dataclass
+class ClassificationSplitStats(BaseSplitStats):
+    left_class_count: np.ndarray
+    right_class_count: np.ndarray
+```
+
+Regardless of the criterion, we need to keep track of the number of samples in each child node.
+Notice they're named `weight` and not `count` because when sample weights are present they are no longer integer counts.
+For instance, a sample with a weight of 2 acts as if we had an extra copy of it.
+It can be a bit weird to think about _fractional_ counts, but they are an extrapolation of the integer example.
+For instance, a sample with weight 2.5 will have 2.5 times more impact on the criterion value.
+
+Our criterion abstraction should provide a way to measure node impurity given `y` as well as methods to track values during split search and compute the objective function in $O(1)$ time.
+It should also provide a method to estimate the optimal value of a node given `y`.
+Depending on the criterion, the optimal node value -- that is, the node value that minimizes the criterion given `y` -- is estimated differently.
+This was overlooked earlier since for all the objective functions we've implemented the optimal value is simply the mean outcome.
+
+```python
+class Criterion(Protocol, Generic[S]):
+    def node_impurity(self, y: np.ndarray, sample_weights: np.ndarray) -> float: ...
+
+    def node_optimal_value(self, y: np.ndarray) -> np.ndarray: ...
+
+    def init_split_stats(self, y: np.ndarray, sample_weights: np.ndarray) -> S: ...
+
+    def update_split_stats(
+        self, stats: S, y_value: np.ndarray, weight: float
+    ) -> None: ...
+
+    def split_impurity(self, stats: S) -> float: ...
+```
+
+Both Gini impurity and entropy take the exact same values as input, so we can create a single classification criterion:
+
+```python
+class ClassificationCriterion:
+    def __init__(self, objective_fn: Callable[[np.ndarray], float]):
+        self.objective = objective_fn
+
+    def node_optimal_value(self, y: np.ndarray) -> np.ndarray:
+        return np.mean(y, axis=0)
+
+    def node_impurity(self, y: np.ndarray, sample_weights: np.ndarray) -> float:
+        return self.objective(_class_probabilities(y, sample_weights))
+
+    def init_split_stats(
+        self, y: np.ndarray, sample_weights: np.ndarray
+    ) -> ClassificationSplitStats:
+        sample_weights = sample_weights.reshape((-1, 1))
+        return ClassificationSplitStats(
+            left_weight=0,
+            right_weight=np.sum(sample_weights),
+            left_class_count=np.zeros(y.shape[1], dtype=y.dtype),
+            right_class_count=np.sum(y * sample_weights, axis=0),
+        )
+
+    def update_split_stats(
+        self,
+        stats: ClassificationSplitStats,
+        y_value: np.ndarray,
+        weight: float,
+    ) -> None:
+        stats.left_weight += weight
+        stats.right_weight -= weight
+        stats.left_class_count += y_value * weight
+        stats.right_class_count -= y_value * weight
+
+    def split_impurity(self, stats: ClassificationSplitStats) -> float:
+        criterion_l = self.objective(stats.left_class_count / stats.left_weight)
+        criterion_r = self.objective(stats.right_class_count / stats.right_weight)
+
+        total_weight = stats.left_weight + stats.right_weight
+        p_l = stats.left_weight / total_weight
+        p_r = stats.right_weight / total_weight
+        return float(p_l * criterion_l + p_r * criterion_r)
+
+
+```
+
+Then, we adapt the split search function to use this criterion.
+
+```python
+def _find_best_split(
+    X, y, criterion: Criterion, sample_weights: np.ndarray
+) -> Split | None:
+    min_score = np.inf
+    best_split = None
 
     for feat_idx in range(X.shape[1]):
-        feature = X[:, feat_idx]
-        sort_idx = np.argsort(feature)
-        feature_sort = feature[sort_idx]
-        y_sort = y[sort_idx]
-        left_class_count = np.zeros(y.shape[1], dtype=np.float64)
-        right_class_count = np.sum(y, axis=0)
+        sort_idx = np.argsort(X[:, feat_idx])
+        x_sorted = X[sort_idx, feat_idx]
+        y_sorted = y[sort_idx]
+        weights_sorted = sample_weights[sort_idx]
 
-        for idx in range(len(sort_idx) - 1):
-            left_class_count += y_sort[idx]
-            right_class_count -= y_sort[idx]
+        stats = criterion.init_split_stats(y_sorted, weights_sorted)
 
-            split_value = feature_sort[idx]
-            if previous_split_value == split_value:
-                continue
-            previous_split_value = split_value
+        for i in range(1, len(y_sorted)):
+            criterion.update_split_stats(stats, y_sorted[i - 1], weights_sorted[i - 1])
+            if x_sorted[i] != x_sorted[i - 1]:
+                score = criterion.split_impurity(stats)
+                if score < min_score:
+                    min_score = score
+                    best_split = Split(
+                        criterion=min_score,
+                        feature_idx=feat_idx,
+                        split_value=x_sorted[i - 1],
+                        left_index=sort_idx[:i],
+                        right_index=sort_idx[i:],
+                        left_value=criterion.node_optimal_value(y_sorted[:i]),
+                        right_value=criterion.node_optimal_value(y_sorted[i:]),
+                    )
 
-            criterion_l = criterion_fn(left_class_count / (idx + 1))
-            criterion_r = criterion_fn(right_class_count / (len(sort_idx) - idx - 1))
-
-            p_l = (idx + 1) / len(sort_idx)
-            p_r = (len(sort_idx) - idx - 1) / len(sort_idx)
-            criterion = p_l * criterion_l + p_r * criterion_r
-            if criterion < min_criterion:
-                left = sort_idx[: idx + 1]
-                right = sort_idx[idx + 1 :]
-                min_criterion = criterion
-                split = Split(
-                    criterion=criterion,
-                    feature_idx=feat_idx,
-                    split_value=split_value,
-                    left_index=left,
-                    right_index=right,
-                    left_value=np.mean(y_sort[: idx + 1], axis=0),
-                    right_value=np.mean(y_sort[idx + 1 :], axis=0),
-                )
-
-    return split
+    return best_split
 ```
+
+# TODO continue
 
 There have been a number of changes in this function.
 For each feature, we initialize two arrays of shape $c$ where $c$ is the number of classes that store the number of samples per class in each node.
@@ -511,6 +592,117 @@ There is an edge case when two consecutive samples have the exact same sample va
 We're moving samples one by one, but when applying the decision rule all tied samples will belong to the same child node.
 To avoid this issue, we check whether the split value has changed from the previous iteration.
 If it has not changed, we skip the iteration -- it's not a valid split point.
+
+### Optimizing regression split search
+
+Recalling what we've seen previously, the squared loss is defined as follows:
+
+$$
+L(\mathcal{D}) = \frac{1}{N} \sum_{i=1}^N (y_{i} - \bar{y})^2
+$$
+
+This function quantifies the _within-node variance_ of the target variable.
+Let's expand the quadratic term:
+
+$$
+\sum_{i=1}^N (y_{i} - \bar{y})^2 = \sum_{i=1}^N (y_{i}^2 - 2 y_{i} \bar{y} + \bar{y}^2) = \sum_{i=1}^N y_{i}^2 - 2 \bar{y} \sum_{i=1}^N y_{i} + N \bar{y}^2
+$$
+
+We know that $\bar{y}$ is _not a parameter_, it's the average outcome of the node:
+
+$$
+\bar{y} = \frac{1}{N} \sum_{i=1}^N y_{i}
+$$
+
+Substituting $\bar{y}$:
+
+$$
+\sum_{i=1}^N y_{i}^2 - 2 \bar{y} \sum_{i=1}^N y_{i} + N \bar{y}^2 = \sum_{i=1}^N y_{i}^2 - 2 \sum_{i=1}^N y_{i} \sum_{i=1}^N y_{i} + N \Big( \frac{1}{N} \sum_{i=1}^N y_{i} \Big)^2 = \sum_{i=1}^N y_{i}^2 - \frac{1}{N} \Big( \sum_{i=1}^N y_{i} \Big)^2
+$$
+
+Thus, the loss becomes:
+
+$$
+L(\mathcal{D}) = \frac{\sum_{i=1}^N y_{i}^2}{N} - \Big(\frac{\sum_{i=1}^N y_{i}}{N}\Big)^2
+$$
+
+The first term is the sum of squares divided by $N$, while the second is the squared mean.
+If we track the squared sum, the sum, and $N$, we can compute the objective in constant time.
+
+```python
+@dataclass
+class SquaredLossSplitStats(BaseSplitStats):
+    left_sum: np.ndarray
+    right_sum: np.ndarray
+    left_sum_squared: np.ndarray
+    right_sum_squared: np.ndarray
+
+
+class SquaredLossCriterion(Criterion):
+    def node_impurity(self, y: np.ndarray, sample_weights: np.ndarray) -> float:
+        sample_weights = sample_weights.reshape(-1, 1)
+        weighted_mean = np.average(y, weights=sample_weights)
+        return float(np.average((y - weighted_mean) ** 2, weights=sample_weights))
+
+    def node_optimal_value(self, y: np.ndarray) -> np.ndarray:
+        return np.mean(y, axis=0)
+
+    def init_split_stats(
+        self, y: np.ndarray, sample_weights: np.ndarray
+    ) -> SquaredLossSplitStats:
+        sample_weights = sample_weights.reshape((-1, 1))
+        return SquaredLossSplitStats(
+            left_weight=0,
+            right_weight=np.sum(sample_weights),
+            left_sum=np.zeros(y.shape[1], dtype=y.dtype),
+            right_sum=np.sum(y * sample_weights, axis=0),
+            left_sum_squared=np.zeros(y.shape[1], dtype=y.dtype),
+            right_sum_squared=np.sum(y * y, axis=0),
+        )
+
+    def update_split_stats(
+        self,
+        stats: SquaredLossSplitStats,
+        y_value: np.ndarray,
+        weight: float,
+    ) -> None:
+        stats.left_sum += weight * y_value
+        stats.right_sum -= weight * y_value
+        stats.left_weight += weight
+        stats.right_weight -= weight
+        stats.left_sum_squared += weight * y_value * y_value
+        stats.right_sum_squared -= weight * y_value * y_value
+
+    def split_impurity(self, stats: SquaredLossSplitStats) -> float:
+        left_mean = stats.left_sum / stats.left_weight if stats.left_weight > 0 else 0
+        right_mean = (
+            stats.right_sum / stats.right_weight if stats.right_weight > 0 else 0
+        )
+
+        criterion_l = (
+            np.sum(stats.left_sum_squared / stats.left_weight - left_mean * left_mean)
+            if stats.left_weight > 0
+            else 0
+        )
+        criterion_r = (
+            np.sum(
+                stats.right_sum_squared / stats.right_weight - right_mean * right_mean
+            )
+            if stats.right_weight > 0
+            else 0
+        )
+
+        total_weight = stats.left_weight + stats.right_weight
+        p_l = stats.left_weight / total_weight
+        p_r = stats.right_weight / total_weight
+        return float(p_l * criterion_l + p_r * criterion_r)
+```
+
+Notice that this time the weight (weighted number of samples) is squared in the objective function, so it should be greater or equal than 1.
+
+## Categorical features
+
+...
 
 ## References
 
