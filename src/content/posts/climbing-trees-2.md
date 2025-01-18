@@ -392,7 +392,9 @@ def split_node(
     return node
 ```
 
-At this point we already have a functional decision tree constructor. Here is an example:
+At this point we already have a functional decision tree constructor[^edge_case]. Here is an example:
+
+[^edge_case]: We are ignoring an edge case when there are repeated values in the feature, which we'll address later.
 
 ```python
 from sklearn.datasets import load_wine
@@ -443,12 +445,16 @@ This process is repeated for each new depth level added to the tree, whose maxim
 The $D$ and $log^2 N$ terms are not bad, but the $N^2$ term makes training trees on large number of samples infeasible.
 
 Luckily, it's possible to compute the objective function in constant time, bringing us back to the usual $O(D\ N\ \log^2{N})$ time complexity.
-With clever caching strategies we can also reuse the sorted features, giving us an average time complexity of $O(D\ N \log{N})$.
+With clever caching strategies we can also reuse the sorted features, giving us an average time complexity of $O(D\ N \log{N})$[^not_implemented].
+
+[^not_implemented]: We will not implement this kind of optimization.
 
 ### Optimizing classification split search
 
-In our current implementation, the run time to compute the best split per feature is $O(N^2)$. For each split we have to go over all samples in each child node to compute the objective function -- this is, effectively, a nested loop.
-We sort the samples by feature value, which means that each new split in the loop moves exactly one sample from one child node to the other. It's for this reason that we don't have to go over all samples every time: the objective function can be recomputed in constant time by moving a single point for each iteration.
+In our current implementation, the run time to compute the best split per feature is $O(N^2)$.
+For each split we have to go over all samples in each child node to compute the objective function -- this is, effectively, a nested loop.
+We sort the samples by feature value, which means that each new split in the loop moves exactly one sample from one child node to the other.
+It's for this reason that we don't have to go over all samples every time: the objective function can be recomputed in constant time by moving a single point for each iteration.
 
 We'll abstract our criterion to accommodate different ways to compute it.
 When searching for the best split, we need to keep track of some values depending on the criterion.
@@ -538,8 +544,6 @@ class ClassificationCriterion:
         p_l = stats.left_weight / total_weight
         p_r = stats.right_weight / total_weight
         return float(p_l * criterion_l + p_r * criterion_r)
-
-
 ```
 
 Then, we adapt the split search function to use this criterion.
@@ -577,16 +581,6 @@ def _find_best_split(
 
     return best_split
 ```
-
-# TODO continue
-
-There have been a number of changes in this function.
-For each feature, we initialize two arrays of shape $c$ where $c$ is the number of classes that store the number of samples per class in each node.
-For the left node we initialize the values as 0, whereas the right node starts with the counts of all samples (remember that the outcome is a one-hot encoded matrix).
-
-Then, for each split point we add the label to the left class count vector and subtract it from the right class count vector.
-To obtain class probabilities, we divide the class counts by the number of elements in each child node -- this number is trivially obtained using the `idx` loop variable.
-Notice that we need to use the original objective functions that take probabilities as inputs, not the convenience functions we've implemented that convert class counts to probabilities.
 
 There is an edge case when two consecutive samples have the exact same sample value.
 We're moving samples one by one, but when applying the decision rule all tied samples will belong to the same child node.
@@ -626,7 +620,7 @@ $$
 L(\mathcal{D}) = \frac{\sum_{i=1}^N y_{i}^2}{N} - \Big(\frac{\sum_{i=1}^N y_{i}}{N}\Big)^2
 $$
 
-The first term is the sum of squares divided by $N$, while the second is the squared mean.
+The first term is the sum of squares divided by $N$ and the second is the squared mean.
 If we track the squared sum, the sum, and $N$, we can compute the objective in constant time.
 
 ```python
