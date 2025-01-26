@@ -19,8 +19,8 @@ Even if you understand everything, check the [references](#references): there is
 ## Defining our building blocks
 
 You should definitely read the first part of this series before this one as I'll use many concepts introduced there to implement the decision trees.
-We will use Python's standard library and _numpy_ as the only external dependency.
-This seems like a reasonable compromise between implementing everything from scratch and delegating some parts to external libraries (in our case, mathematical and vector operations).
+We will use Python's standard library and _numpy_ and _pandas_ as the only external dependencies.
+This seems like a reasonable compromise between implementing everything from scratch and delegating some parts to external libraries (in our case, mathematical operations and table-like data structures).
 
 ### Nodes
 
@@ -31,11 +31,12 @@ First things first: let's define nodes and leaf nodes.
 class LeafNode:
     value: np.ndarray
 
+split_value = float | set
 
 @dataclass
 class Node:
     feature_idx: int
-    split_value: float
+    split_value: split_value
     left: Node | LeafNode
     right: Node | LeafNode
 ```
@@ -44,8 +45,7 @@ Leaf nodes only need to store a _value_, which is a numpy array.
 In classification settings the value is an array of probabilities and in regression, a single-element array with a constant.
 
 Internal nodes (referred to only as _nodes_ from here on) need to store extra information: the ID of the feature chosen to split the node, the split value, the left child node, and the right child node.
-
-TODO: categorical variables
+The split value can be either a float (for numerical features) or a set (for categorical features). We'll first implement the numerical feature case and later extend the implementation for the categorical case.
 
 ### Objective functions
 
@@ -74,6 +74,7 @@ def _class_probabilities(labels, sample_weights=None):
     if sample_weights is None:
         return np.mean(labels, axis=0)
 
+    sample_weights = sample_weights.reshape((-1, 1))
     return (sample_weights * labels).sum(axis=0) / np.sum(sample_weights)
 ```
 
@@ -110,14 +111,16 @@ For each feature, we sort the values as well as the outcome. Then, for each spli
 class Split(NamedTuple):
     criterion: float
     feature_idx: int
-    split_value: float
+    split_value: split_value
     left_index: np.ndarray
     right_index: np.ndarray
     left_value: np.ndarray
     right_value: np.ndarray
 
 
-def _find_best_split(X, y, criterion_fn, sample_weights) -> Split | None:
+def _find_best_split(
+    X, y, criterion_fn, sample_weights, min_samples_leaf
+) -> Split | None:
     min_criterion = np.inf
     split = None
 
@@ -128,7 +131,12 @@ def _find_best_split(X, y, criterion_fn, sample_weights) -> Split | None:
         y_sort = y[sort_idx]
         weights_sort = sample_weights[sort_idx]
 
-        for idx in range(1, len(sort_idx)):
+        n_samples = len(sort_idx)
+        for idx in range(1, n_samples):
+
+          if idx < min_samples_leaf or (n_samples - idx) < min_samples_leaf:
+              continue
+
             left = sort_idx[:idx]
             right = sort_idx[idx:]
             criterion_l = criterion_fn(y_sort[:idx], weights_sort[:idx])
@@ -178,179 +186,28 @@ The child nodes are then split recursively. The first base case is when there is
 
 ```python
 def split_node(
-    node,
-    X,
-    y,
-    value,
-    depth,
-    criterion_fn,
-    sample_weights=None,
-) -> LeafNode | Node | None:
-    if X.shape[0] <= 1:
-        return LeafNode(value)
-
-    split = _find_best_split(X, y, criterion_fn, sample_weights)
-    if split is None:
-        return None
-
-    X_left = X[split.left_index, :]
-    X_right = X[split.right_index, :]
-    y_left = y[split.left_index]
-    y_right = y[split.right_index]
-
-    node = Node(
-        split.feature_idx,
-        split.split_value,
-        LeafNode(split.left_value),
-        LeafNode(split.right_value),
-    )
-
-    left = split_node(
-        node=node,
-        X=X_left,
-        y=y_left,
-        value=split.left_value,
-        depth=depth + 1,
-        criterion_fn=criterion_fn,
-        sample_weights=sample_weights,
-    )
-    right = split_node(
-        node=node,
-        X=X_right,
-        y=y_right,
-        value=split.right_value,
-        depth=depth + 1,
-        criterion_fn=criterion_fn,
-        sample_weights=sample_weights,
-    )
-
-    if left is not None:
-        node.left = left
-    if right is not None:
-        node.right = right
-
-    return node
-
-```
-
-Recursive calls increase the depth counter by 1. We can add a `max_depth` stopping criterion.
-Similarly, we can check the number of samples in child nodes and enforce a minimum number of samples per leaf (`min_samples_leaf`) constraint.
-These constraints are crucial to limit tree size and reduce _variance_ (overfitting).
-
-```python
-def split_node(
-    node,
-    X,
-    y,
-    value,
-    depth,
-    criterion_fn,
-    sample_weights=None,
-    max_depth: int = 0,
-    min_samples_leaf: int = 0,
-) -> LeafNode | Node | None:
-    if X.shape[0] <= 1 or (max_depth and depth >= max_depth):
-        return LeafNode(value)
-
-    if sample_weights is None:
-        sample_weights = _uniform_sample_weights(X)
-
-    split = _find_best_split(X, y, criterion_fn, sample_weights)
-    if split is None:
-        return None
-
-    X_left = X[split.left_index, :]
-    X_right = X[split.right_index, :]
-    y_left = y[split.left_index]
-    y_right = y[split.right_index]
-
-    if min_samples_leaf and (
-        X_left.shape[0] <= min_samples_leaf or X_right.shape[0] <= min_samples_leaf
-    ):
-        return None
-
-    node = Node(
-        split.feature_idx,
-        split.split_value,
-        LeafNode(split.left_value),
-        LeafNode(split.right_value),
-    )
-
-    left = split_node(
-        node=node,
-        X=X_left,
-        y=y_left,
-        value=split.left_value,
-        depth=depth + 1,
-        criterion_fn=criterion_fn,
-        sample_weights=sample_weights,
-        max_depth=max_depth,
-        min_samples_leaf=min_samples_leaf,
-    )
-    right = split_node(
-        node=node,
-        X=X_right,
-        y=y_right,
-        value=split.right_value,
-        depth=depth + 1,
-        criterion_fn=criterion_fn,
-        sample_weights=sample_weights,
-        max_depth=max_depth,
-        min_samples_leaf=min_samples_leaf,
-    )
-
-    if left is not None:
-        node.left = left
-    if right is not None:
-        node.right = right
-
-    return node
-```
-
-We must add another base case: a _pure_ node, that is, a node with samples from a single class (classification) or with samples with a single outcome value (regression) should not be split further.
-All our objective functions yield a value of 0 with pure nodes, so this is easy to implement.
-We can also add the constraint of a minimum criterion reduction -- even though I've argued in the previous post that this is generally a bad idea.
-
-```python
-def split_node(
-    node,
-    X,
-    y,
-    value,
-    depth,
-    criterion_fn,
-    sample_weights=None,
+    node: Node | LeafNode,
+    X: pd.DataFrame,
+    y: np.ndarray,
+    value: np.ndarray,
+    depth: int,
+    criterion,
+    sample_weights: np.ndarray,
     max_depth: int = 0,
     min_samples_leaf: int = 0,
     min_criterion_reduction: float = 0,
 ) -> LeafNode | Node | None:
-    if X.shape[0] <= 1 or (max_depth and depth >= max_depth):
+    if X.shape[0] <= 1:
         return LeafNode(value)
 
-    if sample_weights is None:
-        sample_weights = _uniform_sample_weights(X)
-
-    prior_criterion = criterion_fn(y)
-    if prior_criterion == 0:
-        return LeafNode(value)
-
-    split = _find_best_split(X, y, criterion_fn, sample_weights)
+    split = _find_best_split(X, y, criterion, sample_weights, min_samples_leaf)
     if split is None:
         return None
 
-    criterion_reduction = prior_criterion - split.criterion
-    if criterion_reduction and criterion_reduction < min_criterion_reduction:
-        return None
-
-    X_left = X[split.left_index, :]
-    X_right = X[split.right_index, :]
+    X_left = X.iloc[split.left_index, :]
+    X_right = X.iloc[split.right_index, :]
     y_left = y[split.left_index]
     y_right = y[split.right_index]
-
-    if min_samples_leaf and (
-        X_left.shape[0] < min_samples_leaf or X_right.shape[0] < min_samples_leaf
-    ):
-        return None
 
     node = Node(
         split.feature_idx,
@@ -365,7 +222,7 @@ def split_node(
         y=y_left,
         value=split.left_value,
         depth=depth + 1,
-        criterion_fn=criterion_fn,
+        criterion=criterion,
         sample_weights=sample_weights[split.left_index],
         max_depth=max_depth,
         min_samples_leaf=min_samples_leaf,
@@ -377,7 +234,7 @@ def split_node(
         y=y_right,
         value=split.right_value,
         depth=depth + 1,
-        criterion_fn=criterion_fn,
+        criterion=criterion,
         sample_weights=sample_weights[split.right_index],
         max_depth=max_depth,
         min_samples_leaf=min_samples_leaf,
@@ -392,9 +249,78 @@ def split_node(
     return node
 ```
 
+Recursive calls increase the depth counter by 1. We can add a `max_depth` stopping criterion.
+Similarly, we can check the number of samples in child nodes and enforce a minimum number of samples per leaf (`min_samples_leaf`) constraint.
+These constraints are crucial to limit tree size and reduce _variance_ (overfitting).
+
+```python
+def split_node(
+    node: Node | LeafNode,
+    X: pd.DataFrame,
+    y: np.ndarray,
+    value: np.ndarray,
+    depth: int,
+    criterion,
+    sample_weights: np.ndarray,
+    max_depth: int = 0,
+    min_samples_leaf: int = 0,
+    min_criterion_reduction: float = 0,
+) -> LeafNode | Node | None:
+    if X.shape[0] <= 1 or (max_depth and depth >= max_depth):
+        return LeafNode(value)
+
+    if X.shape[0] < 2 * min_samples_leaf:
+        return LeafNode(value)
+
+    # [...]
+```
+
+> Notice that if the node has less than twice the minimum number of samples per leaf, all possible child nodes will violate the constraint.
+> The split search function should also consider only splits that do not violate this constraint.
+
+We must add another base case: a _pure_ node, that is, a node with samples from a single class (classification) or with samples with a single outcome value (regression) should not be split further.
+All our objective functions yield a value of 0 with pure nodes, so this is easy to implement.
+We can also add the constraint of a minimum criterion reduction -- even though I've argued in the previous post that this is generally a bad idea.
+
+```python
+def split_node(
+    node: Node | LeafNode,
+    X: pd.DataFrame,
+    y: np.ndarray,
+    value: np.ndarray,
+    depth: int,
+    criterion,
+    sample_weights: np.ndarray,
+    max_depth: int = 0,
+    min_samples_leaf: int = 0,
+    min_criterion_reduction: float = 0,
+) -> LeafNode | Node | None:
+    if X.shape[0] <= 1 or (max_depth and depth >= max_depth):
+        return LeafNode(value)
+
+    if X.shape[0] < 2 * min_samples_leaf:
+        return LeafNode(value)
+
+    prior_criterion = criterion.node_impurity(y, sample_weights)
+    if np.isclose(prior_criterion, 0):
+        return LeafNode(value)
+
+    split = _find_best_split(X, y, criterion, sample_weights, min_samples_leaf)
+    if split is None:
+        return None
+
+    criterion_reduction = prior_criterion - split.criterion
+    if min_criterion_reduction and criterion_reduction < min_criterion_reduction:
+        return None
+
+    # [...]
+```
+
 At this point we already have a functional decision tree constructor[^edge_case]. Here is an example:
 
 [^edge_case]: We are ignoring an edge case when there are repeated values in the feature, which we'll address later.
+
+# FIXME arrumar
 
 ```python
 from sklearn.datasets import load_wine
@@ -405,18 +331,25 @@ def print_tree(node: Node | LeafNode, depth: int = 0):
     if isinstance(node, LeafNode):
         print(f"{indent}LeafNode(value={np.array_str(node.value, precision=2)})")
     else:
-        print(
-            f"{indent}Node(feature_idx={node.feature_idx}, split_value={node.split_value:.2f})"
-        )
+        if isinstance(node.split_value, (float, int)):
+            print(
+                f"{indent}Node(feature_idx={node.feature_idx}, split_value={node.split_value:.2f})"
+            )
+        else:
+            print(
+                f"{indent}Node(feature_idx={node.feature_idx}, split_value={node.split_value})"
+            )
+
         print(f"{indent}Left:")
         print_tree(node.left, depth + 1)
         print(f"{indent}Right:")
         print_tree(node.right, depth + 1)
 
 
+
 X, y = load_wine(return_X_y=True)
 
-y_oh = _one_hot_encode(y)
+y_oh = one_hot_encode(y)
 node = LeafNode(np.mean(y_oh, axis=0))
 trained_node = split_node(
     node=node,
@@ -424,7 +357,7 @@ trained_node = split_node(
     y=y_oh,
     value=np.mean(y, axis=0),
     depth=0,
-    criterion_fn=gini_criterion,
+    criterion=gini_criterion,
 )
 node = trained_node if trained_node is not None else node
 print_tree(node)
@@ -504,7 +437,7 @@ class Criterion(Protocol, Generic[S]):
 Both Gini impurity and entropy take the exact same values as input, so we can create a single classification criterion:
 
 ```python
-class ClassificationCriterion:
+class ClassificationCriterion(Criterion):
     def __init__(self, objective_fn: Callable[[np.ndarray], float]):
         self.objective = objective_fn
 
@@ -512,17 +445,26 @@ class ClassificationCriterion:
         return np.mean(y, axis=0)
 
     def node_impurity(self, y: np.ndarray, sample_weights: np.ndarray) -> float:
+        if y.shape[1] == 1:
+            y = np.hstack((y, 1 - y))
         return self.objective(_class_probabilities(y, sample_weights))
 
     def init_split_stats(
         self, y: np.ndarray, sample_weights: np.ndarray
     ) -> ClassificationSplitStats:
         sample_weights = sample_weights.reshape((-1, 1))
+
+        # For binary classification with single column
+        if y.shape[1] == 1:
+            y = np.hstack((y, 1 - y))
+
         return ClassificationSplitStats(
             left_weight=0,
             right_weight=np.sum(sample_weights),
-            left_class_count=np.zeros(y.shape[1], dtype=y.dtype),
-            right_class_count=np.sum(y * sample_weights, axis=0),
+            left_class_count=np.zeros(y.shape[1], dtype=sample_weights.dtype),
+            right_class_count=np.sum(
+                y * sample_weights, axis=0, dtype=sample_weights.dtype
+            ),
         )
 
     def update_split_stats(
@@ -533,6 +475,11 @@ class ClassificationCriterion:
     ) -> None:
         stats.left_weight += weight
         stats.right_weight -= weight
+
+        # For binary classification with single column
+        if len(y_value) == 1:
+            y_value = np.hstack((y_value, 1 - y_value))
+
         stats.left_class_count += y_value * weight
         stats.right_class_count -= y_value * weight
 
@@ -544,7 +491,13 @@ class ClassificationCriterion:
         p_l = stats.left_weight / total_weight
         p_r = stats.right_weight / total_weight
         return float(p_l * criterion_l + p_r * criterion_r)
+
 ```
+
+> Notice that we treat the binary classification case differently.
+> When there are two possible outcomes, the `y` matrix can be encoded with a single binary column (either 1 or 0).
+> Thus, one-hot encoding two classes into two columns is wasteful.
+> Since the objective functions still require the proportion of both classes, we add the second column here.
 
 Then, we adapt the split search function to use this criterion.
 
@@ -611,7 +564,7 @@ $$
 Substituting $\bar{y}$:
 
 $$
-\sum_{i=1}^N y_{i}^2 - 2 \bar{y} \sum_{i=1}^N y_{i} + N \bar{y}^2 = \sum_{i=1}^N y_{i}^2 - 2 \sum_{i=1}^N y_{i} \sum_{i=1}^N y_{i} + N \Big( \frac{1}{N} \sum_{i=1}^N y_{i} \Big)^2 = \sum_{i=1}^N y_{i}^2 - \frac{1}{N} \Big( \sum_{i=1}^N y_{i} \Big)^2
+\sum_{i=1}^N y_{i}^2 - 2 \bar{y} \sum_{i=1}^N y_{i} + N \bar{y}^2 = \sum_{i=1}^N y_{i}^2 - \frac{1}{N} \Big( \sum_{i=1}^N y_{i} \Big)^2
 $$
 
 Thus, the loss becomes:
@@ -692,13 +645,407 @@ class SquaredLossCriterion(Criterion):
         return float(p_l * criterion_l + p_r * criterion_r)
 ```
 
-Notice that this time the weight (weighted number of samples) is squared in the objective function, so it should be greater or equal than 1.
+# FIXME
+
+> Notice that this time the weight (weighted number of samples) is squared in the objective function, so it should be greater or equal than 1.
 
 ## Categorical features
+
+In the previous post we've seen that decision trees accept both numerical and categorical features, yet our implementation can only handle numerical ones.
+One possibility is to one-hot encode categorical features into numerical ones. Since the time complexity of fitting a tree scales linearly with the number of features, this doesn't hurt performance catastrophically.
+In fact, the _scikit-learn_ implementation [still doesn't support](https://scikit-learn.org/stable/modules/tree.html#tree-algorithms:~:text=Able%20to%20handle%20both%20numerical%20and%20categorical%20data.%20However%2C%20the%20scikit%2Dlearn%20implementation%20does%20not%20support%20categorical%20variables%20for%20now.) categorical features directly and requires numerical encoding.
+One-hot encoding shifts the complexity from combinations in each split to the tree structure: many splits are required to capture a relationship that is true for a group of category levels of a feature.
+Moreover, the encoding process makes the `X` feature matrix much larger in memory.
+
+In the CART-based family of decision tree algorithms, a categorical split may consider one category at a time (one _vs_ rest) or combinations of categories.
+The problem is that there are $2^{d-1} - 1$ possible combinations of categories, where $d$ is the number of levels (distinct categories) in a feature.
+If we have 100 levels, that's already 524287 combinations to try for _every_ split.
+The tree structure produced by a one _vs_ rest strategy is effectively equivalent to one produced using one-hot encoded features, but it requires less memory for the feature matrix.
+
+### One _vs_ rest strategy
+
+In this strategy, the split search considers all levels of a feature individually and compares them with all other levels combined.
+In other words, the left child node contains samples of a single level while the right child node contains all other levels.
+The split can be quite uneven and result in less balanced trees, but the performance trade-off can be worth it.
+We avoid the exponential number of combinations seen above and don't expand the memory footprint of the `X` matrix with many one-hot encoded columns.
+
+The criterion interface should have new methods to handle the categorical split, preferably in constant time.
+Each feature level is considered individually, thus we only need to pre-compute the indices of each level.
+This can be done in $O(N \log{N})$ time by lexicographically sorting the feature.
+
+```python
+cat_indices = {}
+sort_idx = np.argsort(x)
+x_sorted = x[sort_idx]
+y_sorted = y[sort_idx]
+weights_sorted = sample_weights[sort_idx]
+
+start_idx = 0
+for i in range(1, len(x_sorted) + 1):
+    if i == len(x_sorted) or x_sorted[i] != x_sorted[start_idx]:
+        cat_indices[x_sorted[start_idx]] = {
+            "indices": sort_idx[start_idx:i],
+            "y": y_sorted[start_idx:i],
+            "weights": weights_sorted[start_idx:i],
+        }
+        start_idx = i
+```
+
+Whenever the feature value changes, we've reached a new level and therefore can compute the indices, the subset of `y`, and the subset of `sample_weights` that belong to this level.
+The criterion of the left child node can be directly computed using the subset of `y` defined above, whereas the criterion for the right child node can be found removing the class counts of the level from the total.
+You may have noticed this is not a $O(1)$ operation because we have to sum over subsets of `y`.
+Still, this is done once per level, and we avoid any quadratic or exponential operations.
+
+The split stats are initialized the same way as before.
+We implement a new method to make new stats for a categorical group with the logic we've just described:
+
+```python
+class ClassificationCriterion(Criterion):
+    # [...]
+
+    def make_stats_from_categorical_level(
+        self,
+        stats: ClassificationSplitStats,
+        y: np.ndarray,
+        sample_weights: np.ndarray,
+        is_left: bool,
+    ) -> ClassificationSplitStats:
+        level_weights = sample_weights.reshape(-1, 1)
+        level_weight = np.sum(sample_weights)
+
+        # For binary classification with single column
+        if y.shape[1] == 1:
+            y = np.hstack((y, 1 - y))
+
+        level_sum = np.sum(y * level_weights, axis=0)
+
+        if is_left:
+            stats = replace(
+                stats,
+                left_weight=level_weight,
+                right_weight=stats.right_weight - level_weight,
+                left_class_count=level_sum,
+                right_class_count=stats.right_class_count - level_sum,
+            )
+        else:
+            stats = replace(
+                stats,
+                left_weight=stats.left_weight - level_weight,
+                right_weight=level_weight,
+                left_class_count=stats.left_class_count - level_sum,
+                right_class_count=level_sum,
+            )
+        return stats
+```
+
+An analogous method has been implemented for the squared loss criterion.
+Then, we use this method in the new `_find_best_categorical_split` function:
+
+```python
+def _best_categorical_split(
+    x: np.ndarray,
+    y: np.ndarray,
+    feat_idx: int,
+    criterion: Criterion,
+    sample_weights: np.ndarray,
+    min_samples_leaf: int,
+):
+    min_score = np.inf
+    best_split = None
+    unique_values = np.unique(x)
+
+    stats = criterion.init_split_stats(y.astype(np.float64), sample_weights)
+
+    # Pre-compute category indices
+    cat_indices = {}
+    sort_idx = np.argsort(x)
+    x_sorted = x[sort_idx]
+    y_sorted = y[sort_idx]
+    weights_sorted = sample_weights[sort_idx]
+
+    start_idx = 0
+    for i in range(1, len(x_sorted) + 1):
+        if i == len(x_sorted) or x_sorted[i] != x_sorted[start_idx]:
+            cat_indices[x_sorted[start_idx]] = {
+                "indices": sort_idx[start_idx:i],
+                "y": y_sorted[start_idx:i],
+                "weights": weights_sorted[start_idx:i],
+            }
+            start_idx = i
+
+    stats = criterion.init_split_stats(y, sample_weights)
+
+    n_samples = len(y_sorted)
+    for value in unique_values:
+        cat_data = cat_indices[value]
+        level_size = len(cat_data["indices"])
+        if level_size == 0 or level_size == len(x):
+            continue
+
+        if level_size < min_samples_leaf or (n_samples - level_size) < min_samples_leaf:
+            continue
+
+        level_stats = criterion.make_stats_from_categorical_level(
+            stats, cat_data["y"], cat_data["weights"], is_left=True
+        )
+        score = criterion.split_impurity(level_stats)
+
+        if score < min_score:
+            min_score = score
+            left_indices = cat_data["indices"]
+            right_indices = np.setdiff1d(np.arange(len(x)), left_indices)
+            best_split = Split(
+                criterion=score,
+                feature_idx=feat_idx,
+                split_value=set([value]),
+                left_index=left_indices,
+                right_index=right_indices,
+                left_value=criterion.node_optimal_value(y[left_indices]),
+                right_value=criterion.node_optimal_value(y[right_indices]),
+            )
+
+    return min_score, best_split
+```
+
+We first extract a function from the `_find_best_split` function to handle only numerical features.
+Then, the function below is applied to all categorical features.
+
+```python
+def _best_categorical_split(
+    x: np.ndarray,
+    y: np.ndarray,
+    feat_idx: int,
+    criterion: Criterion,
+    sample_weights: np.ndarray,
+    min_samples_leaf: int,
+):
+    min_score = np.inf
+    best_split = None
+    unique_values = np.unique(x)
+
+    stats = criterion.init_split_stats(y.astype(np.float64), sample_weights)
+
+    # Pre-compute category indices
+    cat_indices = {}
+    sort_idx = np.argsort(x)
+    x_sorted = x[sort_idx]
+    y_sorted = y[sort_idx]
+    weights_sorted = sample_weights[sort_idx]
+
+    start_idx = 0
+    for i in range(1, len(x_sorted) + 1):
+        if i == len(x_sorted) or x_sorted[i] != x_sorted[start_idx]:
+            cat_indices[x_sorted[start_idx]] = {
+                "indices": sort_idx[start_idx:i],
+                "y": y_sorted[start_idx:i],
+                "weights": weights_sorted[start_idx:i],
+            }
+            start_idx = i
+
+    stats = criterion.init_split_stats(y, sample_weights)
+
+    n_samples = len(y_sorted)
+    for value in unique_values:
+        cat_data = cat_indices[value]
+        group_size = len(cat_data["indices"])
+        if group_size == 0 or group_size == len(x):
+            continue
+
+        if group_size < min_samples_leaf or (n_samples - group_size) < min_samples_leaf:
+            continue
+
+        group_stats = criterion.make_stats_from_categorical_group(
+            stats, cat_data["y"], cat_data["weights"], is_left=True
+        )
+        score = criterion.split_impurity(group_stats)
+
+        if score < min_score:
+            min_score = score
+            left_indices = cat_data["indices"]
+            right_indices = np.setdiff1d(np.arange(len(x)), left_indices)
+            best_split = Split(
+                criterion=score,
+                feature_idx=feat_idx,
+                split_value=set([value]),
+                left_index=left_indices,
+                right_index=right_indices,
+                left_value=criterion.node_optimal_value(y[left_indices]),
+                right_value=criterion.node_optimal_value(y[right_indices]),
+            )
+
+    return min_score, best_split
+```
+
+### Optimal partitioning
+
+Luckily, there is a very handy optimization to find the optimal partitioning of levels when the output is univariate -- that is, when we're dealing with binary classification or univariate regression.
+It was first proposed by [Fisher in 1958](https://www.tandfonline.com/doi/abs/10.1080/01621459.1958.10501479) as a method to group a set of numbers so that the variance within groups is minimized. Here, again, the number of possible combinations grow exponentially.
+The proof states that we only need to look at the sorted partitions by average outcome instead of all possible permutations.
+Consider we want to ...
+
+# TODO continue
+
+This method is now used by [LightGBM](https://lightgbm.readthedocs.io/en/latest/Advanced-Topics.html#categorical-feature-support) and [XGBoost](https://xgboost.readthedocs.io/en/latest/tutorials/categorical.html#optimal-partitioning), both gradient-boosted tree libraries[^gbdt].
+
+[^gbdt]: We'll cover gradient-boosted decision trees (GBDT) in the future.
+
+The average outcome is computed by grouping the outcome vector `y` by feature `x` and applying sample weights:
+
+```python
+df = pd.DataFrame({"x": x, "y": y.ravel(), "w": sample_weights})
+
+cat_stats = df.groupby("x").agg(
+    y_avg=pd.NamedAgg(
+        column="y", aggfunc=lambda x: np.average(x, weights=df.loc[x.index, "w"])
+    ),
+    y_count=pd.NamedAgg(column="y", aggfunc=len),
+    w=pd.NamedAgg(column="w", aggfunc="sum"),
+)
+
+cat_stats = cat_stats.sort_values("y_avg")
+```
+
+After sorting by the average outcome, we split this predictor as if it were an ordered predictor.
+In other words, we go over the levels sorted by average outcome and move one by one to the left child node, computing the criterion at each step.
+Note that, unlike in previous cases, the feature is _not sorted by its values_, rather by the average outcome.
+
+The criterion can be updated with a constant time operation by treating the feature level as a single sample.
+The idea of using an average outcome as a single sample may require some intuition massaging, but it does make sense.
+Consider a level with 8 samples of outcome 1 and 2 samples of outcome 0. The average outcome is 0.8[^avg_outcome].
+Considering uniform sample weights, the weight is 10 (equal to the number of samples).
+We can expand the average outcome to a two class vector $[0.8, 0.2]$ and multiply it by the weight, resulting in the vector $[8, 2]$.
+This vector will be subtracted from the left child node and added to the right child node label count.
+Hence, moving one average outcome "sample" with a sum of sample weights is equivalent to moving each sample individually.
+After computing and ordering by average outcomes, the implementation closely resembles the numerical feature split search and won't be shown here for brevity.
+
+[^avg_outcome]: The average outcome can be seen as the proportion of positive (1) outcomes.
+
+### Combining split search methods
+
+Finally, we combine our three split search functions into one.
+This function applies numerical split search to numerical features (of course).
+For categorical features, optimal partitioning is used if the `y` outcome is univariate.
+Otherwise, a one _vs_ rest approach is used.
+
+```python
+def _find_best_split(
+    X: pd.DataFrame,
+    y: np.ndarray,
+    criterion: Criterion,
+    sample_weights: np.ndarray,
+    min_samples_leaf: int,
+) -> Split | None:
+    min_score = np.inf
+    best_split = None
+
+    categorical_splitter = (
+        _best_categorical_optimal_partitioning
+        if y.shape[1] == 1
+        else _best_categorical_split
+    )
+
+    feature_types = np.array(
+        [np.issubdtype(X.iloc[:, i].dtype, np.number) for i in range(X.shape[1])]
+    )
+    feature_values = [X.iloc[:, i].values for i in range(X.shape[1])]
+
+    for feat_idx in range(X.shape[1]):
+        splitter = (
+            _best_numerical_split if feature_types[feat_idx] else categorical_splitter
+        )
+
+        score, split = splitter(
+            feature_values[feat_idx],
+            y,
+            feat_idx,
+            criterion,
+            sample_weights,
+            min_samples_leaf,
+        )
+
+        if split is not None and score < min_score:
+            min_score = score
+            best_split = split
+
+    return best_split
+```
+
+## Training and inference
+
+The _scikit-learn_ interface has become so ubiquitous in the Python world that it seems only reasonable to use it here.
+Let's define two interfaces (in _scikit-learn_ style), one for classification and the other for regression:
+
+```python
+class Regressor(Protocol):
+    def fit(
+        self, X: pd.DataFrame, y: np.ndarray, sample_weights: np.ndarray | None = None
+    ) -> None: ...
+
+    def predict(self, X: pd.DataFrame) -> np.ndarray: ...
+
+
+class Classifier(Protocol):
+    def fit(
+        self, X: pd.DataFrame, y: np.ndarray, sample_weights: np.ndarray | None = None
+    ) -> None: ...
+
+    def predict(self, X: pd.DataFrame) -> np.ndarray: ...
+
+    def predict_proba(self, X: pd.DataFrame) -> np.ndarray: ...
+```
+
+The classes following these interfaces are mostly boilerplate code, but the inference code is new.
+To make predictions for a single feature, we check if the feature lies on the left or on the right side of the root node split.
+We repeat this process until we reach a leaf node, and then return the leaf node value as the prediction.
+It's quite a simple inference process with a $O(\log{N})$ average time complexity, that is, proportional to the depth of the tree[^depth].
+
+For the regression case:
+
+```python
+class DecisionTreeRegressor:
+    # [...]
+
+    def predict(self, X: pd.DataFrame) -> np.ndarray:
+        if self._root_node is None:
+            raise ValueError("model must be trained before prediction")
+
+        def traverse_tree(x, node):
+            while isinstance(node, Node):
+                feature_val = x.iloc[node.feature_idx]
+                if isinstance(node.split_value, set):
+                    node = node.left if feature_val in node.split_value else node.right
+                else:
+                    node = node.left if feature_val <= node.split_value else node.right
+            return node.value
+
+        y_pred = np.array([traverse_tree(x, self._root_node) for _, x in X.iterrows()])
+        return y_pred
+```
+
+For classification, this method becomes `predict_proba`, which returns vectors of probabilities[^calibration].
+The `predict` method then chooses the most likely class as the prediction for each instance using the following function:
+
+[^calibration]: These probabilities are not well calibrated and _are not_ a good measure of the uncertainty of the model.
+
+```python
+def _prob_to_class(prob: np.ndarray) -> np.ndarray:
+    if prob.shape[1] > 1:
+        return np.argmax(prob, axis=1)
+
+    return (prob.squeeze(1) >= 0.5).astype(int)
+```
+
+[^depth]: We assume roughly balanced trees and therefore the depth of the tree is proportional to $\log {N}$.
+
+## Conclusion
 
 ...
 
 ## References
 
 - [One-hot - Wikipedia](https://en.wikipedia.org/wiki/One-hot)
+- [Scikit-learn documentation on trees](https://scikit-learn.org/stable/modules/tree.html)
 - [Time complexity - Wikipedia](https://en.wikipedia.org/wiki/Time_complexity)
+- Fisher, W. D. (1958). [On Grouping for Maximum Homogeneity](https://doi.org/10.1080/01621459.1958.10501479). Journal of the American Statistical Association, 53(284), 789–798.
+- [LightGBM documentation - Categorical Feature Support](https://lightgbm.readthedocs.io/en/latest/Advanced-Topics.html#categorical-feature-support)
+- [XGboost documentation - Categorical Data](https://xgboost.readthedocs.io/en/latest/tutorials/categorical.html#optimal-partitioning)
