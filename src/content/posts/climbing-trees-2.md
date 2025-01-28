@@ -16,6 +16,9 @@ If things become too complicated, try to read the provided references.
 I've drawn upon various sources instrumental to my understanding of decision trees, including books, documentation, articles, blog posts and lectures.
 Even if you understand everything, check the [references](#references): there is great content there.
 
+The code snippets below sometimes present partial implementation for brevity or to avoid repetition.
+Complete code is available at the [climbing trees repository](https://github.com/mathpn/climbing-trees).
+
 ## Defining our building blocks
 
 You should definitely read the first part of this series before this one as I'll use many concepts introduced there to implement the decision trees.
@@ -1043,6 +1046,7 @@ def _prob_to_class(prob: np.ndarray) -> np.ndarray:
 
 ## References
 
+- [Climbing Trees Repository - Github](https://github.com/mathpn/climbing-trees)
 - [One-hot - Wikipedia](https://en.wikipedia.org/wiki/One-hot)
 - [Scikit-learn documentation on trees](https://scikit-learn.org/stable/modules/tree.html)
 - [Time complexity - Wikipedia](https://en.wikipedia.org/wiki/Time_complexity)
