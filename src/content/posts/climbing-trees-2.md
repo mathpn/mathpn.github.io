@@ -3,9 +3,9 @@ title: "Climbing trees 2: implementing decision trees"
 tags:
   - Machine learning
   - Decision trees
-description: "..."
-pubDatetime: 2999-01-07
-draft: true
+description: "Implementing classification and regression trees (CART) in Python with categorical feature support."
+pubDatetime: 2024-01-28
+draft: false
 lang: "en-us"
 ---
 
@@ -52,7 +52,7 @@ class Node:
 ```
 
 Leaf nodes only need to store a _value_, which is a numpy array.
-In classification settings the value is an array of probabilities and in regression, a single-element array with a constant.
+In classification settings the value is an array of probabilities and for regression, a single-element array with a constant.
 
 Internal nodes (referred to only as _nodes_ from here on) need to store extra information: the ID of the feature chosen to split the node, the split value, the left child node, and the right child node.
 The split value can be either a float (for numerical features) or a set (for categorical features).
@@ -116,7 +116,7 @@ def squared_loss_criterion(y, sample_weights=None):
 
 Recapitulating the decision tree algorithm, we greedily search for the best possible split, recursively.
 To find the best possible split, we simply test _all possible_ splits.
-For each feature, we sort the values as well as the outcome. Then, for each split ($N - 1$), we calculate the weighted average criterion (the value of the objective function) of children nodes.
+For each feature, we sort the values as well as the outcome. Then, for each split ($N - 1$), we calculate the weighted average criterion (the value of the objective function) of child nodes.
 
 ```python
 class Split(NamedTuple):
@@ -179,7 +179,7 @@ The split contains the following:
 - Left value: the predicted value for the left child node.
 - Right value: the predicted value for the right child node.
 
-We loop over all features and, for each one, sort the features and the outcome based on the value of the selected feature.
+We loop over all features and, for each one, sort the feature and the outcome based on the selected feature values.
 Then, we divide the samples of candidate child nodes around each split point (`left` and `right`) and compute the weighted averaged criterion.
 If the criterion value is the lowest observed so far, this is the current best split point.
 Notice that this works for both classification and regression.
@@ -608,7 +608,7 @@ In the previous post we've seen that decision trees accept both numerical and ca
 One possibility is to one-hot encode categorical features into numerical ones. Since the time complexity of fitting a tree scales linearly with the number of features, this doesn't hurt performance catastrophically.
 In fact, the _scikit-learn_ implementation [still doesn't support](https://scikit-learn.org/stable/modules/tree.html#tree-algorithms:~:text=Able%20to%20handle%20both%20numerical%20and%20categorical%20data.%20However%2C%20the%20scikit%2Dlearn%20implementation%20does%20not%20support%20categorical%20variables%20for%20now.) categorical features directly and requires numerical encoding.
 One-hot encoding shifts the complexity from combinations in each split to the tree structure: many splits are required to capture a relationship that is true for a group of category levels of a feature.
-Moreover, the encoding process makes the `X` feature matrix much larger in memory.
+Moreover, the encoding process makes the `X` feature matrix larger in memory.
 
 In the CART-based family of decision tree algorithms, a categorical split may consider one category at a time (one _vs_ rest) or combinations of categories.
 The problem is that there are $2^{d-1} - 1$ possible combinations of categories, where $d$ is the number of levels (distinct categories) in a feature.
@@ -765,11 +765,15 @@ def _best_categorical_split(
 Luckily, there is a very handy optimization to find the optimal partitioning of levels when the output is univariate -- that is, when we're dealing with binary classification or univariate regression.
 It was first proposed by [Fisher in 1958](https://www.tandfonline.com/doi/abs/10.1080/01621459.1958.10501479) as a method to group a set of numbers so that the variance within groups is minimized. Here, again, the number of possible combinations grow exponentially.
 The proof states that we only need to look at the sorted partitions by average outcome instead of all possible permutations.
-Consider we want to ...
 
-# TODO continue
+Consider we want to divide TV shows into two groups so that the audience is as homogeneous as possible in each group.
+This is equivalent to finding the categorical split set that minimizes the weighted variance in each group, i.e. minimizes the squared loss as defined above.
+Any best split must contain only contiguous TV shows (as defined by the ordered audience), as any non-contiguous item would always increase the group variance.
+Therefore, it's possible to try $N - 1$ splits over the ordered TV shows without considering all possible combinations.
+In the regression setting, we calculate the average outcome per category level, which renders the algorithm above suitable for our purposes. Each group level is analogous to a TV show, whereas the audience is the average outcome per group level.
 
-This method is used by [LightGBM](https://lightgbm.readthedocs.io/en/latest/Advanced-Topics.html#categorical-feature-support) and [XGBoost](https://xgboost.readthedocs.io/en/latest/tutorials/categorical.html#optimal-partitioning), both gradient-boosted tree libraries[^gbdt].
+The proof for binary outcomes (binary regression) was only described later and can be found in Breiman et al. (1984) and Ripley (1996).
+In this case, we compute the average _positive_ outcome for each category level: one class is (arbitrarily) represented as 1, hence the average outcome is the proportion of this class. This method is used by [LightGBM](https://lightgbm.readthedocs.io/en/latest/Advanced-Topics.html#categorical-feature-support) and [XGBoost](https://xgboost.readthedocs.io/en/latest/tutorials/categorical.html#optimal-partitioning), both gradient-boosted tree libraries[^gbdt].
 
 [^gbdt]: We'll cover gradient-boosted decision trees (GBDT) in the future.
 
@@ -924,7 +928,80 @@ def _prob_to_class(prob: np.ndarray) -> np.ndarray:
 
 ## Conclusion
 
-...
+We have implemented classification and regression trees (CART) with a decent time complexity (no quadratic time operations), support for sample weights, and categorical features. Let's test them!
+
+```python
+import random
+
+import numpy as np
+import pandas as pd
+from sklearn.datasets import load_breast_cancer, load_diabetes
+from sklearn.metrics import accuracy_score, f1_score, mean_squared_error
+
+from src.cart import DecisionTreeClassifier, DecisionTreeRegressor, print_tree
+
+
+random.seed(42)
+np.random.seed(42)
+X, y = load_breast_cancer(return_X_y=True)
+X = pd.DataFrame(np.random.random(size=(20, 4)))
+X["cat"] = np.array([["B"] * 9 + ["A"] * 6 + ["C"] * 5]).T
+y = np.array([0] * 10 + [1] * 10)
+
+max_depth = 2
+min_samples_leaf = 3
+
+tree = DecisionTreeClassifier(max_depth, min_samples_leaf)
+tree.fit(X, y, sample_weights=np.ones(len(y)) / 10)
+pred = tree.predict(X)
+score = f1_score(y, pred, average="macro")
+acc = accuracy_score(y, pred)
+print_tree(tree._root_node)
+print(f"classification tree -> F1: {score:.2f} accuracy: {acc:.2%}")
+print()
+
+X, y = load_diabetes(return_X_y=True)
+X = pd.DataFrame(X)
+
+tree = DecisionTreeRegressor(max_depth, min_samples_leaf)
+tree.fit(X, y)
+pred = tree.predict(X)
+mse = mean_squared_error(y, pred)
+print_tree(tree._root_node)
+print(f"regression tree -> MSE: {mse:.2f}")
+```
+
+> You may have noticed the `scikit-learn` dependency. Well, it's used only as a convenient way to load a toy dataset, so I think this is fair enough.
+
+```text
+Node(feature_idx=4, split_value={'B'})
+Left:
+  LeafNode(value=[0.])
+Right:
+  Node(feature_idx=3, split_value=0.44)
+  Left:
+    LeafNode(value=[0.8])
+  Right:
+    LeafNode(value=[1.])
+classification tree -> F1: 0.95 accuracy: 95.00%
+
+Node(feature_idx=8, split_value=-0.00)
+Left:
+  Node(feature_idx=2, split_value=0.01)
+  Left:
+    LeafNode(value=[96.31])
+  Right:
+    LeafNode(value=[159.74])
+Right:
+  Node(feature_idx=2, split_value=0.01)
+  Left:
+    LeafNode(value=[162.68])
+  Right:
+    LeafNode(value=[225.88])
+regression tree -> MSE: 3360.05
+```
+
+It works! In the next part of this series we'll talk about _bagging_, a strategy to reduce model variance, and the most famous bagged tree algorithm: _random forests_.
 
 ## References
 
@@ -933,5 +1010,7 @@ def _prob_to_class(prob: np.ndarray) -> np.ndarray:
 - [Scikit-learn documentation on trees](https://scikit-learn.org/stable/modules/tree.html)
 - [Time complexity - Wikipedia](https://en.wikipedia.org/wiki/Time_complexity)
 - Fisher, W. D. (1958). [On Grouping for Maximum Homogeneity](https://doi.org/10.1080/01621459.1958.10501479). Journal of the American Statistical Association, 53(284), 789–798.
+- Breiman, L., Friedman, J., Stone, C., & Olshen, R. (1984). Classification and Regression Trees. Taylor & Francis.
+- Ripley, B. D. (1996). Pattern Recognition and Neural Networks. Cambridge: Cambridge University Press.
 - [LightGBM documentation - Categorical Feature Support](https://lightgbm.readthedocs.io/en/latest/Advanced-Topics.html#categorical-feature-support)
 - [XGboost documentation - Categorical Data](https://xgboost.readthedocs.io/en/latest/tutorials/categorical.html#optimal-partitioning)
