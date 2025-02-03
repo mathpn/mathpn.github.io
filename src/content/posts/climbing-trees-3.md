@@ -35,3 +35,15 @@ Most regularization strategies (such as setting a maximum tree depth) rely on in
 Decision trees are also _unstable_ due to the greedy strategy: small changes in the training data can completely change the final model.
 
 Models with high variance achieve low (or even 0) training error but fail to generalize to new examples.
+
+## Bagging
+
+What if we could build low bias and high variance models, then later reduce their variance _without_ increasing their bias?
+There is a _theoretical_ way to do this: we obtain many independent data sets, train many different models and average their results.
+As the number of models approaches infinity we converge towards the expected classifier for the true population distribution.
+Since variance is a characteristic of each model, we'd _"average out"_ model variance without increasing bias.
+
+Unfortunately, we don't have infinite data sets -- it's usually hard enough to obtain one.
+Dividing one set into many doesn't help either because this increases bias.
+
+This is the motivation behind _bootstrap aggregation_ or _bagging_.
