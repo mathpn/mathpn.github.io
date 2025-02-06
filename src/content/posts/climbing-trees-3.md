@@ -43,7 +43,15 @@ There is a _theoretical_ way to do this: we obtain many independent data sets, t
 As the number of models approaches infinity we converge towards the expected classifier for the true population distribution.
 Since variance is a characteristic of each model, we'd _"average out"_ model variance without increasing bias.
 
+More formally, consider we have access to the true population distribution $\mathcal{P}$.
+Each training set $\mathcal{L}$ contains many $(x;y)$ cases independently drawn from the distribution $\mathcal{P}$.
+The _average_ error for a single model can be expressed as:
+
+$$
+e = E_{\mathcal{L}} E_{X,Y} (Y - \varphi(x;\mathcal{L}))^2
+$$
+
 Unfortunately, we don't have infinite data sets -- it's usually hard enough to obtain one.
 Dividing one set into many doesn't help either because this increases bias.
 
-This is the motivation behind _bootstrap aggregation_ or _bagging_.
+This is the motivation behind _**b**ootstrap **agg**rega**ting**_ or _bagging_.
