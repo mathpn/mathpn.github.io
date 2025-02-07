@@ -48,7 +48,7 @@ Each training set $\mathcal{L}$ contains many $(x;y)$ cases independently drawn 
 The _average_ error for a single model can be expressed as:
 
 $$
-e = E_{\mathcal{L}} E_{X,Y} (Y - \varphi(x;\mathcal{L}))^2
+e = \mathbb{E}_{\mathcal{L}} \mathbb{E}_{X,Y} (Y - \varphi(x;\mathcal{L}))^2
 $$
 
 The model trained on the training set $\mathcal{L}$ is notated as $\varphi(x;\mathcal{L})$.
@@ -58,17 +58,39 @@ That is, $e$ measures the expected squared error over different test points ($E_
 Now, let's consider an aggregated predictor averaged over _all_ possible training sets, its error can be expressed as follows:
 
 $$
-e_a = E_{X,Y} (Y - \varphi_a(x;P))^2
+e_a = \mathbb{E}_{X,Y} (Y - \varphi_a(x;P))^2
 $$
 
 There is no need to consider the expectation over all training sets since the model is already averaged.
 Expanding the squared term in $e$:
 
 $$
-e = E_{\mathcal{L}} E_{X,Y} [Y^2 - 2 Y \varphi(x;\mathcal{L}) + \varphi(x;\mathcal{L})^2]
+e = \mathbb{E}_{\mathcal{L}} \mathbb{E}_{X,Y} [Y^2 - 2 Y \varphi(x;\mathcal{L}) + \varphi^2(x;\mathcal{L})]
 $$
 
-Unfortunately, we don't have infinite data sets -- it's usually hard enough to obtain one.
-Dividing one set into many doesn't help either because this increases bias.
+Using linearity of expectation:
 
-This is the motivation behind _**b**ootstrap **agg**rega**ting**_ or _bagging_.
+$$
+e = \mathbb{E}_{X,Y} Y^2 - 2 \mathbb{E}_{X,Y} Y \mathbb{E}_\mathcal{L} \varphi(x;\mathcal{L}) + \mathbb{E}_{X,Y} \mathbb{E}_{\mathcal{L}} \varphi^2 (x;\mathcal{L})
+$$
+
+The expected value of individual predictors equals the aggregated predictor:
+
+$$
+\mathbb{E}_{\mathcal{L}} \varphi(x;\mathcal{L}) = \varphi_a(x;P)
+$$
+
+Using Jensen's inequality $(EZ)^2 <= E(Z)^2$ applied to $E_{\mathcal{L}} \varphi(x;L)$, we can conclude:
+
+$$
+\begin{aligned}
+&e = \mathbb{E}_{X,Y} Y^2 - 2 \mathbb{E}_{X,Y} Y \varphi_a(x;P) + \mathbb{E}_{X,Y} \mathbb{E}_{\mathcal{L}} \varphi^2 (x;\mathcal{L})\\
+&\hphantom{1} \ge \mathbb{E}_{X,Y} (Y - \varphi_a(x;P))^2 = e_a
+\end{aligned}
+$$
+
+Thus, the aggregated predictor never has higher mean-squared error than any individual predictor.
+Unfortunately, we don't have infinite data sets -- it's usually hard enough to obtain one.
+Dividing one set into many doesn't help either because this increases bias due to lower sample size.
+
+The solution is to _create_ many data sets out of the one we have by _**b**ootstrap **agg**regat**ing**_ or _bagging_.
