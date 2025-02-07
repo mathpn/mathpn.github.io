@@ -44,11 +44,28 @@ As the number of models approaches infinity we converge towards the expected cla
 Since variance is a characteristic of each model, we'd _"average out"_ model variance without increasing bias.
 
 More formally, consider we have access to the true population distribution $\mathcal{P}$.
-Each training set $\mathcal{L}$ contains many $(x;y)$ cases independently drawn from the distribution $\mathcal{P}$.
+Each training set $\mathcal{L}$ contains many $(x;y)$ cases independently drawn from the distribution $\mathcal{P}$, where $X$ and $Y$ are random variables.
 The _average_ error for a single model can be expressed as:
 
 $$
 e = E_{\mathcal{L}} E_{X,Y} (Y - \varphi(x;\mathcal{L}))^2
+$$
+
+The model trained on the training set $\mathcal{L}$ is notated as $\varphi(x;\mathcal{L})$.
+Since we're expressing the _average_ error, we take the _expectation_ over the distribution $E_{X,Y}$ and over the training sets $E_{\mathcal{L}}$.
+That is, $e$ measures the expected squared error over different test points ($E_{X,Y}$) and over different training sets $E_{\mathcal{L}}$.
+
+Now, let's consider an aggregated predictor averaged over _all_ possible training sets, its error can be expressed as follows:
+
+$$
+e_a = E_{X,Y} (Y - \varphi_a(x;P))^2
+$$
+
+There is no need to consider the expectation over all training sets since the model is already averaged.
+Expanding the squared term in $e$:
+
+$$
+e = E_{\mathcal{L}} E_{X,Y} [Y^2 - 2 Y \varphi(x;\mathcal{L}) + \varphi(x;\mathcal{L})^2]
 $$
 
 Unfortunately, we don't have infinite data sets -- it's usually hard enough to obtain one.
