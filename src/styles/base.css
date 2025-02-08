@@ -120,11 +120,11 @@
   }
 
   .prose-lg pre code {
-    @apply !text-base
+    @apply !text-sm;
   }
 
   .prose-xl pre code {
-    @apply !text-lg
+    @apply !text-base;
   }
 
   pre > code {
