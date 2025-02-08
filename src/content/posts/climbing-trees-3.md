@@ -36,12 +36,12 @@ Decision trees are also _unstable_ due to the greedy strategy: small changes in 
 
 Models with high variance achieve low (or even 0) training error but fail to generalize to new examples.
 
-## Bagging
+## Ensembles
 
 What if we could build low bias and high variance models, then later reduce their variance _without_ increasing their bias?
 There is a _theoretical_ way to do this: we obtain many independent data sets, train many different models and average their results.
 As the number of models approaches infinity we converge towards the expected classifier for the true population distribution.
-Since variance is a characteristic of each model, we'd _"average out"_ model variance without increasing bias.
+Since variance is a characteristic of each model, we _"average out"_ model variance without increasing bias.
 
 More formally, consider we have access to the true population distribution $\mathcal{P}$.
 Each training set $\mathcal{L}$ contains many $(x;y)$ cases independently drawn from the distribution $\mathcal{P}$, where $X$ and $Y$ are random variables.
@@ -55,7 +55,7 @@ The model trained on the training set $\mathcal{L}$ is notated as $\varphi(x;\ma
 Since we're expressing the _average_ error, we take the _expectation_ over the distribution $E_{X,Y}$ and over the training sets $E_{\mathcal{L}}$.
 That is, $e$ measures the expected squared error over different test points ($E_{X,Y}$) and over different training sets $E_{\mathcal{L}}$.
 
-Now, let's consider an aggregated predictor averaged over _all_ possible training sets, its error can be expressed as follows:
+Now, let's consider an aggregated predictor averaged over _all_ possible training sets. Its error can be expressed as follows:
 
 $$
 e_a = \mathbb{E}_{X,Y} (Y - \varphi_a(x;P))^2
@@ -90,7 +90,42 @@ $$
 $$
 
 Thus, the aggregated predictor never has higher mean-squared error than any individual predictor.
+The improvement we get from aggregating all possible models depends on how unequal are the two terms:
+
+$$
+[\mathbb{E} \varphi(x, \mathcal{L})]^2 \le \mathbb{E}_{\mathcal{L}} \varphi^2 (x, \mathcal{L})
+$$
+
+Rearranging, we get:
+
+$$
+\mathbb{E}_{\mathcal{L}} \varphi^2 (x, \mathcal{L}) - [\mathbb{E} \varphi(x, \mathcal{L})]^2 \ge 0
+$$
+
+This value is high when the training procedure is _unstable_, indicating that the model exhibits high _variance_.
+As a result, decision trees are particularly well-suited for model aggregation, whereas _k_-nearest neighbor and ordinary least squared (OLS) regression do not benefit as much from this approach.
+
+### Bagging
+
 Unfortunately, we don't have infinite data sets -- it's usually hard enough to obtain one.
 Dividing one set into many doesn't help either because this increases bias due to lower sample size.
-
 The solution is to _create_ many data sets out of the one we have by _**b**ootstrap **agg**regat**ing**_ or _bagging_.
+
+We start with a single training set $\mathcal{L} = \{(x_1, y_1), ..., (x_n, y_n)\}$ and generate new sets by _bootstrapping_.
+That is, we randomly sample from the original set _with replacement_ and generate many new sets with $N$ elements each.
+Some points will be represented more than once in a sampled set, while others will be absent.
+That is, we treat our training set _as if_ it were the population distribution and sample from it.
+This may sound like a gimmick[^bootstrap], but empirically it works. In fact, bootstrapping is widely used in statistics.
+
+[^bootstrap]: It is believed that the name _bootstrapping_ comes from the saying [_"pull oneself up by one's bootstraps"_](https://en.wiktionary.org/wiki/pull_oneself_up_by_one%27s_bootstraps), implying an attempt to do something impossible.
+
+Because we're not considering all points in every sampled set, we do increase bias -- the bootstrap is, after all, an approximation.
+However, the decrease in variance can be higher than the increase in bias. The instability conclusion still holds, so unstable procedures benefit the most from bagging. Stable procedures, on the other hand, tend to produce _worse_ errors when bagged.
+
+## Bagged trees
+
+...
+
+## References
+
+- Breiman, L. [Bagging Predictors](https://www.stat.berkeley.edu/~breiman/bagging.pdf). Machine Learning 24, 123–140 (1996).
