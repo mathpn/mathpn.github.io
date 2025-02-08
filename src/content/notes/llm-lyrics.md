@@ -1,5 +1,5 @@
 ---
-title: "Song lyrics and LLMs: overthinking and poetry"
+title: "Song lyrics and LLM poetry"
 tags:
   - LLM
 pubDatetime: 2025-02-08
@@ -9,10 +9,12 @@ draft: false
 
 A small fun experiment: send song lyrics to LLMs with no explanation and see what comes out.
 I've chosen [The Sound of Silence](https://www.youtube.com/watch?v=Shjqdhc87Xw) by Simon & Garfunkel.
-
-## Llama 3.2
-
+Bigger LLMs either recognize the song and stall any conversation or give bland responses.
+Llama 3.2 seems to be the most keen on poetry among the small models.
+I've tried verses from different songs, and it often continues in poem-like style.
 I am running `llama3.2:3b` with Ollama.
+
+---
 
 > Hello, darkness, my old friend
 
@@ -253,56 +255,3 @@ A gentle hum of something more, that only silence can hear.
 It's as if the world is listening too, in this shared silence we entwine,
 
 And in the depths of soundless space, a secret truth begins to align.
-
-## Deepseek-R1
-
-I am using the `deepseek-r1:7b` distillation with Ollama.
-Thinking tokens are displayed as `code blocks` to differentiate them from the response.
-
-> Hello, darkness, my old friend
-
-Hello! It's great to hear from you again. What brings you out of the darkness? 😊
-
-> I've come to talk with you again
-
-```text
-Alright, so the user greeted me with "hello, darkness, my old friend" and I responded warmly. Now they're saying, "I've come to talk with you again."
-
-Hmm, it seems like we've been in touch before, but this feels a bit more serious or maybe there's something specific they want to discuss now.
-
-I should acknowledge that they’re back and show interest in their conversation. Maybe ask if there's a particular topic they want to talk about to keep the dialogue going smoothly.
-
-Also, since they mentioned "again," I need to make sure not to come off as dismissive but rather welcoming them back into the discussion.
-```
-
-Ah, good to hear you're back! What brings you here today? Let’s dive in and see what we can chat about. 😊
-
-> Because a vision softly creeping
-
-```text
-Alright, so I need to figure out how to respond to the user's latest message: "because a vision softly creeping."
-
-Looking at the conversation history, the user has been talking about something metaphorical, like being in darkness and coming back to talk. Now they mention "a vision softly creeping," which adds another layer—perhaps hinting at change or progress over time.
-
-I should acknowledge their message and build on it by inviting them into a conversation that reflects both their presence here and the idea of a vision or change creeping in. It's important to keep the tone friendly and open, encouraging further dialogue about whatever this vision might be.
-```
-
-Ah, I see you're referring to something deeper—perhaps a vision or a change that's gently taking shape? Let’s talk about what’s on your mind, because together we can explore what’s creeping into our path. 😊
-
-> Left its seeds while I was sleeping
-
-```text
-Alright, the user just wrote ">eft its seeds while I was sleeping."
-
-First off, this seems like a playful or metaphorical reference, perhaps hinting at something subtle or unintended that has been affecting them during their sleep.
-
-They mention "seeds," which could symbolize things planted in the past or things they've neglected. The phrase "while I was sleeping" suggests that these seeds have taken root without the user's awareness.
-
-I need to respond in a way that acknowledges their observation and invites further discussion. It should be gentle, perhaps with an emoji to keep it friendly.
-
-Maybe ask if there's something they'd like me to address or explore based on this metaphorical statement about the seeds taking hold.
-
-Keeping the tone light and open-ended will encourage them to share more if they're comfortable.
-```
-
-Ah, I see you've spotted something subtle in your sleep—a bit of a "seed" has been sown, perhaps while you were asleep. Let’s explore what might be taking root now. What’s on your mind? 😊
