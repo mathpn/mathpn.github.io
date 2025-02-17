@@ -26,6 +26,9 @@ If things become too complicated, try to read the provided references.
 I've drawn upon various sources instrumental to my understanding of decision trees, including books, documentation, articles, blog posts and lectures.
 Even if you understand everything, check the [references](#references): there is great content there.
 
+The code snippets below sometimes present partial implementation for brevity or to avoid repetition.
+Complete code is available at the [climbing trees repository](https://github.com/mathpn/climbing-trees).
+
 ## The variance problem
 
 In the [first part](/posts/climbing-trees-1) of this series, we've seen that decision trees often have poor variance.
@@ -38,8 +41,15 @@ Models with high variance achieve low (or even 0) training error but fail to gen
 
 ## Ensembles
 
+Ensemble methods combine multiple machine learning algorithms or multiple instances of the same algorithm to obtain better predictions.
+The general idea is that learning the correct hypothesis about the data is very hard, so combining multiple hypotheses may lead to a better one.
+There are different types of ensembles, the most famous among them being _bagging_ and _boosting_.
+We'll explore _bagging_. Boosting is a topic for a future post.
+
+### Aggregating hypotheses
+
 What if we could build low bias and high variance models, then later reduce their variance _without_ increasing their bias?
-There is a _theoretical_ way to do this: we obtain many independent data sets, train many different models and average their results.
+There is a _theoretical_ way to do this: we obtain many independent datasets, train many different models and average their results.
 As the number of models approaches infinity we converge towards the expected classifier for the true population distribution.
 Since variance is a characteristic of each model, we _"average out"_ model variance without increasing bias.
 
@@ -107,9 +117,9 @@ As a result, decision trees are particularly well-suited for model aggregation, 
 
 ### Bagging
 
-Unfortunately, we don't have infinite data sets -- it's usually hard enough to obtain one.
+Unfortunately, we don't have infinite datasets -- it's usually hard enough to obtain one.
 Dividing one set into many doesn't help either because this increases bias due to lower sample size.
-The solution is to _create_ many data sets out of the one we have by _**b**ootstrap **agg**regat**ing**_ or _bagging_.
+The solution is to _create_ many datasets out of the one we have by _**b**ootstrap **agg**regat**ing**_ or _bagging_.
 
 We start with a single training set $\mathcal{L} = \{(x_1, y_1), ..., (x_n, y_n)\}$ and generate new sets by _bootstrapping_.
 That is, we randomly sample from the original set _with replacement_ and generate many new sets with $N$ elements each.
@@ -213,8 +223,9 @@ class BaggingClassifier(BaseBagging[Classifier], Classifier):
 
 ## Random Forest
 
-...
+### Random Forest Implementation
 
 ## References
 
+- [Ensemble learning - Wikipedia](https://en.wikipedia.org/wiki/Ensemble_learning)
 - Breiman, L. [Bagging Predictors](https://www.stat.berkeley.edu/~breiman/bagging.pdf). Machine Learning 24, 123–140 (1996).
