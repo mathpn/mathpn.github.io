@@ -223,9 +223,19 @@ class BaggingClassifier(BaseBagging[Classifier], Classifier):
 
 ## Random Forest
 
+The core advantage of bagging is to reduce variance by averaging many models with relatively low bias.
+As we've seen before, decision trees are inherently unstable and can achieve low bias, making them ideal algorithms for bagging.
+
+_Random forests_ is a particular type of bagged trees with one very important modification: at each split search, only a subset of all features are considered _at random_. The rest of the procedure is identical to bagging, that is:
+
+- Sample $n$ datasets with replacement.
+- For each sampled set, train a decision tree, but _with a random subset of features_ chosen before _each split_.
+- Average predictions between all decision trees.
+
 ### Random Forest Implementation
 
 ## References
 
 - [Ensemble learning - Wikipedia](https://en.wikipedia.org/wiki/Ensemble_learning)
 - Breiman, L. [Bagging Predictors](https://www.stat.berkeley.edu/~breiman/bagging.pdf). Machine Learning 24, 123–140 (1996).
+- Breiman, L. [Random Forests](https://doi.org/10.1023/A:1010933404324). Machine Learning 45, 5–32 (2001)
