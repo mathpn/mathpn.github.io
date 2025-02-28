@@ -232,6 +232,43 @@ _Random forests_ is a particular type of bagged trees with one very important mo
 - For each sampled set, train a decision tree, but _with a random subset of features_ chosen before _each split_.
 - Average predictions between all decision trees.
 
+To understand why feature sampling is effective, let's consider the statistical foundations.
+
+Consider what happens when we average $N$ identically distributed random variables.
+If each variable has variance $\sigma^2$ and they are completely independent, their average has variance $\frac{1}{N}\sigma^2$.
+This means that as we increase the number of trees $N$ in our ensemble, we steadily reduce the variance of our predictions.
+
+However, the independence assumption is critical.
+When the variables are positively correlated with some pairwise correlation $\rho$, the variance becomes:
+
+$$
+\rho \sigma^2 + \frac{1 - \rho}{N} \sigma^2
+$$
+
+The first term remains constant regardless of how many trees we add.
+Even with an infinite number of trees, we cannot eliminate this component of variance.
+This is where random feature sampling becomes crucial.
+
+### De-correlating trees
+
+Each decision tree in a random forest can be viewed as a random variable (with some distribution) generating predictions.
+Without feature sampling, trees grown on bootstrapped samples of the same dataset tend to have highly correlated predictions because:
+
+1. Strong predictors tend to be selected repeatedly across trees
+1. Similar tree structures emerge when the same dominant features are available to every tree
+1. The predictions follow similar patterns, especially in regions of the feature space dominated by these strong predictors
+
+By restricting each split to consider only a random subset of features, we force diversity in the tree structures.
+Even if some feature is strongly predictive, some splits will have to consider weaker but still informative features.
+This diversity directly reduces the correlation $\rho$ between tree predictions, which makes the ensemble's variance reduction more effective as we add trees.
+
+### Bias-variance trade-off
+
+Individual trees might become slightly less accurate (higher bias) when restricted to fewer features, similar to how bagging may slightly increase bias due to reduced sample sizes.
+Still, correlation means the trees "fail together", so averaging them provides less stabilization than if their errors were uncorrelated.
+Therefore, the substantial decrease in correlation between trees usually leads to a larger reduction of variance and the sampling pays off.
+Bagging benefits from instability and random forests add even more of it to the already unstable procedure of decision trees.
+
 ### Random Forest Implementation
 
 ## References
