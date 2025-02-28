@@ -276,3 +276,7 @@ Bagging benefits from instability and random forests add even more of it to the 
 - [Ensemble learning - Wikipedia](https://en.wikipedia.org/wiki/Ensemble_learning)
 - Breiman, L. [Bagging Predictors](https://www.stat.berkeley.edu/~breiman/bagging.pdf). Machine Learning 24, 123–140 (1996).
 - Breiman, L. [Random Forests](https://doi.org/10.1023/A:1010933404324). Machine Learning 45, 5–32 (2001)
+- Hastie, T., Tibshirani, R., & Friedman, J. (2009). The Elements of Statistical Learning: Data Mining, Inference, and Prediction, Second Edition. Springer New York.
+- Machine Learning for Intelligent Systems - Cornell CS4780 (Fall 2018) by Kilian Weinberger
+  - [Bagging lecture](https://www.youtube.com/watch?v=4EOCQJgqAOY)
+  - [Decision trees lecture notes](https://www.cs.cornell.edu/courses/cs4780/2018fa/lectures/lecturenote18.html)
