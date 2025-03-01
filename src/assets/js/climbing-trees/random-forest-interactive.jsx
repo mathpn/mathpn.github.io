@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import forestData from "./random_forest.json";
 
 const RandomForestVisualization = () => {
@@ -10,10 +10,38 @@ const RandomForestVisualization = () => {
     rf: true,
   });
 
+  // State for responsive dimensions
+  const [dimensions, setDimensions] = useState({
+    width: 400,
+    height: 400,
+  });
+
+  const containerRef = useRef(null);
   const { trees, dataPoints } = forestData;
 
-  const width = 400;
-  const height = 400;
+  // Update dimensions based on container width
+  useEffect(() => {
+    const updateDimensions = () => {
+      if (containerRef.current) {
+        const containerWidth = containerRef.current.clientWidth;
+        // Set max width to 400px, but scale down on smaller screens
+        const newWidth = Math.min(400, containerWidth - 20); // 20px for padding
+        setDimensions({
+          width: newWidth,
+          height: newWidth, // Keep it square
+        });
+      }
+    };
+
+    // Initial calculation
+    updateDimensions();
+
+    // Add resize listener
+    window.addEventListener("resize", updateDimensions);
+
+    // Cleanup
+    return () => window.removeEventListener("resize", updateDimensions);
+  }, []);
 
   // Function to get color based on probability
   const getProbabilityColor = (probability) => {
@@ -21,6 +49,11 @@ const RandomForestVisualization = () => {
     const r = Math.round(255 * probability);
     const b = Math.round(255 * (1 - probability));
     return `rgb(${r}, 75, ${b})`;
+  };
+
+  // Function to scale coordinates based on current dimensions
+  const scaleCoordinate = (coord, originalSize = 400) => {
+    return (coord / originalSize) * dimensions.width;
   };
 
   // Show only the clicked element, hide others
@@ -33,7 +66,10 @@ const RandomForestVisualization = () => {
   };
 
   return (
-    <div className="flex flex-col items-center p-4 bg-gray-50 rounded-lg shadow">
+    <div
+      className="flex flex-col items-center p-1 bg-gray-50 rounded-lg shadow w-full"
+      ref={containerRef}
+    >
       <h2 className="text-xl font-bold mb-2">
         Random Forest Decision Boundaries
       </h2>
@@ -45,7 +81,7 @@ const RandomForestVisualization = () => {
             key={tree.id}
             onClick={() => showOnlyElement(tree.id)}
             className={`px-3 py-1 border rounded ${visibleElements[tree.id] ? "bg-gray-200" : "bg-white"}`}
-            style={{ borderColor: tree.color }}
+            style={{ borderColor: "#000000" }}
           >
             {tree.name}
           </button>
@@ -53,42 +89,55 @@ const RandomForestVisualization = () => {
       </div>
 
       <div
-        className="relative border border-gray-300 bg-white"
-        style={{ width: `${width}px`, height: `${height}px` }}
+        className="relative border border-gray-300 bg-white mx-auto"
+        style={{
+          width: `${dimensions.width}px`,
+          height: `${dimensions.height}px`,
+        }}
       >
         {/* Decision boundaries */}
         {trees.map(
           (tree) =>
             visibleElements[tree.id] &&
-            tree.heatmap.map((cell, idx) => (
-              <div
-                key={idx}
-                className="absolute"
-                style={{
-                  left: `${cell.x}px`,
-                  top: `${cell.y}px`,
-                  width: "10px",
-                  height: "10px", // XXX adjust
-                  backgroundColor: getProbabilityColor(cell.probability),
-                  opacity: 0.6,
-                }}
-              />
-            )),
+            tree.heatmap.map((cell, idx) => {
+              // Calculate cell size based on current dimensions
+              const cellSize = dimensions.width / 40; // 10px at 400px width
+
+              return (
+                <div
+                  key={idx}
+                  className="absolute"
+                  style={{
+                    left: `${scaleCoordinate(cell.x)}px`,
+                    top: `${scaleCoordinate(cell.y)}px`,
+                    width: `${cellSize}px`,
+                    height: `${cellSize}px`,
+                    backgroundColor: getProbabilityColor(cell.prob),
+                    opacity: 0.6,
+                  }}
+                />
+              );
+            }),
         )}
 
         <svg className="absolute inset-0 w-full h-full pointer-events-none">
           {/* Data points */}
-          {dataPoints.map((point, idx) => (
-            <circle
-              key={idx}
-              cx={point.x}
-              cy={point.y}
-              r="6"
-              fill={point.cls === 1 ? "#ff6666" : "#6666ff"}
-              stroke="#fff"
-              strokeWidth="1"
-            />
-          ))}
+          {dataPoints.map((point, idx) => {
+            // Scale circle radius based on visualization size
+            const radius = (dimensions.width / 400) * 6;
+
+            return (
+              <circle
+                key={idx}
+                cx={scaleCoordinate(point.x)}
+                cy={scaleCoordinate(point.y)}
+                r={radius}
+                fill={point.cls === 1 ? "#ff6666" : "#6666ff"}
+                stroke="#fff"
+                strokeWidth={radius / 6}
+              />
+            );
+          })}
         </svg>
       </div>
 
@@ -105,7 +154,7 @@ const RandomForestVisualization = () => {
       </div>
 
       {/* Description */}
-      <div className="mt-4 text-sm text-gray-700 max-w-md text-center">
+      <div className="mt-4 text-sm text-gray-700 max-w-md text-center px-2">
         <p>
           This visualization shows how individual decision trees create simple
           orthogonal decision boundaries, while the combined random forest
