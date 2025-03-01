@@ -43,11 +43,18 @@ const RandomForestVisualization = () => {
     return () => window.removeEventListener("resize", updateDimensions);
   }, []);
 
+  function pushToExtremes(probability, exponent) {
+    return (
+      Math.pow(probability, exponent) /
+      (Math.pow(probability, exponent) + Math.pow(1 - probability, exponent))
+    );
+  }
+
   // Function to get color based on probability
   const getProbabilityColor = (probability) => {
     // Interpolate between blue (class 0) and red (class 1)
-    const r = Math.round(255 * probability);
-    const b = Math.round(255 * (1 - probability));
+    const r = Math.round(255 * pushToExtremes(probability, 2));
+    const b = Math.round(255 * pushToExtremes(1 - probability, 2));
     return `rgb(${r}, 75, ${b})`;
   };
 
