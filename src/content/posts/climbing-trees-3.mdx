@@ -256,7 +256,7 @@ Without feature sampling, trees grown on bootstrapped samples of the same datase
 1. Similar tree structures emerge when the same dominant features are available to every tree
 1. The predictions follow similar patterns, especially in regions of the feature space dominated by these strong predictors
 
-By restricting each split to consider only a random subset of features, we force diversity in the tree structures.
+By restricting each split to consider only a random subset of features (typically $\sqrt{p}$ for classification or $p/3$ for regression, where $p$ is the total number of features), we force diversity in the tree structures.
 Even if some feature is strongly predictive, some splits will have to consider weaker but still informative features.
 This diversity directly reduces the correlation $\rho$ between tree predictions, which makes the ensemble's variance reduction more effective as we add trees.
 
@@ -267,9 +267,32 @@ Still, correlation means the trees "fail together", so averaging them provides l
 Therefore, the substantial decrease in correlation between trees usually leads to a larger reduction of variance and the sampling pays off.
 Bagging benefits from instability and random forests add even more of it to the already unstable procedure of decision trees.
 
+### Visualizing forests
+
+Let's visualize the decision boundary of a random forest.
+Note that the visualization has two input features, therefore each split considers $\sqrt{2}$ rounded up, which is 2 (all features).
+Hence, in this case bagging with decision trees and random forest yield the same results.
+
 import RandomForest from "@assets/js/climbing-trees/random-forest-interactive.jsx";
 
 <RandomForest client:only />
+
+Only the first three individual trees are shown, but the forest contains 100 decision trees.
+Notice how each decision tree can only make axis-aligned splits, which limits their ability to capture some patterns, while the combined forest produces a smoother boundary that better fits the data.
+Each individual tree is fit until no training error remains, yet the forest is able to reduce variance by averaging over the sampled datasets (bootstrap).
+
+## Pros and cons of random forests
+
+Since random forests are still, at their core, decision trees, many of the pros and cons we've discussed previously remain valid.
+However, there are some important differences.
+
+Random forests have very few hyperparameters, mainly the number of features to consider in each split and the number of trees. The latter can be set to as large as one can afford, while the former has some sensible defaults ($\sqrt{p}$ for classification or $p/3$ for regression, where $p$ is the total number of features).
+Thus, it's possible to train a random forest without _any_ hyperparameter tuning and still get good results.
+This combined with the ability to handle numerical and categorical data with no need for scaling makes random forests a great _bang-for-the-buck_ algorithm.
+
+The two main disadvantages are that training can be slow if the number of trees is high and that _boosting_ usually beats _bagging_, but we'll talk about boosting in the future.
+
+### Out-of-bag error
 
 ### Random Forest Implementation
 
