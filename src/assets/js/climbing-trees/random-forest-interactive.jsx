@@ -151,22 +151,17 @@ const RandomForestVisualization = () => {
       {/* Legend for data points */}
       <div className="flex justify-center mt-4 space-x-6">
         <div className="flex items-center">
-          <div className="w-4 h-4 bg-red-500 mr-2 rounded-full"></div>
-          <span>Class 1</span>
-        </div>
-        <div className="flex items-center">
           <div className="w-4 h-4 bg-blue-500 mr-2 rounded-full"></div>
           <span>Class 0</span>
+        </div>
+        <div className="flex items-center">
+          <div className="w-4 h-4 bg-red-500 mr-2 rounded-full"></div>
+          <span>Class 1</span>
         </div>
       </div>
 
       {/* Description */}
       <div className="mt-4 text-sm text-gray-700 max-w-md text-center px-2">
-        <p>
-          This visualization shows how individual decision trees create simple
-          orthogonal decision boundaries, while the combined random forest
-          produces a smoother probabilistic boundary that better fits the data.
-        </p>
         <p className="mt-2">
           Choose which decision boundary to show by clicking on the buttons.
         </p>
