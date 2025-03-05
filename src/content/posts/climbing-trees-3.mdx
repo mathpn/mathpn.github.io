@@ -37,7 +37,7 @@ Moreover, we've seen that it may not be trivial to tune decision trees and achie
 Most regularization strategies (such as setting a maximum tree depth) rely on integer values and are thus less tunable than fractional counterparts of other machine learning algorithms.
 Decision trees are also _unstable_ due to the greedy strategy: small changes in the training data can completely change the final model.
 
-Models with high variance achieve low (or even 0) training error but fail to generalize to new examples.
+> Models with high variance and low bias (such as fully-grown decision trees) achieve low (or even 0) training error but fail to generalize to new examples.
 
 ## Ensembles
 
@@ -48,7 +48,7 @@ We'll explore _bagging_. Boosting is a topic for a future post.
 
 ### Aggregating hypotheses
 
-What if we could build low bias and high variance models, then later reduce their variance _without_ increasing their bias?
+What if we could build low-bias and high-variance models, then later reduce their variance _without_ increasing their bias?
 There is a _theoretical_ way to do this: we obtain many independent datasets, train many different models and average their results.
 As the number of models approaches infinity we converge towards the expected classifier for the true population distribution.
 Since variance is a characteristic of each model, we _"average out"_ model variance without increasing bias.
@@ -62,8 +62,8 @@ e = \mathbb{E}_{\mathcal{L}} \mathbb{E}_{X,Y} (Y - \varphi(x;\mathcal{L}))^2
 $$
 
 The model trained on the training set $\mathcal{L}$ is notated as $\varphi(x;\mathcal{L})$.
-Since we're expressing the _average_ error, we take the _expectation_ over the distribution $E_{X,Y}$ and over the training sets $E_{\mathcal{L}}$.
-That is, $e$ measures the expected squared error over different test points ($E_{X,Y}$) and over different training sets $E_{\mathcal{L}}$.
+Since we're expressing the _average_ error, we take the _expectation_ over the distribution $\mathbb{E}_{X,Y}$ and over the training sets $\mathbb{E}_{\mathcal{L}}$.
+That is, $e$ measures the expected squared error over different test points ($\mathbb{E}_{X,Y}$) and over different training sets $\mathbb{E}_{\mathcal{L}}$.
 
 Now, let's consider an aggregated predictor averaged over _all_ possible training sets. Its error can be expressed as follows:
 
@@ -90,7 +90,7 @@ $$
 \mathbb{E}_{\mathcal{L}} \varphi(x;\mathcal{L}) = \varphi_a(x;P)
 $$
 
-Using Jensen's inequality $(EZ)^2 <= E(Z)^2$ applied to $E_{\mathcal{L}} \varphi(x;L)$, we can conclude:
+Using Jensen's inequality $(\mathbb{E} Z)^2 \le \mathbb{E} (Z)^2$ applied to $\mathbb{E}_{\mathcal{L}} \varphi(x;L)$, we can conclude:
 
 $$
 e = \mathbb{E}_{X,Y} Y^2 - 2 \mathbb{E}_{X,Y} Y \varphi_a(x;P) + \mathbb{E}_{X,Y} \mathbb{E}_{\mathcal{L}} \varphi^2 (x;\mathcal{L})\\
@@ -313,7 +313,7 @@ This means that, for each sampled dataset, we have effectively two sets: on is t
 We can keep track of which samples are _in-the-bag_ or _out-of-bag_ for each tree in the forest.
 Then, we can make a prediction using the same original training dataset, but for each observation use only the trees where this observation is _out-of-bag_.
 The out-of-bag (OOB) error is estimated using this prediction and closely matches the error estimate obtained by _N_-fold cross-validation.
-Random forests and bagging more generally can therefore forgo of a validation set train on the entire dataset, validating _while_ training.
+Random forests and bagging more generally can therefore forgo of a validation set and train on the entire dataset, validating _while_ training.
 
 > Each sample is out-of-bag for ~37% of the estimators and the OOB error stabilizes after some number of bagging iterations (decision trees trained). The OOB error can be monitored to determine when adding more trees would likely yield no further improvement.
 
@@ -333,7 +333,7 @@ For example, the [diabetes](https://archive.ics.uci.edu/dataset/34/diabetes) toy
 
 ### Random Forest Implementation
 
-Since bagging and random forests are so closely related, their implementation is also very similar.
+Since bagging and random forests are so closely related, their implementations are also very similar.
 First, we modify our previous CART implementation so that it takes an extra argument `max_features` that determines the maximum number of features considered in each split. If `max_features` is lower than the number of features, we sample features at each split.
 
 ```python
