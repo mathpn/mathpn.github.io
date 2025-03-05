@@ -17,7 +17,7 @@ If you haven't already, consider reading the first part of this series: it discu
 
 - [Climbing trees 1: what are decision trees?](/posts/climbing-trees-1)
 - **Climbing trees 2: implementing decision trees** (_you are here_)
-- [Climbing trees 3: from trees to forests](/posts/climbing-trees-3) (_soon_)
+- [Climbing trees 3: from trees to forests](/posts/climbing-trees-3)
 
 ---
 

@@ -3,9 +3,9 @@ title: "Climbing trees 3: from trees to forests"
 tags:
   - Machine learning
   - Decision trees
-description: "..."
-pubDatetime: 2999-01-28
-draft: true
+description: "In this post, we'll explore the mathematical foundations and implementation of bagging, a popular strategy to reduce model variance, and random forests, an algorithm that uses decision trees and bagging."
+pubDatetime: 2025-03-05
+draft: false
 lang: "en-us"
 ---
 
@@ -327,6 +327,9 @@ Thus, there is always some correlation between trees and bagging can only go so 
 
 Fully-grown decision trees may have a variance that is too high for bagging to compensate it.
 Therefore, limiting the size of each tree can and often does improve test error, especially in regression.
+For example, the [diabetes](https://archive.ics.uci.edu/dataset/34/diabetes) toy dataset benefits from minimum node size restrictions over tree size.
+
+![Plot of test error as a function of minimum node size showing lower error with higher minimum node size](../../assets/images/climbing-trees-3/rf_overfit.svg)
 
 ### Random Forest Implementation
 
@@ -482,6 +485,18 @@ class RandomForestRegressor(BaseRandomForest[DecisionTreeRegressor], Regressor):
 ```
 
 ## Conclusion
+
+We have explored the concepts of bagging and random forests, two algorithms that can improve on decision trees by addressing their high variance problem.
+Bagging is a fundamental method in ensemble learning, decreasing model variance via the aggregation of multiple low-bias and high-variance models trained on bootstrapped datasets while barely increasing bias.
+Decision trees are quite unstable, making them very suitable for bagging.
+
+Random forests further build upon bagging by introducing randomness at the feature selection levels to decorrelate trees.
+This boosts the variance improvement achieved with bagging, making them a great off-the-shelf algorithm with few hyperparameters and very decent predictive power.
+
+Random forests share many advantages with decision trees, such as requiring little data preparation, and the ability to handle both numerical and categorical data directly.
+In practice, their major drawback is falling behind boosting in most scenarios.
+If you're going to train hundreds of decision trees, boosting usually can outperform random forests.
+We'll explore boosting in the next part of this series.
 
 ## References
 
