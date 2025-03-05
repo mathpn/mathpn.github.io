@@ -286,15 +286,202 @@ Each individual tree is fit until no training error remains, yet the forest is a
 Since random forests are still, at their core, decision trees, many of the pros and cons we've discussed previously remain valid.
 However, there are some important differences.
 
-Random forests have very few hyperparameters, mainly the number of features to consider in each split and the number of trees. The latter can be set to as large as one can afford, while the former has some sensible defaults ($\sqrt{p}$ for classification or $p/3$ for regression, where $p$ is the total number of features).
+Random forests have very few hyperparameters, mainly the number of features to consider in each split and the number of trees.
+The latter can be set to as large as one can afford, while the former has some sensible defaults ($\sqrt{p}$ for classification or $p/3$ for regression, where $p$ is the total number of features).
 Thus, it's possible to train a random forest without _any_ hyperparameter tuning and still get good results.
 This combined with the ability to handle numerical and categorical data with no need for scaling makes random forests a great _bang-for-the-buck_ algorithm.
 
-The two main disadvantages are that training can be slow if the number of trees is high and that _boosting_ usually beats _bagging_, but we'll talk about boosting in the future.
+Training random forests (and bagging algorithms, more generally) can be slow if the number of trees is high.
+Note that since each estimator is independent when bagging, training can be done in parallel.
+Also, _boosting_ usually beats _bagging_, but we'll talk about boosting in the future.
+
+One of the main advantages of decision trees is their simple interpretability -- all decision paths can be visualized.
+This is lost when using ensemble methods such as bagging or boosting.
 
 ### Out-of-bag error
 
+By sampling _with_ replacement when bootstrapping, it's very likely that not all samples from the original training set are sampled.
+In the limit of large $N$ (original dataset size), the probability of not picking a random sample is:
+
+$$
+\lim_{N \to \infty} \left(1 - \frac{1}{N} \right)^N = e^{-1} \approx 0.368
+$$
+
+Thus, approximately 63% of the original dataset is sampled to each dataset, on average.
+This means that, for each sampled dataset, we have effectively two sets: on is the sampled data (_in-the-bag_), the other set contains all data _not chosen_ in the sampling process (_out-of-bag_).
+
+We can keep track of which samples are _in-the-bag_ or _out-of-bag_ for each tree in the forest.
+Then, we can make a prediction using the same original training dataset, but for each observation use only the trees where this observation is _out-of-bag_.
+The out-of-bag (OOB) error is estimated using this prediction and closely matches the error estimate obtained by _N_-fold cross-validation.
+Random forests and bagging more generally can therefore forgo of a validation set train on the entire dataset, validating _while_ training.
+
+> Each sample is out-of-bag for ~37% of the estimators and the OOB error stabilizes after some number of bagging iterations (decision trees trained). The OOB error can be monitored to determine when adding more trees would likely yield no further improvement.
+
+### Overfitting
+
+Random forests are often referred to as _impossible to overfit_.
+This is true in the sense that increasing the number of trees _will not_ overfit a random forest as the average estimate will converge with many trees.
+Nonetheless, this doesn't mean that the bias-variance tradeoff is always optimal in random forests.
+We've seen that the correlation between trees limit variance reduction, but decreasing the number of sampled features too much to lower this correlation renders many splits useless by considering only uninformative features, hence increasing bias.
+Thus, there is always some correlation between trees and bagging can only go so far to reduce variance.
+
+Fully-grown decision trees may have a variance that is too high for bagging to compensate it.
+Therefore, limiting the size of each tree can and often does improve test error, especially in regression.
+
 ### Random Forest Implementation
+
+Since bagging and random forests are so closely related, their implementation is also very similar.
+First, we modify our previous CART implementation so that it takes an extra argument `max_features` that determines the maximum number of features considered in each split. If `max_features` is lower than the number of features, we sample features at each split.
+
+```python
+def _get_feature_indices(
+    n_features: int, max_features: int | float | None = None
+) -> np.ndarray:
+    """Get indices of features to consider for splitting.
+
+    Args:
+        n_features: Total number of features
+        max_features: If int, consider max_features features.
+                     If float, consider max_features * n_features features.
+                     If None, consider all features.
+    """
+    if max_features is None:
+        return np.arange(n_features)
+
+    if isinstance(max_features, float):
+        if not 0.0 < max_features <= 1.0:
+            raise ValueError("max_features must be in (0, 1]")
+        max_features = int(max_features * n_features)
+
+    max_features = min(max_features, n_features)
+    return np.random.choice(n_features, size=max_features, replace=False)
+
+
+def get_splitter(
+    criterion: Criterion,
+    max_depth: int = 0,
+    min_samples_leaf: int = 0,
+    min_criterion_reduction: float = 0,
+    max_features: int | float | None = None,
+):
+    ...
+```
+
+Then, we implement the random forest:
+
+```python
+T = TypeVar("T", DecisionTreeClassifier, DecisionTreeRegressor)
+
+
+class BaseRandomForest(Generic[T], ABC):
+    """Base class for Random Forest implementations."""
+
+    def __init__(
+        self,
+        n_estimators: int = 100,
+        max_depth: int = 0,
+        min_samples_leaf: int = 1,
+        min_criterion_reduction: float = 0,
+        max_features: int | float | None = None,
+        bootstrap: bool = True,
+        random_state: int | None = None,
+    ) -> None:
+        """Initialize Random Forest.
+
+        Args:
+            n_estimators: Number of trees in the forest
+            max_depth: Maximum depth of each tree
+            min_samples_leaf: Minimum samples required at leaf node
+            min_criterion_reduction: Minimum criterion reduction required for splitting
+            max_features: Number of features to consider for best split:
+                         If int, consider max_features features
+                         If float, consider max_features * n_features features
+                         If None, consider sqrt(n_features) for classification
+                         and n_features/3 for regression
+            bootstrap: Whether to use bootstrap samples
+
+            random_state: Random state for reproducibility
+        """
+        self.n_estimators = n_estimators
+        self.max_depth = max_depth
+        self.min_samples_leaf = min_samples_leaf
+        self.min_criterion_reduction = min_criterion_reduction
+        self.max_features = max_features
+        self.bootstrap = bootstrap
+
+        self.random_state = random_state
+
+        self._estimators: list[T] = []
+        self.feature_importances_: np.ndarray | None = None
+
+        if random_state is not None:
+            np.random.seed(random_state)
+
+    @abstractmethod
+    def _make_estimator(self) -> T:
+        """Create a new decision tree instance."""
+        pass
+
+    def _build_trees(
+        self,
+        X: pd.DataFrame,
+        y: np.ndarray,
+        sample_weights: np.ndarray | None,
+    ) -> list[T]:
+        """Build trees sequentially."""
+        trees = []
+        for _ in range(self.n_estimators):
+            tree = self._make_estimator()
+
+            if self.bootstrap:
+                indices = np.random.choice(X.shape[0], size=X.shape[0], replace=True)
+                sample_weight = (
+                    None if sample_weights is None else sample_weights[indices]
+                )
+                tree.fit(X.iloc[indices], y[indices], sample_weight)
+            else:
+                tree.fit(X, y, sample_weights)
+
+            trees.append(tree)
+
+        return trees
+
+    def fit(
+        self,
+        X: pd.DataFrame,
+        y: np.ndarray,
+        sample_weights: np.ndarray | None = None,
+    ) -> None:
+        """Fit the random forest."""
+        self._n_features = X.shape[1]
+        self._estimators = self._build_trees(X, y, sample_weights)
+```
+
+Here only the `RandomForestRegressor` implementation is shown for brevity (classification is very similar):
+
+```python
+class RandomForestRegressor(BaseRandomForest[DecisionTreeRegressor], Regressor):
+    """Random Forest Regressor implementation."""
+
+    def _make_estimator(self) -> DecisionTreeRegressor:
+        max_features = self.max_features
+        if max_features is None:
+            max_features = max(1, int(self._n_features / 3))
+
+        return DecisionTreeRegressor(
+            max_depth=self.max_depth,
+            min_samples_leaf=self.min_samples_leaf,
+            min_criterion_reduction=self.min_criterion_reduction,
+            max_features=max_features,
+        )
+
+    def predict(self, X: pd.DataFrame) -> np.ndarray:
+        """Predict regression target for X."""
+        all_predictions = np.array([tree.predict(X) for tree in self._estimators])
+        return np.mean(all_predictions, axis=0)
+```
+
+## Conclusion
 
 ## References
 
@@ -304,4 +491,5 @@ The two main disadvantages are that training can be slow if the number of trees 
 - Hastie, T., Tibshirani, R., & Friedman, J. (2009). The Elements of Statistical Learning: Data Mining, Inference, and Prediction, Second Edition. Springer New York.
 - Machine Learning for Intelligent Systems - Cornell CS4780 (Fall 2018) by Kilian Weinberger
   - [Bagging lecture](https://www.youtube.com/watch?v=4EOCQJgqAOY)
-  - [Decision trees lecture notes](https://www.cs.cornell.edu/courses/cs4780/2018fa/lectures/lecturenote18.html)
+  - [Bagging lecture notes](https://www.cs.cornell.edu/courses/cs4780/2018fa/lectures/lecturenote18.html)
+- [Out-of-bag error - Wikipedia](https://en.wikipedia.org/wiki/Out-of-bag_error)
