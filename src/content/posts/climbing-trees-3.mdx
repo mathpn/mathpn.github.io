@@ -308,7 +308,7 @@ $$
 $$
 
 Thus, approximately 63% of the original dataset is sampled to each dataset, on average.
-This means that, for each sampled dataset, we have effectively two sets: on is the sampled data (_in-the-bag_), the other set contains all data _not chosen_ in the sampling process (_out-of-bag_).
+This means that, for each sampled dataset, we have effectively two sets: one is the sampled data (_in-the-bag_), the other set contains all data _not chosen_ in the sampling process (_out-of-bag_).
 
 We can keep track of which samples are _in-the-bag_ or _out-of-bag_ for each tree in the forest.
 Then, we can make a prediction using the same original training dataset, but for each observation use only the trees where this observation is _out-of-bag_.
@@ -325,7 +325,7 @@ Nonetheless, this doesn't mean that the bias-variance tradeoff is always optimal
 We've seen that the correlation between trees limit variance reduction, but decreasing the number of sampled features too much to lower this correlation renders many splits useless by considering only uninformative features, hence increasing bias.
 Thus, there is always some correlation between trees and bagging can only go so far to reduce variance.
 
-Fully-grown decision trees may have a variance that is too high for bagging to compensate it.
+Fully-grown decision trees may have a variance that is too high for bagging to compensate for.
 Therefore, limiting the size of each tree can and often does improve test error, especially in regression.
 For example, the [diabetes](https://archive.ics.uci.edu/dataset/34/diabetes) toy dataset benefits from minimum node size restrictions over tree size.
 
@@ -495,7 +495,7 @@ This boosts the variance improvement achieved with bagging, making them a great 
 
 Random forests share many advantages with decision trees, such as requiring little data preparation, and the ability to handle both numerical and categorical data directly.
 In practice, their major drawback is falling behind boosting in most scenarios.
-If you're going to train hundreds of decision trees, boosting usually can outperform random forests.
+If you're going to train hundreds of decision trees, boosting can usually outperform random forests.
 We'll explore boosting in the next part of this series.
 
 ## References
