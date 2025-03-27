@@ -37,3 +37,25 @@ Also, it ensures that the LLM cannot accidentally change the code while (re)writ
 The system prompt is reasonably simple and inspired by the [PEP 257](https://peps.python.org/pep-0257/) guidelines.
 However, quickly I've noticed that this naive approach yielded inconsistent results.
 Sometimes the docstring would mention arguments in a sentence, others it would create a bullet-point Markdown-like list, and so on.
+
+Here, again, the syntax tree comes in handy.
+The concrete syntax tree is transformed into an abstract syntax tree, which is friendlier to navigate.
+Then, we can traverse function definition nodes to extract their signature, that is, all argument names, defaults, and type hints (if available).
+Hence, we do not rely on the LLM to get all arguments perfectly right every time nor with formatting.
+We have the function signature and, with it, it's possible to generate correct argument lists with consistent formatting.
+
+I then used structured output constraints to ensure the LLM outputs a string in the desired format.[^eol]
+Structured outputs are incredibly useful to extract information from LLM outputs without complex parsing, but they do increase input token usage since the JSON schema is sent as part of the request.
+
+[^eol]: it's still possible to get an unexpected EOL error with structured outputs. However, the request either fails or returns a string that is a valid JSON with the specified schema.
+
+The structured output allowed me to build a docstring with a consistent format, listing arguments, defaults, types, and the return.
+The LLM fills the slots with the overall summary and description of each argument or return.
+
+This approach worked and generated good docstrings, but the user experience was still a bit lacking.
+Installing a standalone Python CLI is easy using `pipx` or `uvx`, but it still required Ollama installed and running.
+If I added OpenAI or Anthropic model support, then it would require configuring environment variables with API keys, which degrade user experience quite a lot.
+The LLM tool (not to be confused with LLM models) mentioned earlier provides a [Python API](https://llm.datasette.io/en/stable/python-api.html) which can be used to execute prompts.
+LLM has API key management built-in, with support for all major LLM providers through plugins.
+
+Substituting the Ollama Python library for the LLM one was very easy, but transforming my little docstring tool into an LLM plugin would be even better.
