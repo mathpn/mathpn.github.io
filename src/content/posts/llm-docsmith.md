@@ -11,7 +11,7 @@ lang: "en-us"
 
 I've been using Simon Willison's [LLM](https://llm.datasette.io/en/stable/) CLI to interact with LLMs for quite a while now, it's a great tool.
 At this point, I think everyone in the software-adjacent world has seen some form of code autocompletion.
-I've been seaching for a tool to generate docstrings for Python code using LLMs.
+I've been searching for a tool to generate docstrings for Python code using LLMs.
 There are a few solutions, but none worked just the way I wanted, so I've decided to reinvent the wheel and implement an AI docstring generator!
 
 > If you just want to get to the repo, [here](https://github.com/mathpn/llm-docsmith) it is
