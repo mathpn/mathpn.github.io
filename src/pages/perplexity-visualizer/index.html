@@ -4,13 +4,14 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Perplexity Visualizer</title>
-    
+
     <script
-    defer
-    is:inline
-    src="https://cloud.umami.is/script.js"
-    data-website-id="51230717-6a20-4dd8-ad65-5eff6c1a7b52"
-    data-domains="mathpn.com"></script>
+      defer
+      is:inline
+      src="https://cloud.umami.is/script.js"
+      data-website-id="51230717-6a20-4dd8-ad65-5eff6c1a7b52"
+      data-domains="mathpn.com"
+    ></script>
 
     <style>
       body {
@@ -30,6 +31,16 @@
           0 4px 32px rgba(40, 40, 60, 0.065),
           0 1.5px 5px rgba(140, 150, 160, 0.03);
         border: 1.5px solid #e2e8f0;
+      }
+
+      @media screen and (max-width: 600px) {
+        body {
+          padding: 0px;
+        }
+        .container {
+          border-radius: 0px;
+          padding: 18px 18px 14px 18px;
+        }
       }
 
       h1 {
