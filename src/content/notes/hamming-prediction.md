@@ -1,9 +1,10 @@
 ---
-title: "Hamming and the AI future"
+title: "Hamming and the future of AI"
 tags:
   - AI
   - Books
 pubDatetime: 2025-05-26
+modDatetime: 2025-05-27
 lang: "en-us"
 ---
 
