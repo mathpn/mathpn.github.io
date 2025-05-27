@@ -21,7 +21,7 @@ Then he offers artificial intelligence as a counterexample, noting that AI leade
 
 The book was published in 1997, based on a course Hamming taught at the Naval Postgraduate School.
 Most of his students are likely still alive today.
-His skepticism towards AI probably refelcts the [AI winter](https://en.wikipedia.org/wiki/AI_winter) climate of the time.
+His skepticism towards AI probably reflects the [AI winter](https://en.wikipedia.org/wiki/AI_winter) climate of the time.
 He was right that AI experts had been making far-fetched predictions for decades.
 But with hindsight, those were actually the _optimistic_ predictions.
 The thing is, AI's "short-term" took decades.
