@@ -1,6 +1,7 @@
 ---
 layout: ../layouts/AboutLayout.astro
 title: "About me"
+activeNav: "about"
 ---
 
 My name is Matheus and I live in Brazil. I currently work as a data scientist and developer. My goal here is to condense interesting thoughts into written form, making things as simple as possible, but not any simpler.

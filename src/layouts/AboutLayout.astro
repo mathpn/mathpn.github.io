@@ -9,6 +9,7 @@ export interface Props {
   frontmatter: {
     title: string;
     description?: string;
+    activeNav?: "posts" | "notes" | "archives" | "tags" | "about" | "resources" | "search";
   };
 }
 
@@ -16,7 +17,7 @@ const { frontmatter } = Astro.props;
 ---
 
 <Layout title={`${frontmatter.title} | ${SITE.title}`}>
-  <Header activeNav="about" />
+  <Header activeNav={frontmatter.activeNav} />
   <Breadcrumbs />
   <main id="main-content">
     <section
