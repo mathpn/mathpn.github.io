@@ -1,4 +1,4 @@
-import type socialIcons from "@assets/socialIcons";
+import type socialIcons from "@components/socialIcons";
 import type { CollectionEntry } from "astro:content";
 
 export type PostCollectionEntry =
