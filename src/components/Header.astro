@@ -4,7 +4,7 @@ import Hr from "./Hr.astro";
 import LinkButton from "./LinkButton.astro";
 
 export interface Props {
-  activeNav?: "posts" | "notes" | "archives" | "tags" | "about" | "resources" | "search";
+  activeNav?: string;
 }
 
 const { activeNav } = Astro.props;

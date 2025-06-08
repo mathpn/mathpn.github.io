@@ -3,21 +3,21 @@ import { SITE } from "@config";
 import Breadcrumbs from "@components/Breadcrumbs.astro";
 import Footer from "@components/Footer.astro";
 import Header from "@components/Header.astro";
+import type { PageCollectionEntry } from "types";
+import { render } from "astro:content";
 import Layout from "./Layout.astro";
 
 export interface Props {
-  frontmatter: {
-    title: string;
-    description?: string;
-    activeNav?: "posts" | "notes" | "archives" | "tags" | "about" | "resources" | "search";
-  };
+  entry: PageCollectionEntry;
 }
 
-const { frontmatter } = Astro.props;
+const { entry } = Astro.props;
+const { title, activeNav } = entry.data;
+const { Content } = await render(entry);
 ---
 
-<Layout title={`${frontmatter.title} | ${SITE.title}`}>
-  <Header activeNav={frontmatter.activeNav} />
+<Layout title={`${title} | ${SITE.title}`}>
+  <Header activeNav={activeNav} />
   <Breadcrumbs />
   <main id="main-content">
     <section
@@ -25,8 +25,9 @@ const { frontmatter } = Astro.props;
       class="prose md:prose-lg lg:prose-xl mb-28 max-w-3xl lg:max-w-4xl prose-img:border-0"
     >
       <h1 class="text-2xl sm:text-3xl lg:text-4xl font-semibold">
-        {frontmatter.title}
+        {title}
       </h1>
+      <Content />
       <slot />
     </section>
   </main>

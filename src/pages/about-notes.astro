@@ -1,0 +1,9 @@
+---
+import PageLayout from "@layouts/PageLayout.astro";
+import { getEntry } from "astro:content";
+import type { PageCollectionEntry } from "types";
+
+const entry = await getEntry("pages", "about-notes") as PageCollectionEntry;
+---
+
+<PageLayout entry={entry} />

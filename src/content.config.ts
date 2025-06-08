@@ -63,4 +63,23 @@ const notes = defineCollection({
     }),
 });
 
-export const collections = { posts, notes };
+const pages = defineCollection({
+  loader: glob({ pattern: "**/*.{md,mdx}", base: "./src/content/pages" }),
+  schema: ({ image }) =>
+    z.object({
+      author: z.string().default(SITE.author),
+      title: z.string(),
+      draft: z.boolean().optional(),
+      activeNav: z.string().optional(),
+      ogImage: image()
+        .refine((img) => img.width >= 1200 && img.height >= 630, {
+          message: "OpenGraph image must be at least 1200 X 630 pixels!",
+        })
+        .or(z.string())
+        .optional(),
+      description: z.string().optional(),
+      lang: z.string().optional(),
+    }),
+});
+
+export const collections = { posts, notes, pages };

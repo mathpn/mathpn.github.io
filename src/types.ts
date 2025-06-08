@@ -5,6 +5,8 @@ export type PostCollectionEntry =
   | CollectionEntry<"posts">
   | CollectionEntry<"notes">;
 
+export type PageCollectionEntry = CollectionEntry<"pages">;
+
 export type Site = {
   website: string;
   author: string;
